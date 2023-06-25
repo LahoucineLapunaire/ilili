@@ -1,36 +1,40 @@
 import 'package:flutter/material.dart';
+import 'components/home.dart';
+import 'components/login.dart';
+import 'components/signup.dart';
+
+bool logged = true;
 
 void main() {
-  runApp(MyApp());
+  if (logged)
+    runApp(Logged());
+  else
+    runApp(UnLogged());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class UnLogged extends StatelessWidget {
+  const UnLogged({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: HomePage(),
-    );
+    return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'UnLogged',
+        home: Scaffold(
+          body: SignupPage(),
+        ));
   }
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class Logged extends StatelessWidget {
+  const Logged({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Flutter Demo Home Page'),
-      ),
-      body: Center(
-        child: Text('Hello World, I have modified the code with my PC'),
-      ),
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Logged',
+      home: HomePage(),
     );
   }
 }
