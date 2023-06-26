@@ -5,8 +5,13 @@ class SignupPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Text("SignupPage"),
-    );
+    return Scaffold(
+        body: Center(
+      child: ElevatedButton(
+          onPressed: () {
+            print("Signup");
+          },
+          child: Text('Login')),
+    ));
   }
 }
