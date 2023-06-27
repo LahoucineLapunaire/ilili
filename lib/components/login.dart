@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ilili/components/resetPassword.dart';
 import 'package:ilili/components/signup.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
@@ -216,7 +217,7 @@ class ToSignup extends StatelessWidget {
       onPressed: () {
         redirectToLogin(context);
       },
-      child: Text("No account ? register now "),
+      child: Text("No account ? Register now "),
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all<Color>(
             Colors.transparent), // Set the background color to transparent
@@ -241,7 +242,7 @@ class ToForgottedPassword extends StatelessWidget {
   void redirectToLogin(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SignupPage()),
+      MaterialPageRoute(builder: (context) => ResetPassword()),
     );
   }
 
