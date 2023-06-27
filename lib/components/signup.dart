@@ -1,9 +1,11 @@
-import 'dart:math';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ilili/components/login.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
+FirebaseFirestore firestore = FirebaseFirestore.instance;
+CollectionReference usersCollection = firestore.collection('users');
 FirebaseAuth auth = FirebaseAuth.instance;
 
 class SignupPage extends StatelessWidget {
@@ -116,40 +118,56 @@ class _FormSectionState extends State<FormSection> {
     }
   }
 
-  void signup() async {
+  Future<void> signup() async {
     if (emailController.text == '' ||
-        selectedDate.toString() == '' ||
         passwordController.text == '' ||
-        passwordConfirmationController.text == '') {
+        passwordConfirmationController.text == '' ||
+        selectedDate.toString() == '') {
       setState(() {
         error = true;
         errorMessage = "All fields must be filled";
       });
       return;
     }
-    if (passwordController.text != passwordConfirmationController.text) {
+
+    int age = DateTime.now().year - selectedDate.year;
+    if (DateTime.now().month < selectedDate.month ||
+        (DateTime.now().month == selectedDate.month &&
+            DateTime.now().day < selectedDate.day)) {
+      age--;
+    }
+    if (age < 18) {
+      setState(() {
+        error = true;
+        errorMessage = "You must be at least 18 years old";
+      });
       return;
     }
+
     try {
-      await auth
-          .createUserWithEmailAndPassword(
-              email: emailController.text, password: passwordController.text)
-          .then((value) => print("User ${value.user?.email} signed up"));
+      UserCredential userCredential = await auth.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+
+      String uid = userCredential.user?.uid ?? '';
+
+      await firestore.collection('users').doc(uid).set({
+        'birthdate': DateFormat('yyyy-MM-dd').format(selectedDate),
+      });
+
+      print('User signed up and document created successfully!');
+      setState(() {
+        error = false;
+        errorMessage = "";
+      });
     } catch (e) {
+      print('Error signing up user and creating document: $e');
       setState(() {
         error = true;
         errorMessage = e.toString().split('] ')[1];
       });
     }
-  }
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    birthdateController.dispose();
-    passwordController.dispose();
-    passwordConfirmationController.dispose();
-    super.dispose();
   }
 
   @override

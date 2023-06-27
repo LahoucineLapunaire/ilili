@@ -109,6 +109,10 @@ class _FormSectionState extends State<FormSection> {
           .signInWithEmailAndPassword(
               email: emailController.text, password: passwordController.text)
           .then((value) => {print("User ${value.user?.email} logged in")});
+      setState(() {
+        error = false;
+        errorMessage = "";
+      });
     } catch (e) {
       setState(() {
         error = true;
