@@ -116,28 +116,30 @@ class _FormSectionState extends State<FormSection> {
     }
   }
 
-  void signup() {
-    if(emailController.text == '' || selectedDate.toString() == '' || passwordController.text == '' || passwordConfirmationController.text == ''){
+  void signup() async {
+    if (emailController.text == '' ||
+        selectedDate.toString() == '' ||
+        passwordController.text == '' ||
+        passwordConfirmationController.text == '') {
       setState(() {
         error = true;
         errorMessage = "All fields must be filled";
       });
       return;
     }
-    if(passwordController.text != passwordConfirmationController.text){
+    if (passwordController.text != passwordConfirmationController.text) {
       return;
     }
     try {
-      auth
-        .createUserWithEmailAndPassword(
-            email: emailController.text, password: passwordController.text)
-        .then((value) => print("User ${value.user?.email} signed up"));
+      await auth
+          .createUserWithEmailAndPassword(
+              email: emailController.text, password: passwordController.text)
+          .then((value) => print("User ${value.user?.email} signed up"));
     } catch (e) {
-      print("---------------------------------------");
-      print(e.toString());
-      error = true;
-      errorMessage = e.toString();
-      print("---------------------------------------");
+      setState(() {
+        error = true;
+        errorMessage = e.toString().split('] ')[1];
+      });
     }
   }
 
@@ -299,20 +301,24 @@ class ToLogin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: (){
-      redirectToLogin(context);
-    }, 
-    child: Text("Already have an account? Login"),
-    style: ButtonStyle(
-    backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent), // Set the background color to transparent
-    elevation: MaterialStateProperty.all<double>(0), // Remove the button's elevation
-    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-      RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8), // Customize the button's border radius as desired
-        side: BorderSide(color: Colors.transparent), // Remove the button's border
+      onPressed: () {
+        redirectToLogin(context);
+      },
+      child: Text("Already have an account? Login"),
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all<Color>(
+            Colors.transparent), // Set the background color to transparent
+        elevation: MaterialStateProperty.all<double>(
+            0), // Remove the button's elevation
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
+                8), // Customize the button's border radius as desired
+            side: BorderSide(
+                color: Colors.transparent), // Remove the button's border
+          ),
+        ),
       ),
-    ),
-  ),
-);
+    );
   }
 }
