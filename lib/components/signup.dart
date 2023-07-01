@@ -116,6 +116,22 @@ class _FormSectionState extends State<FormSection> {
   String errorMessage = "";
   String infoMessage = "";
 
+  Future<void> sendEmailVerification() async {
+    try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      User? user = auth.currentUser;
+
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        print('Email verification sent to ${user.email}');
+      } else {
+        print('No user or email is already verified');
+      }
+    } catch (error) {
+      print('Error sending email verification: $error');
+    }
+  }
+
   Future<void> signup() async {
     if (emailController.text == '' ||
         passwordController.text == '' ||
@@ -148,6 +164,9 @@ class _FormSectionState extends State<FormSection> {
       });
 
       print('User signed up and document created successfully!');
+
+      sendEmailVerification();
+
       setState(() {
         error = false;
         errorMessage = "";
@@ -155,10 +174,12 @@ class _FormSectionState extends State<FormSection> {
       });
     } catch (e) {
       print('Error signing up user and creating document: $e');
-      setState(() {
-        error = true;
-        errorMessage = e.toString().split('] ')[1];
-      });
+      if (mounted) {
+        setState(() {
+          error = true;
+          errorMessage = e.toString().split('] ')[1];
+        });
+      }
     }
   }
 

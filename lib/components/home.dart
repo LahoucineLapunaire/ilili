@@ -16,7 +16,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void testVerifiedAccount() {
-    if (auth.currentUser?.emailVerified != null) {
+    if (auth.currentUser!.emailVerified) {
       print("User is verified");
     } else {
       print("User is not verified");
@@ -33,13 +33,32 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            logout();
-          },
-          child: Text('Logout'),
-        ),
+        body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ButtonLogout(),
+        ],
+      ),
+    ));
+  }
+}
+
+class ButtonLogout extends StatelessWidget {
+  const ButtonLogout({super.key});
+
+  void logout() {
+    auth.signOut().then((value) => print("User logged out"));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: ElevatedButton(
+        onPressed: () {
+          logout();
+        },
+        child: Text('Logout'),
       ),
     );
   }
