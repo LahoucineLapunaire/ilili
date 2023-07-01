@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ilili/components/resetPassword.dart';
 import 'package:ilili/components/signup.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+GoogleSignIn googleSignIn = GoogleSignIn();
 
 FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -34,6 +37,12 @@ class LoginPage extends StatelessWidget {
             SizedBox(height: 20),
             ToSignup(),
             ToForgottedPassword(),
+            Divider(
+              color: Colors.white,
+              height: 20,
+              thickness: 2,
+            ),
+            GoogleLoginForm(),
           ],
         ),
       )),
@@ -267,6 +276,114 @@ class ToForgottedPassword extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class GoogleLoginForm extends StatefulWidget {
+  const GoogleLoginForm({Key? key}) : super(key: key);
+
+  @override
+  _GoogleLoginFormState createState() => _GoogleLoginFormState();
+}
+
+class _GoogleLoginFormState extends State<GoogleLoginForm> {
+  String errorMessage = '';
+
+  verifyTermsOfUses() {
+    if (termOfUses) {
+      setState(() {
+        errorMessage = '';
+      });
+      signupWithGoogle();
+    } else {
+      setState(() {
+        errorMessage = 'You must agree to the terms of uses';
+      });
+      return;
+    }
+  }
+
+  Future<void> signupWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser!.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString().split('] ')[1];
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (errorMessage != '')
+          Padding(
+            padding: EdgeInsets.only(bottom: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error, color: Colors.red),
+                SizedBox(width: 5),
+                Container(
+                  width: 250,
+                  child: Text(
+                    "${errorMessage}",
+                    style: TextStyle(
+                        color: Colors.red, fontWeight: FontWeight.bold),
+                  ),
+                )
+              ],
+            ),
+          ),
+        Container(
+          width: 250,
+          child: ElevatedButton(
+            onPressed: () {
+              verifyTermsOfUses();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors
+                  .white, // Set button background color // Set button text color
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(30), // Set button border radius
+              ),
+              padding: EdgeInsets.symmetric(
+                  vertical: 10, horizontal: 16), // Set button padding
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/google.png', // Replace with the path to your Google icon image
+                  height: 20, // Set the height of the icon
+                ),
+                SizedBox(
+                    width: 10), // Add some spacing between the icon and text
+                Text(
+                  'Login with Google',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black), // Set the font size of the text
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
     );
   }
 }
