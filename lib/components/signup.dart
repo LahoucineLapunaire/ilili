@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:ilili/components/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 CollectionReference usersCollection = firestore.collection('users');
 FirebaseAuth auth = FirebaseAuth.instance;
+GoogleSignIn googleSignIn = GoogleSignIn();
 
 class SignupPage extends StatelessWidget {
   SignupPage({super.key});
@@ -15,7 +17,9 @@ class SignupPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-          child: Container(
+          child: SingleChildScrollView(
+              child: Container(
+        height: MediaQuery.of(context).size.height,
         width: double.maxFinite,
         decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -36,9 +40,15 @@ class SignupPage extends StatelessWidget {
             FormSection(),
             SizedBox(height: 20),
             ToLogin(),
+            Divider(
+              color: Colors.white,
+              height: 20,
+              thickness: 2,
+            ),
+            GoogleSignupButton(),
           ],
         ),
-      )),
+      ))),
     );
   }
 }
@@ -49,8 +59,8 @@ class LogoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 250,
-      height: 250,
+      width: 200,
+      height: 200,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         image: DecorationImage(
@@ -103,6 +113,7 @@ class _FormSectionState extends State<FormSection> {
   bool passwordSame = false;
   bool error = false;
   String errorMessage = "";
+  String infoMessage = "";
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -149,6 +160,7 @@ class _FormSectionState extends State<FormSection> {
         email: emailController.text,
         password: passwordController.text,
       );
+      User? user = userCredential.user;
 
       String uid = userCredential.user?.uid ?? '';
 
@@ -160,6 +172,7 @@ class _FormSectionState extends State<FormSection> {
       setState(() {
         error = false;
         errorMessage = "";
+        infoMessage = "User signed up successfully!";
       });
     } catch (e) {
       print('Error signing up user and creating document: $e');
@@ -189,6 +202,24 @@ class _FormSectionState extends State<FormSection> {
                       "${errorMessage}",
                       style: TextStyle(
                           color: Colors.red, fontWeight: FontWeight.bold),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          if (infoMessage != '')
+            Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  Icon(Icons.check, color: Colors.green),
+                  SizedBox(width: 5),
+                  Container(
+                    width: 250,
+                    child: Text(
+                      "${infoMessage}",
+                      style: TextStyle(
+                          color: Colors.green, fontWeight: FontWeight.bold),
                     ),
                   )
                 ],
@@ -336,6 +367,48 @@ class ToLogin extends StatelessWidget {
                 color: Colors.transparent), // Remove the button's border
           ),
         ),
+      ),
+    );
+  }
+}
+
+class GoogleSignupButton extends StatelessWidget {
+  const GoogleSignupButton({super.key});
+
+  Future<void> signupWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser!.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (error) {
+      print("------------------");
+      print(error);
+      print("------------------");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        signupWithGoogle();
+      },
+      child: Text("Sign up with Google"),
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        fixedSize: Size(200, 50), // Set the width and height of the button
+        backgroundColor:
+            Color(0xFF009688), // Set the background color of the button
       ),
     );
   }

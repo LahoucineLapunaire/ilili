@@ -5,7 +5,6 @@ import 'package:ilili/components/login.dart';
 import 'components/home.dart';
 import 'components/signup.dart';
 
-
 FirebaseAuth auth = FirebaseAuth.instance;
 
 Future<void> main() async {
@@ -28,7 +27,7 @@ class UnLogged extends StatelessWidget {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-        primaryColor: Color(0xFF6A1B9A), // Change this to your desired color
+          primaryColor: Color(0xFF6A1B9A), // Change this to your desired color
         ),
         title: 'ilili',
         home: Scaffold(
