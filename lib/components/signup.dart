@@ -67,7 +67,7 @@ class LogoSection extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         image: DecorationImage(
-          image: AssetImage('assets/images/logo.png'),
+          image: AssetImage('assets/images/ic_launcher.png'),
           fit: BoxFit.cover,
         ),
       ),
