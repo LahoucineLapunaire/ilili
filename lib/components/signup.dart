@@ -159,8 +159,8 @@ class _FormSectionState extends State<FormSection> {
       String uid = userCredential.user?.uid ?? '';
 
       await firestore.collection('users').doc(uid).set({
-        'pseudo': '',
         'profilPicture': '',
+        'username': '',
       });
 
       print('User signed up and document created successfully!');
@@ -418,6 +418,13 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
+
+      String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'profilPicture': '',
+        'username': '',
+      });
     } catch (e) {
       setState(() {
         errorMessage = e.toString().split('] ')[1];

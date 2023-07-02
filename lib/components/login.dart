@@ -126,10 +126,12 @@ class _FormSectionState extends State<FormSection> {
         errorMessage = "";
       });
     } catch (e) {
-      setState(() {
-        error = true;
-        errorMessage = e.toString().split('] ')[1];
-      });
+      if (mounted) {
+        setState(() {
+          error = true;
+          errorMessage = e.toString().split('] ')[1];
+        });
+      }
     }
   }
 
@@ -292,20 +294,6 @@ class GoogleLoginForm extends StatefulWidget {
 class _GoogleLoginFormState extends State<GoogleLoginForm> {
   String errorMessage = '';
 
-  verifyTermsOfUses() {
-    if (termOfUses) {
-      setState(() {
-        errorMessage = '';
-      });
-      signupWithGoogle();
-    } else {
-      setState(() {
-        errorMessage = 'You must agree to the terms of uses';
-      });
-      return;
-    }
-  }
-
   Future<void> signupWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -354,7 +342,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
           width: 250,
           child: ElevatedButton(
             onPressed: () {
-              verifyTermsOfUses();
+              signupWithGoogle();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors
