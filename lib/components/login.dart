@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ilili/components/resetPassword.dart';
 import 'package:ilili/components/signup.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 GoogleSignIn googleSignIn = GoogleSignIn();
 
@@ -296,17 +297,51 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
 
   Future<void> signupWithGoogle() async {
     try {
+      // Trigger the Google sign-in flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser!.authentication;
+      if (googleUser != null) {
+        // Obtain the authentication details from the Google sign-in
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
 
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+        // Create a new credential using the Google ID token and access token
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
+        // Sign in to Firebase with the Google credential
+        final UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithCredential(credential);
+
+        final String uid = userCredential.user!.uid;
+
+        // Check if the user already exists
+        final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+            await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+        if (userSnapshot.exists) {
+          // User already exists, log in and navigate to HomePage
+          // Add your own navigation logic here
+          print('User already exists');
+          // Navigate to HomePage
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(builder: (context) => HomePage()),
+          // );
+        } else {
+          // User does not exist, create a new document in Firestore
+          await FirebaseFirestore.instance.collection('users').doc(uid).set({
+            'profilPicture': '',
+            'username': '',
+          });
+
+          print('New user created');
+
+          // Add your own navigation logic here to navigate to the desired page after sign-up
+        }
+      }
     } catch (e) {
       setState(() {
         errorMessage = e.toString().split('] ')[1];

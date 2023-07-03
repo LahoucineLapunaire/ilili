@@ -30,18 +30,16 @@ class _HomePageState extends State<HomePage> {
     DocumentSnapshot ds =
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
 
-    setState(() {
-      userInfo['username'] = ds.get('username');
-      userInfo['profilPicture'] = ds.get('profilPicture');
-    });
-
-    if (userInfo['username'] == "") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SetUsernamePage(),
-        ),
-      );
+    if (ds.exists == false ||
+        ds.get('username') == "" ||
+        ds.get('username') == null) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => SetUsernamePage()));
+    } else {
+      setState(() {
+        userInfo['username'] = ds.get('username');
+        userInfo['profilPicture'] = ds.get('profilPicture');
+      });
     }
   }
 
