@@ -48,6 +48,16 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>CFBundleURLTypes</key>
+	<key>NSPhotoLibraryUsageDescription</key>
+<string>Allow access to photo library</string>
+
+<key>NSCameraUsageDescription</key>
+<string>Allow access to camera to capture photos</string>
+
+<key>NSMicrophoneUsageDescription</key>
+<string>Allow access to microphone</string>
+<string>Network access required</string>
+<key>NSBonjourServices</key>
 <array>
 	<dict>
 		<key>CFBundleTypeRole</key>

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ilili/components/appRouter.dart';
 import 'package:ilili/components/emailNotVerified.dart';
-import 'package:ilili/components/login.dart';
-import 'components/home.dart';
 import 'components/signup.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
@@ -50,7 +49,7 @@ class Logged extends StatelessWidget {
         primaryColor: Color(0xFF6A1B9A), // Change this to your desired color
       ),
       title: 'ilili',
-      home: HomePage(),
+      home: AppRouter(),
     );
   }
 }
