@@ -5,6 +5,8 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 
+List<String> tagsList = [];
+
 class AddPostPage extends StatelessWidget {
   const AddPostPage({super.key});
 
@@ -23,6 +25,11 @@ class AddPostPage extends StatelessWidget {
               thickness: 2,
             ),
             RecordSection(),
+            Divider(
+              height: 50,
+              thickness: 2,
+            ),
+            TagsSection(),
           ],
         ),
       ),
@@ -237,5 +244,105 @@ class _RecordSectionState extends State<RecordSection> {
         )
       ],
     ));
+  }
+}
+
+class TagsSection extends StatefulWidget {
+  const TagsSection({super.key});
+
+  @override
+  State<TagsSection> createState() => _TagsSectionState();
+}
+
+class _TagsSectionState extends State<TagsSection> {
+  TextEditingController tagController = TextEditingController();
+  String error = "";
+
+  void addTag() {
+    try {
+      if (tagsList.contains(tagController.text)) {
+        setState(() {
+          error = "Tag already exists";
+        });
+        return;
+      }
+      if (tagsList.length >= 3) {
+        setState(() {
+          error = "You can only add 3 tags";
+        });
+        return;
+      }
+
+      setState(() {
+        tagsList.add(tagController.text);
+        error = "";
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (error != "")
+          Padding(
+            padding: EdgeInsets.only(bottom: 10),
+            child: Row(
+              children: [
+                Icon(Icons.error, color: Colors.red),
+                SizedBox(width: 5),
+                Container(
+                  width: 250,
+                  child: Text(
+                    "${error}",
+                    style: TextStyle(
+                        color: Colors.red, fontWeight: FontWeight.bold),
+                  ),
+                )
+              ],
+            ),
+          ),
+        TextField(
+          controller: tagController,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            suffixIcon: IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () {
+                addTag();
+              },
+            ),
+            labelText: 'tag',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+        ),
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: tagsList.length,
+          itemBuilder: (context, index) {
+            return Row(
+              children: [
+                Text(tagsList[index]),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    setState(() {
+                      tagsList.removeAt(index);
+                    });
+                  },
+                )
+              ],
+            );
+          },
+        ),
+      ],
+    );
   }
 }
