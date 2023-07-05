@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_sound/flutter_sound.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_sound/flutter_sound.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 
 class AddPostPage extends StatelessWidget {
@@ -16,7 +17,12 @@ class AddPostPage extends StatelessWidget {
           children: [
             AudioPlayerWidget(
                 audioPath:
-                    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3')
+                    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'),
+            Divider(
+              height: 50,
+              thickness: 2,
+            ),
+            RecordSection(),
           ],
         ),
       ),
@@ -139,5 +145,97 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             child: Text('Pick a file')),
       ],
     );
+  }
+}
+
+class RecordSection extends StatefulWidget {
+  const RecordSection({super.key});
+
+  @override
+  State<RecordSection> createState() => _RecordSectionState();
+}
+
+class _RecordSectionState extends State<RecordSection> {
+  FlutterSoundRecorder? audioRecorder;
+  FlutterSoundPlayer? _player;
+  String? audioFilePath = "";
+  late FlutterSound flutterSound;
+
+  void initState() {
+    super.initState();
+  }
+
+  Future<bool> checkPermission() async {
+    var status = await Permission.microphone.request();
+    if (status != PermissionStatus.granted) {
+      throw RecordingPermissionException('Microphone permission not granted');
+    }
+    if (await Permission.microphone.request().isGranted) {
+      print('Permission granted');
+      return true;
+    } else {
+      print('Permission denied');
+      return false;
+    }
+  }
+
+  void startRecording() async {
+    try {
+      if (audioRecorder != null) {
+        // Stop any ongoing recording before starting a new one
+        await audioRecorder!.stopRecorder();
+      }
+
+      audioRecorder = FlutterSoundRecorder();
+
+      // Start recording audio
+      await audioRecorder?.openRecorder();
+      await audioRecorder!.startRecorder(toFile: 'path_to_save_recording.aac');
+    } catch (e) {
+      print('Error starting recording: $e');
+    }
+  }
+
+  void stopRecording() async {
+    try {
+      if (audioRecorder != null) {
+        // Stop the ongoing recording
+        await audioRecorder!.stopRecorder();
+        await audioRecorder!.closeRecorder();
+        audioRecorder = null;
+        print("Recording stopped");
+
+        // Play the recorded audio
+        _player = FlutterSoundPlayer();
+
+        await _player!.openPlayer();
+        await _player!.startPlayer(fromURI: 'path_to_save_recording.aac');
+        _player!.setVolume(1.0); // Set volume to maximum (1.0)
+      }
+    } catch (e) {
+      print('Error stopping recording or playing audio: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+          onPressed: () {
+            startRecording();
+          },
+          child: Text('Start Recording'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            stopRecording();
+          },
+          child: Text('Stop Recording'),
+        )
+      ],
+    ));
   }
 }
