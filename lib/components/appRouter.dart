@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ilili/components/addPost.dart';
 import 'package:ilili/components/home.dart';
-import 'package:ilili/components/profile.dart';
+import 'package:ilili/components/userProfile.dart';
 
 class AppRouter extends StatefulWidget {
   @override
@@ -9,12 +9,12 @@ class AppRouter extends StatefulWidget {
 }
 
 class _AppRouterState extends State<AppRouter> {
-  int _currentIndex = 1;
+  int _currentIndex = 2;
 
   final List<Widget> _pages = [
     HomePage(),
     AddPostPage(),
-    ProfilePage(),
+    UserProfilePage(),
   ];
 
   void _onTabTapped(int index) {

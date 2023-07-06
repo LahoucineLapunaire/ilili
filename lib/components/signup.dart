@@ -159,6 +159,9 @@ class _FormSectionState extends State<FormSection> {
         'profilPicture': '',
         'username': '',
         'posts': [],
+        'followers': [],
+        'following': [],
+        'description': '',
       });
 
       print('User signed up and document created successfully!');
