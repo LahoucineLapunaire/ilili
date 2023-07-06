@@ -158,6 +158,7 @@ class _FormSectionState extends State<FormSection> {
       await firestore.collection('users').doc(uid).set({
         'profilPicture': '',
         'username': '',
+        'posts': [],
       });
 
       print('User signed up and document created successfully!');

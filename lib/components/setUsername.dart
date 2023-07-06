@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ilili/components/home.dart';
+import 'package:ilili/components/appRouter.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -73,7 +73,7 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => HomePage(),
+          builder: (context) => AppRouter(),
         ),
       );
     }

@@ -1,14 +1,22 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:ilili/components/appRouter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:path/path.dart' as path;
 import 'dart:async';
 import 'dart:io';
 
 List<String> tagsList = [];
 AudioPlayer audioPlayer = AudioPlayer();
 String audioPath = '';
+String error = "";
+FirebaseAuth auth = FirebaseAuth.instance;
+FirebaseStorage storage = FirebaseStorage.instance;
 
 class AddPostPage extends StatelessWidget {
   const AddPostPage({super.key});
@@ -16,13 +24,34 @@ class AddPostPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFECEFF1),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
                 "To add a post, please record an audio file or upload one, and add some tags to it, and then click on the 'Add Post' button."),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
+            if (error != '')
+              Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error, color: Colors.red),
+                    SizedBox(width: 5),
+                    Container(
+                      width: 250,
+                      child: Text(
+                        "${error}",
+                        style: TextStyle(
+                            color: Colors.red, fontWeight: FontWeight.bold),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            SizedBox(height: 10),
             ButtonSection(),
             SizedBox(height: 20),
             AudioPlayerSection(),
@@ -31,6 +60,8 @@ class AddPostPage extends StatelessWidget {
               thickness: 2,
             ),
             TagsSection(),
+            SizedBox(height: 20),
+            SendButtonSection(),
           ],
         ),
       ),
@@ -151,7 +182,7 @@ class _ButtonSectionState extends State<ButtonSection> {
                 borderRadius: BorderRadius.circular(10),
               ),
               fixedSize:
-                  Size(150, 30), // Set the width and height of the button
+                  Size(170, 35), // Set the width and height of the button
               backgroundColor:
                   Color(0xFF6A1B9A), // Set the background color of the button
             ),
@@ -171,7 +202,7 @@ class _ButtonSectionState extends State<ButtonSection> {
                 borderRadius: BorderRadius.circular(10),
               ),
               fixedSize:
-                  Size(150, 30), // Set the width and height of the button
+                  Size(170, 35), // Set the width and height of the button
               backgroundColor:
                   Color(0xFF6A1B9A), // Set the background color of the button
             ),
@@ -190,7 +221,7 @@ class _ButtonSectionState extends State<ButtonSection> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            fixedSize: Size(150, 30), // Set the width and height of the button
+            fixedSize: Size(170, 35), // Set the width and height of the button
             backgroundColor:
                 Color(0xFF6A1B9A), // Set the background color of the button
           ),
@@ -211,7 +242,6 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
   bool isPlaying = false;
   Duration audioDuration = Duration();
   Duration position = Duration();
-  String error = '';
 
   void initState() {
     super.initState();
@@ -264,25 +294,6 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (error != '')
-          Padding(
-            padding: EdgeInsets.only(bottom: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error, color: Colors.red),
-                SizedBox(width: 5),
-                Container(
-                  width: 250,
-                  child: Text(
-                    "${error}",
-                    style: TextStyle(
-                        color: Colors.red, fontWeight: FontWeight.bold),
-                  ),
-                )
-              ],
-            ),
-          ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -328,7 +339,6 @@ class TagsSection extends StatefulWidget {
 
 class _TagsSectionState extends State<TagsSection> {
   TextEditingController tagController = TextEditingController();
-  String error = "";
 
   void addTag() {
     try {
@@ -341,6 +351,12 @@ class _TagsSectionState extends State<TagsSection> {
       if (tagsList.length >= 3) {
         setState(() {
           error = "You can only add 3 tags";
+        });
+        return;
+      }
+      if (tagController.text == "") {
+        setState(() {
+          error = "Tag can't be empty";
         });
         return;
       }
@@ -362,24 +378,6 @@ class _TagsSectionState extends State<TagsSection> {
       width: 300,
       child: Column(
         children: [
-          if (error != "")
-            Padding(
-              padding: EdgeInsets.only(bottom: 10),
-              child: Row(
-                children: [
-                  Icon(Icons.error, color: Colors.red),
-                  SizedBox(width: 5),
-                  Container(
-                    width: 250,
-                    child: Text(
-                      "${error}",
-                      style: TextStyle(
-                          color: Colors.red, fontWeight: FontWeight.bold),
-                    ),
-                  )
-                ],
-              ),
-            ),
           TextField(
             controller: tagController,
             decoration: InputDecoration(
@@ -424,6 +422,111 @@ class _TagsSectionState extends State<TagsSection> {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class SendButtonSection extends StatefulWidget {
+  SendButtonSection({Key? key}) : super(key: key);
+
+  @override
+  _SendButtonSectionState createState() => _SendButtonSectionState();
+}
+
+class _SendButtonSectionState extends State<SendButtonSection> {
+  Reference storageRef = storage.ref("posts");
+  String audioLink = "";
+
+  String generateUniqueFileName() {
+    String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    String randomString = path.basenameWithoutExtension(
+        path.basenameWithoutExtension(path.basenameWithoutExtension(
+            path.basenameWithoutExtension(path.basenameWithoutExtension(
+                path.basenameWithoutExtension(path.basenameWithoutExtension(
+                    path.basenameWithoutExtension(timestamp))))))));
+    String fileName = 'audio_$randomString.aac';
+    return fileName;
+  }
+
+  Future<List<dynamic>> getPosts() async {
+    try {
+      User? user = auth.currentUser;
+      if (user != null) {
+        String userId = user.uid;
+
+        QuerySnapshot snapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .collection('posts')
+            .get();
+
+        List<dynamic> posts = snapshot.docs.map((doc) => doc.data()).toList();
+
+        return posts;
+      }
+    } catch (e) {
+      print('Error getting posts: $e');
+    }
+    return [];
+  }
+
+  Future postAudio() async {
+    try {
+      String name = generateUniqueFileName();
+      List<dynamic> posts = await getPosts();
+      Reference postRef = storageRef.child(name);
+      UploadTask uploadTask = postRef.putFile(File(audioPath));
+      posts.add(name);
+
+      await uploadTask.whenComplete(() async {
+        String downloadURL = await postRef.getDownloadURL();
+
+        FirebaseFirestore.instance.collection('posts').doc(name).set({
+          'userId': auth.currentUser!.uid,
+          'audio': downloadURL,
+          'tags': tagsList,
+          'likes': 0,
+          'comments': 0,
+          'timestamp': DateTime.now(),
+        });
+
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(auth.currentUser!.uid)
+            .update({
+          'posts': posts,
+        });
+      });
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AppRouter(),
+        ),
+      );
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        postAudio();
+      },
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Icon(Icons.send),
+        SizedBox(width: 10),
+        Text('Pick Audio')
+      ]),
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        fixedSize: Size(170, 35), // Set the width and height of the button
+        backgroundColor:
+            Color(0xFF6A1B9A), // Set the background color of the button
       ),
     );
   }
