@@ -42,9 +42,10 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     DocumentSnapshot<Map<String, dynamic>> ds =
         await firestore.collection('users').doc(widget.userId).get();
     setState(() {
-      profilePicture = ds.data()!['profilPicture'];
+      profilePicture = ds.data()!['profilePicture'];
       username = ds.data()!['username'];
     });
+    print('profilePicture: $profilePicture');
   }
 
   void getPostInfo() async {
@@ -130,7 +131,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             ClipRRect(
               borderRadius: BorderRadius.circular(40.0),
               child: Image.network(
-                "https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256", // Replace with the actual path and filename of your image file
+                profilePicture, // Replace with the actual path and filename of your image file
                 width: 50,
                 height: 50,
                 fit: BoxFit.cover,

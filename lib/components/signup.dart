@@ -156,7 +156,7 @@ class _FormSectionState extends State<FormSection> {
       String uid = userCredential.user?.uid ?? '';
 
       await firestore.collection('users').doc(uid).set({
-        'profilPicture':
+        'profilePicture':
             'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
         'username': '',
         'posts': [],

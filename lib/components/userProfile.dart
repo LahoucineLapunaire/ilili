@@ -43,7 +43,8 @@ class TopSection extends StatefulWidget {
 
 class _TopSectionState extends State<TopSection> {
   String username = "";
-  String profilPicture = "";
+  String profilPicture =
+      'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256';
   String description = "";
   int followers = 0;
   int following = 0;
@@ -65,7 +66,7 @@ class _TopSectionState extends State<TopSection> {
 
     setState(() {
       username = ds.get('username');
-      profilPicture = ds.get('profilPicture');
+      profilPicture = ds.get('profilePicture');
       description = ds.get('description');
     });
   }
@@ -84,7 +85,7 @@ class _TopSectionState extends State<TopSection> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(40.0),
                   child: Image.network(
-                    "https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256", // Replace with the actual path and filename of your image file
+                    profilPicture, // Replace with the actual path and filename of your image file
                     width: 50,
                     height: 50,
                     fit: BoxFit.cover,
