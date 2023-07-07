@@ -22,6 +22,12 @@ class AddPostPage extends StatelessWidget {
   const AddPostPage({super.key});
 
   @override
+  void dispose() {
+    audioPlayer.release();
+    audioPlayer.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFECEFF1),
@@ -152,6 +158,7 @@ class _ButtonSectionState extends State<ButtonSection> {
         print("File path: ${file.path}");
         setState(() {
           audioPath = file.path!;
+          audioPlayer.setSourceUrl(file.path!);
         });
       }
     } catch (e) {

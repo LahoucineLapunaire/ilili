@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ilili/components/changeProfile.dart';
 import 'package:ilili/components/component.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
@@ -47,9 +48,15 @@ class _TopSectionState extends State<TopSection> {
   int followers = 0;
   int following = 0;
 
+  @override
   void initState() {
     super.initState();
     getUserData();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void getUserData() async {
@@ -73,16 +80,27 @@ class _TopSectionState extends State<TopSection> {
           children: [
             Row(
               children: [
-                Container(
-                    width: 80,
-                    height: 80,
-                    child: Icon(Icons.account_circle, size: 80)),
+                SizedBox(width: 5),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(40.0),
+                  child: Image.network(
+                    "https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256", // Replace with the actual path and filename of your image file
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
+                ),
                 Text("$username"),
               ],
             ),
             PopupMenuButton<String>(onSelected: (value) {
+              if (value == "User Profile") {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChangeProfilePage()),
+                );
+              }
               // Handle the sub-menu item selection
-              print('Selected: $value');
             }, itemBuilder: (BuildContext context) {
               return [
                 PopupMenuItem<String>(
@@ -120,9 +138,15 @@ class PostSection extends StatefulWidget {
 class _PostSectionState extends State<PostSection> {
   List<dynamic> posts = [];
 
+  @override
   void initState() {
     super.initState();
     getPosts();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void getPosts() async {
@@ -132,7 +156,7 @@ class _PostSectionState extends State<PostSection> {
         .get();
 
     setState(() {
-      posts = qs.docs.map((e) => e.get('audio')).toList();
+      posts = qs.docs.map((e) => e.id).toList();
     });
   }
 
@@ -140,7 +164,13 @@ class _PostSectionState extends State<PostSection> {
   Widget build(BuildContext context) {
     return ListView(
       shrinkWrap: true,
-      children: [for (var post in posts) AudioPlayerWidget(audioPath: post)],
+      children: [
+        for (var post in posts)
+          AudioPlayerWidget(
+            userId: auth.currentUser!.uid,
+            postId: post,
+          )
+      ],
     );
   }
 }

@@ -1,11 +1,17 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 class AudioPlayerWidget extends StatefulWidget {
-  final String audioPath;
+  final String userId;
+  final String postId;
 
-  AudioPlayerWidget({required this.audioPath, Key? key}) : super(key: key);
+  AudioPlayerWidget({Key? key, required this.userId, required this.postId})
+      : super(key: key);
 
   @override
   State<AudioPlayerWidget> createState() => AudioPlayerWidgetState();
@@ -16,19 +22,50 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   bool isPlaying = false;
   Duration audioDuration = Duration();
   Duration position = Duration();
+  String audioPath = '';
+  String profilePicture =
+      "https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256";
+  String username = '';
+  String postDate = '';
+  List<dynamic> tags = [];
+  int likes = 0;
+  int comments = 0;
 
   @override
   void initState() {
     super.initState();
-    audioPlayer.onDurationChanged.listen((Duration duration) {
-      setState(() {
-        audioDuration = duration;
-      });
-    });
+    getUserInfo();
+    getPostInfo();
+  }
 
-    audioPlayer.onPositionChanged.listen((Duration pos) {
-      setState(() {
-        position = pos;
+  void getUserInfo() async {
+    DocumentSnapshot<Map<String, dynamic>> ds =
+        await firestore.collection('users').doc(widget.userId).get();
+    setState(() {
+      profilePicture = ds.data()!['profilPicture'];
+      username = ds.data()!['username'];
+    });
+  }
+
+  void getPostInfo() async {
+    DocumentSnapshot<Map<String, dynamic>> ds =
+        await firestore.collection('posts').doc(widget.postId).get();
+    setState(() {
+      audioPath = ds.data()!['audio'];
+      tags = ds.data()!['tags'];
+      likes = ds.data()!['likes'];
+      comments = ds.data()!['comments'];
+      postDate = formatTimestamp(ds.data()!['timestamp']);
+      audioPlayer.setSourceUrl(audioPath);
+      audioPlayer.onDurationChanged.listen((Duration duration) {
+        setState(() {
+          audioDuration = duration;
+        });
+        audioPlayer.onPositionChanged.listen((Duration pos) {
+          setState(() {
+            position = pos;
+          });
+        });
       });
     });
   }
@@ -39,8 +76,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         await audioPlayer.pause();
         setState(() => isPlaying = false);
       } else {
-        if (widget.audioPath != null) {
-          await audioPlayer.play(UrlSource(widget.audioPath));
+        if (audioPath != null) {
+          await audioPlayer.play(UrlSource(audioPath)).then((value) {});
           setState(() => isPlaying = true);
         }
       }
@@ -63,6 +100,19 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     return '$minutes:$seconds';
   }
 
+  String formatTimestamp(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+
+    String formattedDate = '${dateTime.month.toString().padLeft(2, '0')}/'
+        '${dateTime.day.toString().padLeft(2, '0')}/'
+        '${dateTime.year.toString().substring(2)}';
+
+    String formattedTime = '${dateTime.hour.toString().padLeft(2, '0')}:'
+        '${dateTime.minute.toString().padLeft(2, '0')}';
+
+    return '$formattedDate $formattedTime';
+  }
+
   @override
   void dispose() {
     audioPlayer.release();
@@ -75,6 +125,20 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(40.0),
+              child: Image.network(
+                "https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256", // Replace with the actual path and filename of your image file
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Text(username),
+          ],
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -93,7 +157,9 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                   inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
                   min: 0.0,
                   max: audioDuration.inSeconds.toDouble(),
-                  value: position.inSeconds.toDouble(),
+                  value: position.inSeconds
+                      .toDouble()
+                      .clamp(0.0, audioDuration.inSeconds.toDouble()),
                   onChanged: (double value) {
                     setState(() {
                       _seekToSecond(value.toInt());
@@ -105,6 +171,43 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             )
           ],
         ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Row(children: [
+              for (var tag in tags) Text(tag),
+              SizedBox(width: 10),
+              Text(postDate),
+              SizedBox(width: 10),
+              Row(
+                children: [
+                  Text(likes.toString()),
+                  IconButton(
+                    icon: Icon(Icons.favorite),
+                    onPressed: () {
+                      setState(() {
+                        likes++;
+                      });
+                    },
+                  )
+                ],
+              ),
+              Row(
+                children: [
+                  Text(comments.toString()),
+                  IconButton(
+                    icon: Icon(Icons.comment),
+                    onPressed: () {
+                      setState(() {
+                        comments++;
+                      });
+                    },
+                  )
+                ],
+              )
+            ]),
+          ],
+        )
       ],
     );
   }
