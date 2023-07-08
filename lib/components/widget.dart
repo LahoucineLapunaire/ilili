@@ -116,8 +116,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   void dispose() {
-    audioPlayer.release();
-    audioPlayer.dispose();
+    audioPlayer.dispose(); // Dispose of the audio player
     super.dispose();
   }
 

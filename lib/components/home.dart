@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
     } else {
       setState(() {
         userInfo['username'] = ds.get('username');
-        userInfo['profilPicture'] = ds.get('profilPicture');
+        userInfo['profilPicture'] = ds.get('profilePicture');
       });
     }
   }
