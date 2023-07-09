@@ -9,7 +9,7 @@ class AppRouter extends StatefulWidget {
 }
 
 class _AppRouterState extends State<AppRouter> {
-  int _currentIndex = 2;
+  int _currentIndex = 0;
 
   final List<Widget> _pages = [
     HomePage(),

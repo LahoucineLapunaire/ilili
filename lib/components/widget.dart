@@ -122,93 +122,95 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(40.0),
-              child: Image.network(
-                profilePicture, // Replace with the actual path and filename of your image file
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Text(username),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-              onPressed: () {
-                playPause();
-              },
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(formatPosition(position.inMilliseconds)),
-                Slider(
-                  activeColor: Color(0xFF6A1B9A),
-                  inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
-                  min: 0.0,
-                  max: audioDuration.inSeconds.toDouble(),
-                  value: position.inSeconds
-                      .toDouble()
-                      .clamp(0.0, audioDuration.inSeconds.toDouble()),
-                  onChanged: (double value) {
-                    setState(() {
-                      _seekToSecond(value.toInt());
-                    });
-                  },
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(40.0),
+                child: Image.network(
+                  profilePicture, // Replace with the actual path and filename of your image file
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
                 ),
-                Text(formatPosition(audioDuration.inMilliseconds)),
-              ],
-            )
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Row(children: [
-              for (var tag in tags) Text(tag),
-              SizedBox(width: 10),
-              Text(postDate),
-              SizedBox(width: 10),
-              Row(
-                children: [
-                  Text(likes.toString()),
-                  IconButton(
-                    icon: Icon(Icons.favorite),
-                    onPressed: () {
-                      setState(() {
-                        likes++;
-                      });
-                    },
-                  )
-                ],
+              ),
+              Text(username),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                onPressed: () {
+                  playPause();
+                },
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(comments.toString()),
-                  IconButton(
-                    icon: Icon(Icons.comment),
-                    onPressed: () {
+                  Text(formatPosition(position.inMilliseconds)),
+                  Slider(
+                    activeColor: Color(0xFF6A1B9A),
+                    inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
+                    min: 0.0,
+                    max: audioDuration.inSeconds.toDouble(),
+                    value: position.inSeconds
+                        .toDouble()
+                        .clamp(0.0, audioDuration.inSeconds.toDouble()),
+                    onChanged: (double value) {
                       setState(() {
-                        comments++;
+                        _seekToSecond(value.toInt());
                       });
                     },
-                  )
+                  ),
+                  Text(formatPosition(audioDuration.inMilliseconds)),
                 ],
               )
-            ]),
-          ],
-        )
-      ],
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Row(children: [
+                for (var tag in tags) Text(tag),
+                SizedBox(width: 10),
+                Text(postDate),
+                SizedBox(width: 10),
+                Row(
+                  children: [
+                    Text(likes.toString()),
+                    IconButton(
+                      icon: Icon(Icons.favorite),
+                      onPressed: () {
+                        setState(() {
+                          likes++;
+                        });
+                      },
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(comments.toString()),
+                    IconButton(
+                      icon: Icon(Icons.comment),
+                      onPressed: () {
+                        setState(() {
+                          comments++;
+                        });
+                      },
+                    )
+                  ],
+                )
+              ]),
+            ],
+          )
+        ],
+      ),
     );
   }
 }
