@@ -525,7 +525,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         Icon(Icons.send),
         SizedBox(width: 10),
-        Text('Pick Audio')
+        Text('Post Audio')
       ]),
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(

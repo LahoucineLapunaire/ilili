@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ilili/components/changeProfile.dart';
+import 'package:ilili/components/userProfile.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
+Reference storageRef = FirebaseStorage.instance.ref("posts");
 
 class AudioPlayerWidget extends StatefulWidget {
   final String userId;
@@ -115,6 +118,29 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     return '$formattedDate $formattedTime';
   }
 
+  void deletePost() async {
+    try {
+      storageRef.child(widget.postId).delete();
+      await firestore.collection('posts').doc(widget.postId).delete();
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => UserProfilePage()));
+      dispose();
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  void openModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return ChangeTagsModal(
+          idPost: widget.postId,
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     audioPlayer.dispose(); // Dispose of the audio player
@@ -128,17 +154,47 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(40.0),
-                child: Image.network(
-                  profilePicture, // Replace with the actual path and filename of your image file
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(40.0),
+                    child: Image.network(
+                      profilePicture, // Replace with the actual path and filename of your image file
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(width: 5),
+                  Text(username),
+                ],
               ),
-              Text(username),
+              PopupMenuButton<String>(
+                onSelected: (String value) {
+                  // Handle menu item selection
+                  if (value == "Modify Post") {
+                    print('Selected value: $value');
+                    openModal(context);
+                  } else if (value == "Delete Post") {
+                    deletePost();
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  PopupMenuItem(
+                    value: 'Modify Post',
+                    child: Text('Modify Post'),
+                    textStyle: TextStyle(color: Colors.black),
+                  ),
+                  PopupMenuItem(
+                    value: 'Delete Post',
+                    child: Text('Delete Post'),
+                    textStyle: TextStyle(color: Colors.red),
+                  ),
+                ],
+              ),
             ],
           ),
           Row(
@@ -174,7 +230,6 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             ],
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Row(children: [
                 for (var tag in tags) Text(tag),
@@ -212,6 +267,197 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           )
         ],
       ),
+    );
+  }
+}
+
+class ChangeTagsModal extends StatefulWidget {
+  final String idPost;
+
+  ChangeTagsModal({Key? key, required this.idPost}) : super(key: key);
+
+  @override
+  State<ChangeTagsModal> createState() => _ChangeTagsModalState();
+}
+
+class _ChangeTagsModalState extends State<ChangeTagsModal> {
+  TextEditingController tagController = TextEditingController();
+  List<String> tagsList = [];
+  String error = "";
+
+  void initState() {
+    super.initState();
+    getTags();
+  }
+
+  void getTags() async {
+    try {
+      DocumentSnapshot documentSnapshot =
+          await firestore.collection('posts').doc(widget.idPost).get();
+      setState(() {
+        tagsList = List.from(documentSnapshot['tags']);
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString().split('] ')[1];
+      });
+    }
+  }
+
+  void deleteTag(int index) {
+    setState(() {
+      tagsList.removeAt(index);
+    });
+  }
+
+  void addTag() {
+    try {
+      if (tagsList.contains(tagController.text)) {
+        setState(() {
+          error = "Tag already exists";
+        });
+        return;
+      }
+      if (tagsList.length >= 3) {
+        setState(() {
+          error = "You can only add 3 tags";
+        });
+        return;
+      }
+      if (tagController.text == "") {
+        setState(() {
+          error = "Tag can't be empty";
+        });
+        return;
+      }
+
+      setState(() {
+        tagsList.add(tagController.text);
+        error = "";
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString().split('] ')[1];
+      });
+    }
+  }
+
+  void postTags() async {
+    try {
+      await firestore
+          .collection('posts')
+          .doc(widget.idPost)
+          .update({'tags': tagsList});
+      Navigator.pop(context);
+    } catch (e) {
+      setState(() {
+        error = e.toString().split('] ')[1];
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Center(
+      child: Container(
+        width: 300,
+        height: 650,
+        // Add your modal content here
+        child: Column(
+          children: [
+            SizedBox(height: 30),
+            if (error != '')
+              Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error, color: Colors.red),
+                    SizedBox(width: 5),
+                    Container(
+                      width: 250,
+                      child: Text(
+                        "${error}",
+                        style: TextStyle(
+                            color: Colors.red, fontWeight: FontWeight.bold),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            TextField(
+              controller: tagController,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () {
+                    addTag();
+                  },
+                ),
+                labelText: 'tag',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ), // Accessing idPost from widget argument
+            Container(
+              width: 250,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: tagsList.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 200, // Set the desired width here
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(tagsList[index]),
+                        IconButton(
+                          icon: Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              tagsList.removeAt(index);
+                            });
+                          },
+                        )
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                postTags();
+              },
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.send),
+                    SizedBox(width: 10),
+                    Text('Post Audio')
+                  ]),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                fixedSize:
+                    Size(170, 35), // Set the width and height of the button
+                backgroundColor:
+                    Color(0xFF6A1B9A), // Set the background color of the button
+              ),
+            )
+          ],
+        ),
+      ),
+    ),
     );
   }
 }
@@ -280,7 +526,6 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
       });
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
