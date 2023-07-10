@@ -21,7 +21,6 @@ class UserProfilePage extends StatelessWidget {
             children: [
               SizedBox(height: 30),
               TopSection(),
-              SizedBox(height: 10),
               PostSection(),
             ],
           )),

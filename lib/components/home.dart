@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
     "username": "",
     "profilPicture": "",
   };
+  TextEditingController textEditingController = TextEditingController();
 
   @override
   void initState() {
@@ -51,15 +52,28 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Welcome ${userInfo["username"]}!"),
-              Text("${auth.currentUser!.email}"),
-              Text("${auth.currentUser!.uid}"),
-              ButtonLogout(),
-            ],
+        appBar: AppBar(
+          title: Text("Search"),
+          actions: [
+            IconButton(
+              onPressed: () {
+                showSearch(context: context, delegate: SearchDelegateWidget());
+              },
+              icon: Icon(Icons.search),
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Welcome ${userInfo["username"]}!"),
+                Text("${auth.currentUser!.email}"),
+                Text("${auth.currentUser!.uid}"),
+                ButtonLogout(),
+              ],
+            ),
           ),
         ));
   }
@@ -81,6 +95,67 @@ class ButtonLogout extends StatelessWidget {
         },
         child: Text('Logout'),
       ),
+    );
+  }
+}
+
+class SearchDelegateWidget extends SearchDelegate {
+  List<String> searchResult = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+  ];
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+        onPressed: () {
+          close(context, null);
+        },
+        icon: Icon(Icons.arrow_back));
+  }
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+          onPressed: () {
+            if (query.isEmpty) {
+              close(context, null);
+            }
+          },
+          icon: Icon(Icons.clear))
+    ];
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return Center(
+      child: Text(query,
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    List<String> suggestion = searchResult.where((element) {
+      return element.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+    return ListView.builder(
+      itemCount: suggestion.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(suggestion[index]),
+          onTap: () {
+            query = suggestion[index];
+            showResults(context);
+          },
+        );
+      },
     );
   }
 }
