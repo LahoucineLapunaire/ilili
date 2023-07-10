@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ilili/components/changeProfile.dart';
-import 'package:ilili/components/userProfile.dart';
+import 'package:ilili/components/OwnerProfile.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 Reference storageRef = FirebaseStorage.instance.ref("posts");
@@ -489,7 +489,7 @@ class _ChangeTagsModalState extends State<ChangeTagsModal> {
                     children: [
                       Icon(Icons.send),
                       SizedBox(width: 10),
-                      Text('Post Audio')
+                      Text('Change tags')
                     ]),
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(

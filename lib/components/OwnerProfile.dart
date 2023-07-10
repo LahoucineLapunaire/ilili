@@ -13,17 +13,19 @@ class UserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFECEFF1),
-      floatingActionButton: FloatingActionButtonUser(),
-      body: Center(
-          child: Column(
-        children: [
-          SizedBox(height: 30),
-          TopSection(),
-          PostSection(),
-        ],
-      )),
-    );
+        backgroundColor: Color(0xFFECEFF1),
+        floatingActionButton: FloatingActionButtonUser(),
+        body: SingleChildScrollView(
+          child: Center(
+              child: Column(
+            children: [
+              SizedBox(height: 30),
+              TopSection(),
+              SizedBox(height: 10),
+              PostSection(),
+            ],
+          )),
+        ));
   }
 }
 
@@ -86,7 +88,6 @@ class _TopSectionState extends State<TopSection> {
           )),
       child: Column(
         children: [
-          SizedBox(height: 25),
           Container(
             padding: const EdgeInsets.all(4),
             height: 150,
@@ -193,6 +194,7 @@ class _PostSectionState extends State<PostSection> {
   Widget build(BuildContext context) {
     return ListView(
       shrinkWrap: true,
+      physics: ClampingScrollPhysics(),
       children: [
         for (var post in posts)
           AudioPlayerWidget(postId: post, userId: auth.currentUser!.uid),
