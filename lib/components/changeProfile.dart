@@ -291,6 +291,12 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
       });
       return;
     }
+    if(descriptionController.text.length > 170) {
+      setState(() {
+        error = "Description cannot be longer than 170 characters";
+      });
+      return;
+    }
     if (isPhotoChanged) {
       Reference imageRef = storageRef.child(auth.currentUser!.uid + ".jpg");
       UploadTask uploadTask = imageRef.putFile(File(profilePicture));

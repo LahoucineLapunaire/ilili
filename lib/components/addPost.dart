@@ -35,8 +35,11 @@ class AddPostPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+           Container(
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child:  Text(
                 "To add a post, please record an audio file or upload one, and add some tags to it, and then click on the 'Add Post' button."),
+           ),
             SizedBox(height: 10),
             if (error != '')
               Padding(

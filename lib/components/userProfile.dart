@@ -20,14 +20,6 @@ class UserProfilePage extends StatelessWidget {
         children: [
           SizedBox(height: 30),
           TopSection(),
-          SizedBox(height: 10),
-          Divider(
-            color: Colors.black,
-            height: 20,
-            thickness: 2,
-            indent: 20,
-            endIndent: 20,
-          ),
           PostSection(),
         ],
       )),
@@ -74,38 +66,93 @@ class _TopSectionState extends State<TopSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                SizedBox(width: 5),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(40.0),
-                  child: Image.network(
-                    profilPicture, // Replace with the actual path and filename of your image file
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Text("$username"),
-              ],
+    return Container(
+      decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(0, 3), // changes the position of the shadow
             ),
           ],
-        ),
-        Text("$description"),
-        SizedBox(height: 20),
-        Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          Text("$followers followers"),
-          SizedBox(width: 10),
-          Text("$following following"),
-          SizedBox(width: 20)
-        ]),
-      ],
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF6A1B9A),
+              Color(0xFFCD7CFF),
+            ],
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+          )),
+      child: Column(
+        children: [
+          SizedBox(height: 25),
+          Container(
+            padding: const EdgeInsets.all(4),
+            height: 150,
+            width: 150,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(75),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.4),
+                  spreadRadius: 1,
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(200),
+              child: Image.network(
+                "$profilPicture",
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          Text(
+            "$username",
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 20),
+          Container(
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Text(
+              "$description",
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Text(
+              "$followers followers",
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(width: 10),
+            Text(
+              "$following following",
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(width: 20)
+          ]),
+          SizedBox(height: 25),
+        ],
+      ),
     );
   }
 }

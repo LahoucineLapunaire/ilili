@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
@@ -150,6 +151,16 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.black,
+            width: 0.5,
+          ),
+        ),
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -168,8 +179,14 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  SizedBox(width: 5),
-                  Text(username),
+                  SizedBox(width: 10),
+                  Text(
+                    username,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
               PopupMenuButton<String>(
@@ -230,39 +247,69 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             ],
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Row(children: [
-                for (var tag in tags) Text(tag),
-                SizedBox(width: 10),
-                Text(postDate),
-                SizedBox(width: 10),
-                Row(
-                  children: [
-                    Text(likes.toString()),
-                    IconButton(
-                      icon: Icon(Icons.favorite),
-                      onPressed: () {
-                        setState(() {
-                          likes++;
-                        });
-                      },
-                    )
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text(comments.toString()),
-                    IconButton(
-                      icon: Icon(Icons.comment),
-                      onPressed: () {
-                        setState(() {
-                          comments++;
-                        });
-                      },
-                    )
-                  ],
+              for (var tag in tags)
+                Container(
+                  padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF009688),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        offset: Offset(0,
+                            2), // Controls the shadow position, positive value for bottom
+                        blurRadius:
+                            2, // Determines the blurriness of the shadow
+                        spreadRadius: 0, // Controls the spread of the shadow
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    tag,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 )
-              ]),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Opacity(
+                    opacity: 0.6,
+                    child: Text(postDate),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(likes.toString()),
+                  IconButton(
+                    icon: Icon(Icons.favorite),
+                    onPressed: () {
+                      setState(() {
+                        likes++;
+                      });
+                    },
+                  ),
+                  SizedBox(width: 5),
+                  Text(comments.toString()),
+                  IconButton(
+                    icon: Icon(Icons.comment),
+                    onPressed: () {
+                      setState(() {
+                        comments++;
+                      });
+                    },
+                  ),
+                ],
+              ),
             ],
           )
         ],
@@ -360,104 +407,104 @@ class _ChangeTagsModalState extends State<ChangeTagsModal> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Center(
-      child: Container(
-        width: 300,
-        height: 650,
-        // Add your modal content here
-        child: Column(
-          children: [
-            SizedBox(height: 30),
-            if (error != '')
-              Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error, color: Colors.red),
-                    SizedBox(width: 5),
-                    Container(
-                      width: 250,
-                      child: Text(
-                        "${error}",
-                        style: TextStyle(
-                            color: Colors.red, fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  ],
+        child: Container(
+          width: 300,
+          height: 650,
+          // Add your modal content here
+          child: Column(
+            children: [
+              SizedBox(height: 30),
+              if (error != '')
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error, color: Colors.red),
+                      SizedBox(width: 5),
+                      Container(
+                        width: 250,
+                        child: Text(
+                          "${error}",
+                          style: TextStyle(
+                              color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-            TextField(
-              controller: tagController,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    addTag();
+              TextField(
+                controller: tagController,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: () {
+                      addTag();
+                    },
+                  ),
+                  labelText: 'tag',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ), // Accessing idPost from widget argument
+              Container(
+                width: 250,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: tagsList.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      width: 200, // Set the desired width here
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(tagsList[index]),
+                          IconButton(
+                            icon: Icon(
+                              Icons.delete,
+                              color: Colors.red,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                tagsList.removeAt(index);
+                              });
+                            },
+                          )
+                        ],
+                      ),
+                    );
                   },
                 ),
-                labelText: 'tag',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
               ),
-            ), // Accessing idPost from widget argument
-            Container(
-              width: 250,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: tagsList.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    width: 200, // Set the desired width here
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(tagsList[index]),
-                        IconButton(
-                          icon: Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              tagsList.removeAt(index);
-                            });
-                          },
-                        )
-                      ],
-                    ),
-                  );
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  postTags();
                 },
-              ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                postTags();
-              },
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.send),
-                    SizedBox(width: 10),
-                    Text('Post Audio')
-                  ]),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.send),
+                      SizedBox(width: 10),
+                      Text('Post Audio')
+                    ]),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  fixedSize:
+                      Size(170, 35), // Set the width and height of the button
+                  backgroundColor: Color(
+                      0xFF6A1B9A), // Set the background color of the button
                 ),
-                fixedSize:
-                    Size(170, 35), // Set the width and height of the button
-                backgroundColor:
-                    Color(0xFF6A1B9A), // Set the background color of the button
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 }
