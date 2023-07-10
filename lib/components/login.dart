@@ -297,6 +297,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
 
   Future<void> signupWithGoogle() async {
     try {
+      print("Signing up with Google");
       // Trigger the Google sign-in flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
@@ -345,6 +346,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
     } catch (e) {
       setState(() {
         errorMessage = e.toString().split('] ')[1];
+        print("---------------------> ${errorMessage}");
       });
     }
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ilili/components/changeProfile.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -211,6 +212,91 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           )
         ],
       ),
+    );
+  }
+}
+
+class FloatingActionButtonUser extends StatefulWidget {
+  FloatingActionButtonUser({Key? key}) : super(key: key);
+
+  @override
+  _FloatingActionButtonUserState createState() =>
+      _FloatingActionButtonUserState();
+}
+
+class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
+  bool isOpen = false;
+
+  void toggleMenu() {
+    setState(() {
+      isOpen = !isOpen;
+    });
+  }
+
+  void showPopupMenu(BuildContext context) {
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    final double yOffset =
+        -175; // Adjust the y-offset value to move the menu higher
+
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(button.size.bottomRight(Offset.zero),
+            ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero),
+            ancestor: overlay),
+      ).translate(0, yOffset), // Apply the y-offset to move the menu higher
+      Offset.zero & overlay.size,
+    );
+
+    showMenu(
+      context: context,
+      position: position,
+      items: [
+        PopupMenuItem(
+          child: Text('User Account'),
+          value: 'User Account',
+        ),
+        PopupMenuItem(
+          child: Text('Settings'),
+          value: 'Settings',
+        ),
+      ],
+      elevation: 8,
+    ).then((selectedValue) {
+      if (selectedValue == "User Account") {
+        print('Selected value: $selectedValue');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ChangeProfilePage()),
+        );
+      }
+      toggleMenu();
+    }).whenComplete(() {
+      setState(() {
+        isOpen = false;
+      });
+    });
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        if (isOpen) {
+          // Handle close button action here
+          print('Close button pressed');
+        } else {
+          // Open the popup menu when the floating action button is pressed
+          showPopupMenu(context);
+        }
+        toggleMenu();
+      },
+      backgroundColor: Color(0xFF6A1B9A),
+      child: isOpen ? Icon(Icons.close) : Icon(Icons.menu),
     );
   }
 }

@@ -51,13 +51,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // Open the popup menu when the floating action button is pressed
-            showPopupMenu(context);
-          },
-          child: Icon(Icons.add),
-        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -70,49 +63,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ));
   }
-}
-
-void showPopupMenu(BuildContext context) {
-  final RenderBox button = context.findRenderObject() as RenderBox;
-  final RenderBox overlay =
-      Overlay.of(context).context.findRenderObject() as RenderBox;
-
-  final double yOffset =
-      -230; // Adjust the y-offset value to move the menu higher
-
-  final RelativeRect position = RelativeRect.fromRect(
-    Rect.fromPoints(
-      button.localToGlobal(button.size.bottomRight(Offset.zero),
-          ancestor: overlay),
-      button.localToGlobal(button.size.bottomRight(Offset.zero),
-          ancestor: overlay),
-    ).translate(0, yOffset), // Apply the y-offset to move the menu higher
-    Offset.zero & overlay.size,
-  );
-
-  // Create and show the popup menu
-  showMenu(
-    context: context,
-    position: position,
-    items: [
-      PopupMenuItem(
-        child: Text('User Account'),
-        value: 'User Account',
-      ),
-      PopupMenuItem(
-        child: Text('Settings'),
-        value: 'Settings',
-      ),
-    ],
-    elevation: 8,
-  ).then((selectedValue) {
-    if (selectedValue == "User Account") {
-      // Do something based on the selected value
-      print('Selected value: $selectedValue');
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => ChangeProfilePage()));
-    }
-  });
 }
 
 class ButtonLogout extends StatelessWidget {

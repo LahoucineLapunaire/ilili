@@ -245,12 +245,6 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
   }
 
   bool checkUsername() {
-    if (usernameList.contains(usernameController.text)) {
-      setState(() {
-        error = "Username already exists";
-      });
-      return false;
-    }
     if (containsSpacesOrSpecialCharacters(usernameController.text)) {
       setState(() {
         error = "Username cannot contain spaces or special characters";
@@ -277,7 +271,8 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
   }
 
   void changeUserInfo() async {
-    print("username: ${usernameController.text}");
+    try {
+      print("username: ${usernameController.text}");
     print("description: ${descriptionController.text}");
     print("profilePicture: $profilePicture");
     if (usernameController.text == "" || descriptionController.text == null) {
@@ -319,6 +314,10 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
         builder: (context) => AppRouter(),
       ),
     );
+    } catch (e) {
+      error = e.toString().split('] ')[1];
+      print("---------------------> ${e.toString().split('] ')[1]}");
+    }
   }
 
   @override

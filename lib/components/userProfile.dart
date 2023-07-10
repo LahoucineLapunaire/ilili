@@ -14,6 +14,7 @@ class UserProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFECEFF1),
+      floatingActionButton: FloatingActionButtonUser(),
       body: Center(
           child: Column(
         children: [
@@ -94,26 +95,6 @@ class _TopSectionState extends State<TopSection> {
                 Text("$username"),
               ],
             ),
-            PopupMenuButton<String>(onSelected: (value) {
-              if (value == "User Profile") {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ChangeProfilePage()),
-                );
-              }
-              // Handle the sub-menu item selection
-            }, itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem<String>(
-                  value: 'User Profile',
-                  child: Text('User Profile'),
-                ),
-                PopupMenuItem<String>(
-                  value: 'Parameters',
-                  child: Text('Parameters'),
-                ),
-              ];
-            })
           ],
         ),
         Text("$description"),
