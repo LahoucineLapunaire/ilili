@@ -14,7 +14,7 @@ class _AppRouterState extends State<AppRouter> {
   final List<Widget> _pages = [
     HomePage(),
     AddPostPage(),
-    UserProfilePage(),
+    OwnerProfilePage(),
   ];
 
   void _onTabTapped(int index) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ilili/components/UserProfilePage.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:ilili/components/setUsername.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,12 +21,16 @@ class _HomePageState extends State<HomePage> {
     "profilPicture": "",
   };
   TextEditingController textEditingController = TextEditingController();
+  late CollectionReference<Map<String, dynamic>> usersCollectionRef;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     checkUsername();
+    setState(() {
+      usersCollectionRef = firestore.collection('users');
+    });
   }
 
   Future<void> checkUsername() async {
@@ -57,7 +62,9 @@ class _HomePageState extends State<HomePage> {
           actions: [
             IconButton(
               onPressed: () {
-                showSearch(context: context, delegate: SearchDelegateWidget());
+                showSearch(
+                    context: context,
+                    delegate: SearchDelegateWidget(usersCollectionRef));
               },
               icon: Icon(Icons.search),
             ),
@@ -100,62 +107,133 @@ class ButtonLogout extends StatelessWidget {
 }
 
 class SearchDelegateWidget extends SearchDelegate {
-  List<String> searchResult = [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-  ];
+  final CollectionReference<Map<String, dynamic>> usersCollectionRef;
+
+  SearchDelegateWidget(this.usersCollectionRef);
 
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
-        onPressed: () {
-          close(context, null);
-        },
-        icon: Icon(Icons.arrow_back));
+      onPressed: () {
+        close(context, null);
+      },
+      icon: Icon(Icons.arrow_back),
+    );
   }
 
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
-          onPressed: () {
-            if (query.isEmpty) {
-              close(context, null);
-            }
-          },
-          icon: Icon(Icons.clear))
+        onPressed: () {
+          if (query.isEmpty) {
+            close(context, null);
+          }
+        },
+        icon: Icon(Icons.clear),
+      ),
     ];
   }
 
   @override
   Widget buildResults(BuildContext context) {
-    return Center(
-      child: Text(query,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      future: usersCollectionRef
+          .where('username', isGreaterThanOrEqualTo: query)
+          .where('username', isLessThan: query)
+          .get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasData) {
+          final searchResults = snapshot.data!.docs;
+          return ListView.builder(
+            itemCount: searchResults.length,
+            itemBuilder: (context, index) {
+              final document = searchResults[index];
+              return ListTile(
+                title: Text(document['username']),
+                onTap: () {
+                  close(context, document['username']);
+                },
+              );
+            },
+          );
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Text('Error occurred while searching.'),
+          );
+        } else {
+          return Center(
+            child: Text('No search results found.'),
+          );
+        }
+      },
     );
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    List<String> suggestion = searchResult.where((element) {
-      return element.toLowerCase().contains(query.toLowerCase());
-    }).toList();
-    return ListView.builder(
-      itemCount: suggestion.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(suggestion[index]),
-          onTap: () {
-            query = suggestion[index];
-            showResults(context);
-          },
-        );
+    if (query.isEmpty) {
+      return Container(); // Return an empty container when the query is empty
+    }
+
+    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      future: usersCollectionRef.get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasData) {
+          final users = snapshot.data!.docs;
+          List<User> suggestion = users
+              .map((document) {
+                return User(
+                  userId: document.id,
+                  username: document['username'] as String,
+                  profilePicture: document['profilePicture'] as String,
+                );
+              })
+              .where((user) =>
+                  user.username.toLowerCase().contains(query.toLowerCase()))
+              .toList();
+          return ListView.builder(
+            itemCount: suggestion.length,
+            itemBuilder: (context, index) {
+              User user = suggestion[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(user.profilePicture),
+                ),
+                title: Text(user.username),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            UserProfilePage(userId: user.userId)),
+                  );
+                },
+              );
+            },
+          );
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Text('Error occurred while fetching users.'),
+          );
+        } else {
+          return Center(
+            child: Text('No users found.'),
+          );
+        }
       },
     );
   }
+}
+
+class User {
+  final String username;
+  final String profilePicture;
+  final String userId;
+
+  User({required this.username, required this.profilePicture ,required this.userId});
 }

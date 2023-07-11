@@ -124,7 +124,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       storageRef.child(widget.postId).delete();
       await firestore.collection('posts').doc(widget.postId).delete();
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => UserProfilePage()));
+          context, MaterialPageRoute(builder: (context) => OwnerProfilePage()));
       dispose();
     } catch (e) {
       print("Error: $e");

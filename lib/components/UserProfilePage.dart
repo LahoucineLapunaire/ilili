@@ -7,24 +7,28 @@ import 'package:ilili/components/widget.dart';
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-class OwnerProfilePage extends StatelessWidget {
-  const OwnerProfilePage({super.key});
+class UserProfilePage extends StatelessWidget {
+  final String userId;
+
+  const UserProfilePage({required this.userId, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xFFECEFF1),
-        floatingActionButton: FloatingActionButtonUser(),
-        body: SingleChildScrollView(
-          child: Center(
-              child: Column(
+      backgroundColor: Color(0xFFECEFF1),
+      floatingActionButton: FloatingActionButtonUser(),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
             children: [
               SizedBox(height: 30),
               TopSection(),
               PostSection(),
             ],
-          )),
-        ));
+          ),
+        ),
+      ),
+    );
   }
 }
 
