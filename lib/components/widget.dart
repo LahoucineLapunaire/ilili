@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ilili/components/UserProfilePage.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:ilili/components/OwnerProfile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -173,6 +174,20 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     );
   }
 
+  void redirectToUser() {
+    if (widget.isOwner) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => OwnerProfilePage()));
+    } else {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => UserProfilePage(
+                    userId: widget.userId,
+                  )));
+    }
+  }
+
   @override
   void dispose() {
     audioPlayer.dispose(); // Dispose of the audio player
@@ -198,27 +213,32 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(40.0),
-                    child: Image.network(
-                      profilePicture, // Replace with the actual path and filename of your image file
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
+              GestureDetector(
+                onTap: () {
+                  redirectToUser(); // Call the redirectToUser() function on tap
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(40.0),
+                      child: Image.network(
+                        profilePicture, // Replace with the actual path and filename of your image file
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    username,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    SizedBox(width: 10),
+                    Text(
+                      username,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               if (widget.isOwner)
                 PopupMenuButton<String>(
@@ -565,6 +585,10 @@ class _FloatingActionButtonOwnerState extends State<FloatingActionButtonOwner> {
     });
   }
 
+  void logout() {
+    auth.signOut().then((value) => print("User logged out"));
+  }
+
   void showPopupMenu(BuildContext context) {
     final RenderBox button = context.findRenderObject() as RenderBox;
     final RenderBox overlay =
@@ -595,6 +619,13 @@ class _FloatingActionButtonOwnerState extends State<FloatingActionButtonOwner> {
           child: Text('Settings'),
           value: 'Settings',
         ),
+        PopupMenuItem(
+          child: Text(
+            'Logout',
+            style: TextStyle(color: Colors.red),
+          ),
+          value: 'Logout',
+        ),
       ],
       elevation: 8,
     ).then((selectedValue) {
@@ -604,6 +635,10 @@ class _FloatingActionButtonOwnerState extends State<FloatingActionButtonOwner> {
           context,
           MaterialPageRoute(builder: (context) => ChangeProfilePage()),
         );
+      } else if (selectedValue == "Settings") {
+        print("Settings");
+      } else if (selectedValue == "Logout") {
+        logout();
       }
       toggleMenu();
     }).whenComplete(() {
@@ -719,7 +754,9 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
       position: position,
       items: [
         PopupMenuItem(
-          child: followingList.contains(auth.currentUser!.uid) ? Text('Unfollow') : Text('Follow'),
+          child: followingList.contains(auth.currentUser!.uid)
+              ? Text('Unfollow')
+              : Text('Follow'),
           value: 'Follow',
         ),
         PopupMenuItem(

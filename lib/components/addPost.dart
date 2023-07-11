@@ -499,6 +499,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           'likes': [],
           'comments': [],
           'timestamp': DateTime.now(),
+          'score':0,
         });
 
         FirebaseFirestore.instance
