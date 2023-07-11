@@ -35,11 +35,11 @@ class AddPostPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-           Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child:  Text(
-                "To add a post, please record an audio file or upload one, and add some tags to it, and then click on the 'Add Post' button."),
-           ),
+            Container(
+              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+              child: Text(
+                  "To add a post, please record an audio file or upload one, and add some tags to it, and then click on the 'Add Post' button."),
+            ),
             SizedBox(height: 10),
             if (error != '')
               Padding(
@@ -499,7 +499,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           'likes': [],
           'comments': [],
           'timestamp': DateTime.now(),
-          'score':0,
+          'score': 0,
         });
 
         FirebaseFirestore.instance

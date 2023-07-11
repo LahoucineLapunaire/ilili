@@ -198,7 +198,12 @@ class _PostSectionState extends State<PostSection> {
       physics: ClampingScrollPhysics(),
       children: [
         for (var post in posts)
-          AudioPlayerWidget(postId: post, userId: auth.currentUser!.uid, isOwner: true),
+          AudioPlayerWidget(
+            postId: post,
+            userId: auth.currentUser!.uid,
+            isOwner: true,
+            isComment: false,
+          ),
       ],
     );
   }

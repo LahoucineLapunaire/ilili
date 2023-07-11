@@ -59,15 +59,16 @@ class _HomePageState extends State<HomePage> {
         firestore.collection('posts');
 
     // Query the posts collection and order by weighted score
-    QuerySnapshot<Map<String, dynamic>> querySnapshot = await postsCollectionRef
-        .get();
+    QuerySnapshot<Map<String, dynamic>> querySnapshot =
+        await postsCollectionRef.get();
 
     // Extract the post documents and convert them to Post objects with weighted score
     List<Post> postslist = querySnapshot.docs.map((doc) {
       String user = doc.get('userId');
       int score = doc.get('score');
       Timestamp timestamp = doc.get('timestamp');
-      double weightedScore = score.toDouble() * 0.7 + timestamp.seconds.toDouble() * 0.3;
+      double weightedScore =
+          score.toDouble() * 0.7 + timestamp.seconds.toDouble() * 0.3;
 
       return Post(
         userId: user,
@@ -113,6 +114,7 @@ class _HomePageState extends State<HomePage> {
                     postId: post.postId,
                     userId: post.userId,
                     isOwner: false,
+                    isComment: false,
                   ),
               ],
             ),

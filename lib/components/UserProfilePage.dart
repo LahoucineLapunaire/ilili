@@ -16,14 +16,14 @@ class UserProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFECEFF1),
-      floatingActionButton: FloatingActionButtonUser(ownerId : userId),
+      floatingActionButton: FloatingActionButtonUser(ownerId: userId),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
               SizedBox(height: 30),
-              TopSection( userId: userId),
-              PostSection( userId: userId),
+              TopSection(userId: userId),
+              PostSection(userId: userId),
             ],
           ),
         ),
@@ -204,7 +204,11 @@ class _PostSectionState extends State<PostSection> {
       physics: ClampingScrollPhysics(),
       children: [
         for (var post in posts)
-          AudioPlayerWidget(postId: post, userId: widget.userId, isOwner: false),
+          AudioPlayerWidget(
+              postId: post,
+              userId: widget.userId,
+              isOwner: false,
+              isComment: false),
       ],
     );
   }
