@@ -14,7 +14,7 @@ class OwnerProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Color(0xFFECEFF1),
-        floatingActionButton: FloatingActionButtonUser(),
+        floatingActionButton: FloatingActionButtonOwner(),
         body: SingleChildScrollView(
           child: Center(
               child: Column(
@@ -196,7 +196,7 @@ class _PostSectionState extends State<PostSection> {
       physics: ClampingScrollPhysics(),
       children: [
         for (var post in posts)
-          AudioPlayerWidget(postId: post, userId: auth.currentUser!.uid),
+          AudioPlayerWidget(postId: post, userId: auth.currentUser!.uid, isOwner: true),
       ],
     );
   }

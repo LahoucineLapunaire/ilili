@@ -496,8 +496,8 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           'userId': auth.currentUser!.uid,
           'audio': downloadURL,
           'tags': tagsList,
-          'likes': 0,
-          'comments': 0,
+          'likes': [],
+          'comments': [],
           'timestamp': DateTime.now(),
         });
 

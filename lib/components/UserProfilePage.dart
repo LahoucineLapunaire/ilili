@@ -16,14 +16,14 @@ class UserProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFECEFF1),
-      floatingActionButton: FloatingActionButtonUser(),
+      floatingActionButton: FloatingActionButtonOwner(),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
               SizedBox(height: 30),
-              TopSection(),
-              PostSection(),
+              TopSection( userId: userId),
+              PostSection( userId: userId),
             ],
           ),
         ),
@@ -33,7 +33,8 @@ class UserProfilePage extends StatelessWidget {
 }
 
 class TopSection extends StatefulWidget {
-  const TopSection({super.key});
+  final String userId;
+  const TopSection({super.key, required this.userId});
 
   @override
   State<TopSection> createState() => _TopSectionState();
@@ -60,7 +61,7 @@ class _TopSectionState extends State<TopSection> {
 
   void getUserData() async {
     DocumentSnapshot ds =
-        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+        await firestore.collection('users').doc(widget.userId).get();
 
     setState(() {
       username = ds.get('username');
@@ -162,7 +163,8 @@ class _TopSectionState extends State<TopSection> {
 }
 
 class PostSection extends StatefulWidget {
-  const PostSection({super.key});
+  final String userId;
+  const PostSection({super.key, required this.userId});
 
   @override
   State<PostSection> createState() => _PostSectionState();
@@ -185,7 +187,7 @@ class _PostSectionState extends State<PostSection> {
   void getPosts() async {
     QuerySnapshot<Map<String, dynamic>> qs = await FirebaseFirestore.instance
         .collection('posts')
-        .where("userId", isEqualTo: auth.currentUser!.uid)
+        .where("userId", isEqualTo: widget.userId)
         .get();
 
     setState(() {
@@ -200,7 +202,7 @@ class _PostSectionState extends State<PostSection> {
       physics: ClampingScrollPhysics(),
       children: [
         for (var post in posts)
-          AudioPlayerWidget(postId: post, userId: auth.currentUser!.uid),
+          AudioPlayerWidget(postId: post, userId: widget.userId, isOwner: false),
       ],
     );
   }

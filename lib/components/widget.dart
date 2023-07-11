@@ -7,15 +7,22 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:ilili/components/OwnerProfile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 Reference storageRef = FirebaseStorage.instance.ref("posts");
+FirebaseAuth auth = FirebaseAuth.instance;
 
 class AudioPlayerWidget extends StatefulWidget {
   final String userId;
   final String postId;
+  bool isOwner = false;
 
-  AudioPlayerWidget({Key? key, required this.userId, required this.postId})
+  AudioPlayerWidget(
+      {Key? key,
+      required this.userId,
+      required this.postId,
+      required this.isOwner})
       : super(key: key);
 
   @override
@@ -33,8 +40,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   String username = '';
   String postDate = '';
   List<dynamic> tags = [];
-  int likes = 0;
-  int comments = 0;
+  List<dynamic> likes = [];
+  List<dynamic> comments = [];
 
   @override
   void initState() {
@@ -91,6 +98,30 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       setState(() {
         print('Error: $e');
       });
+    }
+  }
+
+  Future<void> likePost() async {
+    try {
+      if (likes.contains(auth.currentUser!.uid)) {
+        await firestore.collection('posts').doc(widget.postId).update({
+          'likes': FieldValue.arrayRemove([auth.currentUser!.uid])
+        });
+        print("unliked");
+        setState(() {
+          likes.remove(auth.currentUser!.uid);
+        });
+      } else {
+        await firestore.collection('posts').doc(widget.postId).update({
+          'likes': FieldValue.arrayUnion([auth.currentUser!.uid])
+        });
+        print("liked");
+        setState(() {
+          likes.add(auth.currentUser!.uid);
+        });
+      }
+    } catch (e) {
+      print('Error: $e');
     }
   }
 
@@ -189,29 +220,30 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                   ),
                 ],
               ),
-              PopupMenuButton<String>(
-                onSelected: (String value) {
-                  // Handle menu item selection
-                  if (value == "Modify Post") {
-                    print('Selected value: $value');
-                    openModal(context);
-                  } else if (value == "Delete Post") {
-                    deletePost();
-                  }
-                },
-                itemBuilder: (BuildContext context) => [
-                  PopupMenuItem(
-                    value: 'Modify Post',
-                    child: Text('Modify Post'),
-                    textStyle: TextStyle(color: Colors.black),
-                  ),
-                  PopupMenuItem(
-                    value: 'Delete Post',
-                    child: Text('Delete Post'),
-                    textStyle: TextStyle(color: Colors.red),
-                  ),
-                ],
-              ),
+              if (widget.isOwner)
+                PopupMenuButton<String>(
+                  onSelected: (String value) {
+                    // Handle menu item selection
+                    if (value == "Modify Post") {
+                      print('Selected value: $value');
+                      openModal(context);
+                    } else if (value == "Delete Post") {
+                      deletePost();
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => [
+                    PopupMenuItem(
+                      value: 'Modify Post',
+                      child: Text('Modify Post'),
+                      textStyle: TextStyle(color: Colors.black),
+                    ),
+                    PopupMenuItem(
+                      value: 'Delete Post',
+                      child: Text('Delete Post'),
+                      textStyle: TextStyle(color: Colors.red),
+                    ),
+                  ],
+                ),
             ],
           ),
           Row(
@@ -289,22 +321,27 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               ),
               Row(
                 children: [
-                  Text(likes.toString()),
+                  Text((likes.length - 1).toString()),
                   IconButton(
-                    icon: Icon(Icons.favorite),
+                    icon: Icon(
+                      Icons.favorite,
+                      color: likes.contains(auth.currentUser?.uid) ? Colors.red : null,
+                    ),
                     onPressed: () {
-                      setState(() {
-                        likes++;
-                      });
+                      if (widget.isOwner) {
+                        print("likes: $likes");
+                      } else {
+                        likePost();
+                      }
                     },
                   ),
                   SizedBox(width: 5),
-                  Text(comments.toString()),
+                  Text((comments.length - 1).toString()),
                   IconButton(
                     icon: Icon(Icons.comment),
                     onPressed: () {
                       setState(() {
-                        comments++;
+                        print("comments : $comments");
                       });
                     },
                   ),
@@ -509,15 +546,15 @@ class _ChangeTagsModalState extends State<ChangeTagsModal> {
   }
 }
 
-class FloatingActionButtonUser extends StatefulWidget {
-  FloatingActionButtonUser({Key? key}) : super(key: key);
+class FloatingActionButtonOwner extends StatefulWidget {
+  FloatingActionButtonOwner({Key? key}) : super(key: key);
 
   @override
-  _FloatingActionButtonUserState createState() =>
-      _FloatingActionButtonUserState();
+  _FloatingActionButtonOwnerState createState() =>
+      _FloatingActionButtonOwnerState();
 }
 
-class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
+class _FloatingActionButtonOwnerState extends State<FloatingActionButtonOwner> {
   bool isOpen = false;
 
   void toggleMenu() {
