@@ -40,8 +40,8 @@ class _TopSectionState extends State<TopSection> {
   String profilPicture =
       'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256';
   String description = "";
-  int followers = 0;
-  int following = 0;
+  List<dynamic> followers = [];
+  List<dynamic> followings = [];
 
   @override
   void initState() {
@@ -62,6 +62,8 @@ class _TopSectionState extends State<TopSection> {
       username = ds.get('username');
       profilPicture = ds.get('profilePicture');
       description = ds.get('description');
+      followers = ds.get('followers');
+      followings = ds.get('followings');
     });
   }
 
@@ -134,7 +136,7 @@ class _TopSectionState extends State<TopSection> {
           SizedBox(height: 20),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Text(
-              "$followers followers",
+              "${followers.length} followers",
               style: TextStyle(
                 fontSize: 15,
                 color: Colors.white,
@@ -142,7 +144,7 @@ class _TopSectionState extends State<TopSection> {
             ),
             SizedBox(width: 10),
             Text(
-              "$following following",
+              "${followings.length} following",
               style: TextStyle(
                 fontSize: 15,
                 color: Colors.white,
