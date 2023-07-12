@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ilili/components/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ilili/components/widget.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -58,16 +59,11 @@ class EmailSection extends StatefulWidget {
 
 class _EmailSectionState extends State<EmailSection> {
   TextEditingController emailController = TextEditingController();
-  bool error = false;
-  String errorMessage = "";
   bool confirmation = false;
 
   Future<void> sendPasswordResetEmail() async {
+    showErrorMessage("All fields must be filled", context);
     if (emailController.text == '') {
-      setState(() {
-        error = true;
-        errorMessage = "All fields must be filled";
-      });
       return;
     }
     try {
@@ -78,15 +74,11 @@ class _EmailSectionState extends State<EmailSection> {
           confirmation = true;
         });
       });
+      showInfoMessage('Password reset email sent successfully', context);
       print('Password reset email sent successfully');
-      error = false;
-      errorMessage = "";
     } catch (e) {
+      showErrorMessage(e.toString().split('] ')[1], context);
       print('Error sending password reset email: $e');
-      setState(() {
-        error = true;
-        errorMessage = e.toString().split('] ')[1];
-      });
     }
   }
 
@@ -109,24 +101,6 @@ class _EmailSectionState extends State<EmailSection> {
                         "Password reset email sent successfully, please check your email",
                         style: TextStyle(
                             color: Colors.green, fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            if (error)
-              Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Row(
-                  children: [
-                    Icon(Icons.error, color: Colors.red),
-                    SizedBox(width: 5),
-                    Container(
-                      width: 250,
-                      child: Text(
-                        "${errorMessage}",
-                        style: TextStyle(
-                            color: Colors.red, fontWeight: FontWeight.bold),
                       ),
                     )
                   ],

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:ilili/components/appRouter.dart';
 import 'package:ilili/components/signup.dart';
+import 'package:ilili/components/widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -16,7 +17,6 @@ String profilePicture =
     "https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256";
 String description = "";
 bool isPhotoChanged = false;
-String error = "";
 TextEditingController usernameController = TextEditingController();
 TextEditingController descriptionController = TextEditingController();
 
@@ -31,25 +31,6 @@ class ChangeProfilePage extends StatelessWidget {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (error != '')
-            Padding(
-              padding: EdgeInsets.only(bottom: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error, color: Colors.red),
-                  SizedBox(width: 5),
-                  Container(
-                    width: 250,
-                    child: Text(
-                      "${error}",
-                      style: TextStyle(
-                          color: Colors.red, fontWeight: FontWeight.bold),
-                    ),
-                  )
-                ],
-              ),
-            ),
           ProfilPictureSection(),
           SizedBox(height: 20),
           UserInfoWidget(),
@@ -246,26 +227,18 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
 
   bool checkUsername() {
     if (containsSpacesOrSpecialCharacters(usernameController.text)) {
-      setState(() {
-        error = "Username cannot contain spaces or special characters";
-      });
+      showErrorMessage(
+          "Username cannot contain spaces or special characters", context);
       return false;
     }
     if (usernameController.text.length > 20) {
-      setState(() {
-        error = "Username cannot be longer than 20 characters";
-      });
+      showErrorMessage("Username cannot be longer than 20 characters", context);
       return false;
     }
     if (usernameController.text == "") {
-      setState(() {
-        error = "Username cannot be empty";
-      });
+      showErrorMessage("Username cannot be empty", context);
       return false;
     } else {
-      setState(() {
-        error = "";
-      });
       return true;
     }
   }
@@ -273,55 +246,50 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
   void changeUserInfo() async {
     try {
       print("username: ${usernameController.text}");
-    print("description: ${descriptionController.text}");
-    print("profilePicture: $profilePicture");
-    if (usernameController.text == "" || descriptionController.text == null) {
-      setState(() {
-        error = "Please fill in all fields";
-      });
-      return;
-    }
-    if (checkUsername() == false) {
-      return;
-    }
+      print("description: ${descriptionController.text}");
+      print("profilePicture: $profilePicture");
+      if (usernameController.text == "" || descriptionController.text == null) {
+        showErrorMessage("Please fill in all fields", context);
+        return;
+      }
+      if (checkUsername() == false) {
+        return;
+      }
 
-    if (profilePicture.isEmpty) {
-      setState(() {
-        error = "Please select a profile picture";
-      });
-      return;
-    }
-    if(descriptionController.text.length > 170) {
-      setState(() {
-        error = "Description cannot be longer than 170 characters";
-      });
-      return;
-    }
-    if (isPhotoChanged) {
-      Reference imageRef = storageRef.child(auth.currentUser!.uid + ".jpg");
-      UploadTask uploadTask = imageRef.putFile(File(profilePicture));
-      await uploadTask.whenComplete(() async {
-        String downloadURL = await imageRef.getDownloadURL();
+      if (profilePicture.isEmpty) {
+        showErrorMessage("Please select a profile picture", context);
+        return;
+      }
+      if (descriptionController.text.length > 170) {
+        showErrorMessage(
+            "Description cannot be longer than 170 characters", context);
+        return;
+      }
+      if (isPhotoChanged) {
+        Reference imageRef = storageRef.child(auth.currentUser!.uid + ".jpg");
+        UploadTask uploadTask = imageRef.putFile(File(profilePicture));
+        await uploadTask.whenComplete(() async {
+          String downloadURL = await imageRef.getDownloadURL();
+          firestore.collection('users').doc(auth.currentUser!.uid).update({
+            'username': usernameController.text,
+            'description': descriptionController.text,
+            'profilePicture': downloadURL,
+          });
+        });
+      } else {
         firestore.collection('users').doc(auth.currentUser!.uid).update({
           'username': usernameController.text,
           'description': descriptionController.text,
-          'profilePicture': downloadURL,
         });
-      });
-    } else {
-      firestore.collection('users').doc(auth.currentUser!.uid).update({
-        'username': usernameController.text,
-        'description': descriptionController.text,
-      });
-    }
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AppRouter(),
-      ),
-    );
+      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AppRouter(),
+        ),
+      );
     } catch (e) {
-      error = e.toString().split('] ')[1];
+      showErrorMessage(e.toString().split('] ')[1], context);
       print("---------------------> ${e.toString().split('] ')[1]}");
     }
   }

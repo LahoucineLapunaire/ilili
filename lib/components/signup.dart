@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ilili/components/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:ilili/components/widget.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 CollectionReference usersCollection = firestore.collection('users');
@@ -109,8 +110,6 @@ class _FormSectionState extends State<FormSection> {
   TextEditingController passwordConfirmationController =
       TextEditingController();
   bool passwordSame = false;
-  bool error = false;
-  String errorMessage = "";
   String infoMessage = "";
 
   Future<void> sendEmailVerification() async {
@@ -120,12 +119,14 @@ class _FormSectionState extends State<FormSection> {
 
       if (user != null && !user.emailVerified) {
         await user.sendEmailVerification();
+        showInfoMessage('Email verification sent to ${user.email}', context);
         print('Email verification sent to ${user.email}');
       } else {
+        showErrorMessage('No user or email is already verified', context);
         print('No user or email is already verified');
       }
-    } catch (error) {
-      print('Error sending email verification: $error');
+    } catch (e) {
+      showErrorMessage(e.toString(), context);
     }
   }
 
@@ -133,17 +134,11 @@ class _FormSectionState extends State<FormSection> {
     if (emailController.text == '' ||
         passwordController.text == '' ||
         passwordConfirmationController.text == '') {
-      setState(() {
-        error = true;
-        errorMessage = "All fields must be filled";
-      });
+      showErrorMessage("All fields must be filled", context);
       return;
     }
     if (termOfUses == false) {
-      setState(() {
-        error = true;
-        errorMessage = "You must accept the terms of use";
-      });
+      showErrorMessage("You must accept the terms of use", context);
       return;
     }
     try {
@@ -168,19 +163,11 @@ class _FormSectionState extends State<FormSection> {
       print('User signed up and document created successfully!');
 
       sendEmailVerification();
-
-      setState(() {
-        error = false;
-        errorMessage = "";
-        infoMessage = "User signed up successfully!";
-      });
+      showInfoMessage("User signed up successfully!", context);
     } catch (e) {
       print('Error signing up user and creating document: $e');
       if (mounted) {
-        setState(() {
-          error = true;
-          errorMessage = e.toString().split('] ')[1];
-        });
+        showErrorMessage(e.toString().split('] ')[1], context);
       }
     }
   }
@@ -191,24 +178,6 @@ class _FormSectionState extends State<FormSection> {
       width: 300,
       child: Column(
         children: [
-          if (error)
-            Padding(
-              padding: EdgeInsets.only(bottom: 10),
-              child: Row(
-                children: [
-                  Icon(Icons.error, color: Colors.red),
-                  SizedBox(width: 5),
-                  Container(
-                    width: 250,
-                    child: Text(
-                      "${errorMessage}",
-                      style: TextStyle(
-                          color: Colors.red, fontWeight: FontWeight.bold),
-                    ),
-                  )
-                ],
-              ),
-            ),
           if (infoMessage != '')
             Padding(
               padding: EdgeInsets.only(bottom: 10),
@@ -391,18 +360,11 @@ class GoogleSignupForm extends StatefulWidget {
 }
 
 class _GoogleSignupFormState extends State<GoogleSignupForm> {
-  String errorMessage = '';
-
   verifyTermsOfUses() {
     if (termOfUses) {
-      setState(() {
-        errorMessage = '';
-      });
       signupWithGoogle();
     } else {
-      setState(() {
-        errorMessage = 'You must agree to the terms of uses';
-      });
+      showErrorMessage('You must agree to the terms of uses', context);
       return;
     }
   }
@@ -455,9 +417,7 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
         }
       }
     } catch (e) {
-      setState(() {
-        errorMessage = e.toString().split('] ')[1];
-      });
+      showErrorMessage(e.toString().split('] ')[1], context);
     }
   }
 
@@ -466,25 +426,6 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (errorMessage != '')
-          Padding(
-            padding: EdgeInsets.only(bottom: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error, color: Colors.red),
-                SizedBox(width: 5),
-                Container(
-                  width: 250,
-                  child: Text(
-                    "${errorMessage}",
-                    style: TextStyle(
-                        color: Colors.red, fontWeight: FontWeight.bold),
-                  ),
-                )
-              ],
-            ),
-          ),
         Container(
           width: 250,
           child: ElevatedButton(

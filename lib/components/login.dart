@@ -4,6 +4,7 @@ import 'package:ilili/components/resetPassword.dart';
 import 'package:ilili/components/signup.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ilili/components/widget.dart';
 
 GoogleSignIn googleSignIn = GoogleSignIn();
 
@@ -106,15 +107,10 @@ class FormSection extends StatefulWidget {
 class _FormSectionState extends State<FormSection> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  bool error = false;
-  String errorMessage = "";
 
   void login() async {
     if (emailController.text == '' || passwordController.text == '') {
-      setState(() {
-        error = true;
-        errorMessage = "All fields must be filled";
-      });
+      showErrorMessage("All fields must be filled", context);
       return;
     }
     try {
@@ -122,16 +118,16 @@ class _FormSectionState extends State<FormSection> {
           .signInWithEmailAndPassword(
               email: emailController.text, password: passwordController.text)
           .then((value) => {print("User ${value.user?.email} logged in")});
-      setState(() {
-        error = false;
-        errorMessage = "";
-      });
     } catch (e) {
       if (mounted) {
-        setState(() {
-          error = true;
-          errorMessage = e.toString().split('] ')[1];
-        });
+        if (e.toString().split('] ')[1] ==
+            "There is no user record corresponding to this identifier. The user may have been deleted.") {
+          showErrorMessage("User not found", context);
+          return;
+        } else {
+          print("Error : $e");
+          showErrorMessage(e.toString().split('] ')[1], context);
+        }
       }
     }
   }
@@ -149,24 +145,6 @@ class _FormSectionState extends State<FormSection> {
       width: 300,
       child: Column(
         children: [
-          if (error)
-            Padding(
-              padding: EdgeInsets.only(bottom: 10),
-              child: Row(
-                children: [
-                  Icon(Icons.error, color: Colors.red),
-                  SizedBox(width: 5),
-                  Container(
-                    width: 250,
-                    child: Text(
-                      "${errorMessage}",
-                      style: TextStyle(
-                          color: Colors.red, fontWeight: FontWeight.bold),
-                    ),
-                  )
-                ],
-              ),
-            ),
           TextField(
             controller: emailController,
             decoration: InputDecoration(
@@ -293,8 +271,6 @@ class GoogleLoginForm extends StatefulWidget {
 }
 
 class _GoogleLoginFormState extends State<GoogleLoginForm> {
-  String errorMessage = '';
-
   Future<void> signupWithGoogle() async {
     try {
       print("Signing up with Google");
@@ -344,10 +320,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
         }
       }
     } catch (e) {
-      setState(() {
-        errorMessage = e.toString().split('] ')[1];
-        print("---------------------> ${errorMessage}");
-      });
+      showErrorMessage(e.toString().split('] ')[1], context);
     }
   }
 
@@ -356,25 +329,6 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (errorMessage != '')
-          Padding(
-            padding: EdgeInsets.only(bottom: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error, color: Colors.red),
-                SizedBox(width: 5),
-                Container(
-                  width: 250,
-                  child: Text(
-                    "${errorMessage}",
-                    style: TextStyle(
-                        color: Colors.red, fontWeight: FontWeight.bold),
-                  ),
-                )
-              ],
-            ),
-          ),
         Container(
           width: 250,
           child: ElevatedButton(

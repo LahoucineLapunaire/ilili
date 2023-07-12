@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:ilili/components/widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:ilili/components/appRouter.dart';
@@ -14,7 +15,6 @@ import 'dart:io';
 List<String> tagsList = [];
 AudioPlayer audioPlayer = AudioPlayer();
 String audioPath = '';
-String error = "";
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseStorage storage = FirebaseStorage.instance;
 
@@ -40,26 +40,6 @@ class AddPostPage extends StatelessWidget {
               child: Text(
                   "To add a post, please record an audio file or upload one, and add some tags to it, and then click on the 'Add Post' button."),
             ),
-            SizedBox(height: 10),
-            if (error != '')
-              Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error, color: Colors.red),
-                    SizedBox(width: 5),
-                    Container(
-                      width: 250,
-                      child: Text(
-                        "${error}",
-                        style: TextStyle(
-                            color: Colors.red, fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  ],
-                ),
-              ),
             SizedBox(height: 10),
             ButtonSection(),
             SizedBox(height: 20),
@@ -128,6 +108,7 @@ class _ButtonSectionState extends State<ButtonSection> {
         isRecording = true;
       });
     } catch (e) {
+      showErrorMessage(e.toString(), context);
       print('Error starting recording: $e');
     }
   }
@@ -150,6 +131,7 @@ class _ButtonSectionState extends State<ButtonSection> {
       }
       ;
     } catch (e) {
+      showErrorMessage(e.toString(), context);
       print('Error stopping recording or playing audio: $e');
     }
   }
@@ -169,6 +151,7 @@ class _ButtonSectionState extends State<ButtonSection> {
         });
       }
     } catch (e) {
+      showErrorMessage(e.toString(), context);
       print("Error while picking the file: ${e.toString()}");
     }
   }
@@ -285,9 +268,7 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
         }
       }
     } catch (e) {
-      setState(() {
-        error = "Please select a valid audio file";
-      });
+      showErrorMessage(e.toString(), context);
     }
   }
 
@@ -357,32 +338,23 @@ class _TagsSectionState extends State<TagsSection> {
   void addTag() {
     try {
       if (tagsList.contains(tagController.text)) {
-        setState(() {
-          error = "Tag already exists";
-        });
+        showErrorMessage("Tag already exists", context);
         return;
       }
       if (tagsList.length >= 3) {
-        setState(() {
-          error = "You can only add 3 tags";
-        });
+        showErrorMessage("You can only add 3 tags", context);
         return;
       }
       if (tagController.text == "") {
-        setState(() {
-          error = "Tag can't be empty";
-        });
+        showErrorMessage("Tag can't be empty", context);
         return;
       }
 
       setState(() {
         tagsList.add(tagController.text);
-        error = "";
       });
     } catch (e) {
-      setState(() {
-        error = e.toString();
-      });
+      showErrorMessage(e.toString(), context);
     }
   }
 
@@ -480,6 +452,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
         return posts;
       }
     } catch (e) {
+      showErrorMessage(e.toString(), context);
       print('Error getting posts: $e');
     }
     return [];
