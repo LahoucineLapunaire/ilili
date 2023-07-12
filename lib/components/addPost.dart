@@ -115,11 +115,15 @@ class _ButtonSectionState extends State<ButtonSection> {
         await existingFile.delete();
         print('Existing file deleted');
       }
+      await checkPermission();
+      print('--------------->Here1');
       audioRecorder = FlutterSoundRecorder();
-
+      print('--------------->Here2');
       // Start recording audio
       await audioRecorder?.openRecorder();
+      print('--------------->Here3');
       await audioRecorder!.startRecorder(toFile: 'audio.aac');
+      print('--------------->Here4');
       setState(() {
         isRecording = true;
       });
