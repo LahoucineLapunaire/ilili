@@ -72,25 +72,34 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   void getPostInfo() async {
-    DocumentSnapshot<Map<String, dynamic>> ds =
-        await firestore.collection('posts').doc(widget.postId).get();
-    setState(() {
-      audioPath = ds.data()!['audio'];
-      tags = ds.data()!['tags'];
-      likes = ds.data()!['likes'];
-      if (!widget.isComment) {
+    if (widget.isComment) {
+      DocumentSnapshot<Map<String, dynamic>> ds =
+          await firestore.collection('comments').doc(widget.postId).get();
+      setState(() {
+        audioPath = ds.data()!['audio'];
+        tags = [];
+        likes = ds.data()!['likes'];
+        postDate = formatTimestamp(ds.data()!['timestamp']);
+      });
+    } else {
+      DocumentSnapshot<Map<String, dynamic>> ds =
+          await firestore.collection('posts').doc(widget.postId).get();
+      setState(() {
+        audioPath = ds.data()!['audio'];
+        tags = ds.data()!['tags'];
+        likes = ds.data()!['likes'];
         comments = ds.data()!['comments'];
-      }
-      postDate = formatTimestamp(ds.data()!['timestamp']);
-      audioPlayer.setSourceUrl(audioPath);
-      audioPlayer.onDurationChanged.listen((Duration duration) {
+        postDate = formatTimestamp(ds.data()!['timestamp']);
+      });
+    }
+    audioPlayer.setSourceUrl(audioPath);
+    audioPlayer.onDurationChanged.listen((Duration duration) {
+      setState(() {
+        audioDuration = duration;
+      });
+      audioPlayer.onPositionChanged.listen((Duration pos) {
         setState(() {
-          audioDuration = duration;
-        });
-        audioPlayer.onPositionChanged.listen((Duration pos) {
-          setState(() {
-            position = pos;
-          });
+          position = pos;
         });
       });
     });
@@ -116,22 +125,42 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   Future<void> likePost() async {
     try {
-      if (likes.contains(auth.currentUser!.uid)) {
-        await firestore.collection('posts').doc(widget.postId).update({
-          'likes': FieldValue.arrayRemove([auth.currentUser!.uid])
-        });
-        print("unliked");
-        setState(() {
-          likes.remove(auth.currentUser!.uid);
-        });
+      if (widget.isComment) {
+        if (likes.contains(auth.currentUser!.uid)) {
+          await firestore.collection('comments').doc(widget.postId).update({
+            'likes': FieldValue.arrayRemove([auth.currentUser!.uid])
+          });
+          print("unliked");
+          setState(() {
+            likes.remove(auth.currentUser!.uid);
+          });
+        } else {
+          await firestore.collection('comments').doc(widget.postId).update({
+            'likes': FieldValue.arrayUnion([auth.currentUser!.uid])
+          });
+          print("liked");
+          setState(() {
+            likes.add(auth.currentUser!.uid);
+          });
+        }
       } else {
-        await firestore.collection('posts').doc(widget.postId).update({
-          'likes': FieldValue.arrayUnion([auth.currentUser!.uid])
-        });
-        print("liked");
-        setState(() {
-          likes.add(auth.currentUser!.uid);
-        });
+        if (likes.contains(auth.currentUser!.uid)) {
+          await firestore.collection('posts').doc(widget.postId).update({
+            'likes': FieldValue.arrayRemove([auth.currentUser!.uid])
+          });
+          print("unliked");
+          setState(() {
+            likes.remove(auth.currentUser!.uid);
+          });
+        } else {
+          await firestore.collection('posts').doc(widget.postId).update({
+            'likes': FieldValue.arrayUnion([auth.currentUser!.uid])
+          });
+          print("liked");
+          setState(() {
+            likes.add(auth.currentUser!.uid);
+          });
+        }
       }
     } catch (e) {
       print('Error: $e');
@@ -766,7 +795,7 @@ class _CommentModalState extends State<CommentModal> {
           'timestamp': DateTime.now(),
         });
         await firestore.collection('posts').doc(widget.postId).update({
-          'comment': FieldValue.arrayUnion([name]),
+          'comments': FieldValue.arrayUnion([name]),
         });
       });
       Navigator.pop(context);

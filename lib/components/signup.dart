@@ -1,3 +1,6 @@
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart';
+import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ilili/components/login.dart';
@@ -406,9 +409,14 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
           // );
         } else {
           // User does not exist, create a new document in Firestore
-          await FirebaseFirestore.instance.collection('users').doc(uid).set({
-            'profilPicture': '',
+          await firestore.collection('users').doc(uid).set({
+            'profilePicture':
+                'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
             'username': '',
+            'posts': [],
+            'followers': [],
+            'followings': [],
+            'description': 'mydescription',
           });
 
           print('New user created');

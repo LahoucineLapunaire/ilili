@@ -6,6 +6,8 @@ import 'package:ilili/components/widget.dart';
 String sortType = "newest";
 List<dynamic> commentList = [];
 
+FirebaseFirestore firestore = FirebaseFirestore.instance;
+
 class PostPage extends StatefulWidget {
   final String postId;
   final String userId;
@@ -30,18 +32,32 @@ class _PostPageState extends State<PostPage> {
   }
 
   void getComments() async {
-    FirebaseFirestore.instance
-        .collection('posts')
-        .doc(widget.postId)
-        .collection('comments')
-        .orderBy('timestamp', descending: true)
-        .snapshots()
-        .listen((event) {
-      event.docs.forEach((element) {
-        commentList.add(element);
-      });
+    firestore.collection('posts').doc(widget.postId).get().then((postSnapshot) {
+      final comments = postSnapshot.data()?['comments'];
+      for (String comment in comments) {
+        firestore
+            .collection('comments')
+            .doc(comment)
+            .get()
+            .then((postSnapshot) {
+          bool isOwner = false;
+          if (postSnapshot.data()?['userId'] == auth.currentUser!.uid) {
+            isOwner = true;
+          }
+          setState(() {
+            commentList.add({
+              "commentId": comment,
+              "userId": postSnapshot.data()?['userId'],
+              "isOwner": isOwner,
+            });
+          });
+        });
+      }
     });
+
+    print("-------------------");
     print(commentList);
+    print("-------------------");
   }
 
   @override
@@ -63,18 +79,20 @@ class _PostPageState extends State<PostPage> {
           },
           child: Icon(Icons.comment),
         ),
-        body: Center(
-          child: Column(
-            children: [
-              AudioPlayerWidget(
-                postId: widget.postId,
-                userId: widget.userId,
-                isOwner: widget.isOwner,
-                isComment: false,
-              ),
-              SortSection(),
-              CommentSection(),
-            ],
+        body: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              children: [
+                AudioPlayerWidget(
+                  postId: widget.postId,
+                  userId: widget.userId,
+                  isOwner: widget.isOwner,
+                  isComment: false,
+                ),
+                SortSection(),
+                CommentSection(),
+              ],
+            ),
           ),
         ));
   }
@@ -137,11 +155,10 @@ class _CommentSectionState extends State<CommentSection> {
       children: [
         for (var comment in commentList)
           AudioPlayerWidget(
-            postId: comment['postId'],
-            userId: comment['userId'],
-            isOwner: comment['isOwner'],
-            isComment: true,
-          ),
+              userId: comment["userId"],
+              postId: comment["commentId"],
+              isOwner: comment["isOwner"],
+              isComment: true),
       ],
     );
   }
