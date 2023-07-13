@@ -71,6 +71,17 @@ class _PostPageState extends State<PostPage> {
         appBar: AppBar(
           backgroundColor: Color(0xFF6A1B9A),
           title: Text("Post"),
+          actions: [
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  commentList = [];
+                });
+                getComments();
+              },
+              icon: Icon(Icons.refresh),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           backgroundColor: Color(0xFF6A1B9A),
@@ -161,6 +172,7 @@ class _CommentSectionState extends State<CommentSection> {
     return Column(
       children: [
         for (var comment in commentList)
+        if(comment != null)
           AudioPlayerWidget(
               userId: comment["userId"],
               postId: comment["commentId"],

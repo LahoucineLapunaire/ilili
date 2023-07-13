@@ -102,6 +102,15 @@ class _HomePageState extends State<HomePage> {
               },
               icon: Icon(Icons.search),
             ),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  posts = [];
+                });
+                getFeedPosts();
+              },
+              icon: Icon(Icons.refresh),
+            ),
           ],
         ),
         body: SingleChildScrollView(
