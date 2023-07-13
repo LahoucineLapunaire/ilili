@@ -24,11 +24,11 @@ class PostPage extends StatefulWidget {
 }
 
 class _PostPageState extends State<PostPage> {
+  
   @override
   void initState() {
-    super.initState();
-    print("post page init");
     getComments();
+    super.initState();
   }
 
   void getComments() async {
@@ -54,19 +54,26 @@ class _PostPageState extends State<PostPage> {
         });
       }
     });
-
     print("-------------------");
     print(commentList);
     print("-------------------");
   }
 
+ @override
+ void dispose() {
+   commentList = [];
+   super.dispose();
+ }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Color(0xFF6A1B9A),
           title: Text("Post"),
         ),
         floatingActionButton: FloatingActionButton(
+          backgroundColor: Color(0xFF6A1B9A),
           onPressed: () {
             showModalBottomSheet(
               context: context,
