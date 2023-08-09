@@ -9,6 +9,7 @@ import 'package:ilili/components/widget.dart';
 GoogleSignIn googleSignIn = GoogleSignIn();
 
 FirebaseAuth auth = FirebaseAuth.instance;
+FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -109,11 +110,11 @@ class _FormSectionState extends State<FormSection> {
   TextEditingController passwordController = TextEditingController();
 
   void login() async {
-    if (emailController.text == '' || passwordController.text == '') {
+    try {
+      if (emailController.text == '' || passwordController.text == '') {
       showErrorMessage("All fields must be filled", context);
       return;
     }
-    try {
       await auth
           .signInWithEmailAndPassword(
               email: emailController.text, password: passwordController.text)
@@ -297,6 +298,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
         // Check if the user already exists
         final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
             await FirebaseFirestore.instance.collection('users').doc(uid).get();
+            
 
         if (userSnapshot.exists) {
           // User already exists, log in and navigate to HomePage
@@ -309,10 +311,15 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
           // );
         } else {
           // User does not exist, create a new document in Firestore
-          await FirebaseFirestore.instance.collection('users').doc(uid).set({
-            'profilPicture': '',
-            'username': '',
-          });
+          await firestore.collection('users').doc(uid).set({
+        'profilePicture':
+            'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
+        'username': '',
+        'posts': [],
+        'followers': [],
+        'following': [],
+        'description': '',
+      });
 
           print('New user created');
 
@@ -320,6 +327,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
         }
       }
     } catch (e) {
+      print("----------------> Error : ${e.toString()}");
       showErrorMessage(e.toString().split('] ')[1], context);
     }
   }

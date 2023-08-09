@@ -109,10 +109,19 @@ class _HomePageState extends State<HomePage> {
             ),
             IconButton(
               onPressed: () {
+<<<<<<< HEAD
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => MessageListPage()));
               },
               icon: Icon(Icons.message),
+=======
+                setState(() {
+                  posts = [];
+                });
+                getFeedPosts();
+              },
+              icon: Icon(Icons.refresh),
+>>>>>>> 8f09491e5cd44baa5e82941ab833122ce8a4fd4e
             ),
           ],
         ),

@@ -54,12 +54,20 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   List<dynamic> tags = [];
   List<dynamic> likes = [];
   List<dynamic> comments = [];
+  bool shouldReload = false;
 
   @override
   void initState() {
     super.initState();
     getUserInfo();
     getPostInfo();
+  }
+
+  void reloadPage() {
+    setState(() {
+      // Set the flag to trigger a rebuild of the widget
+      shouldReload = true;
+    });
   }
 
   void getUserInfo() async {
@@ -194,16 +202,43 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   void deletePost() async {
-    try {
-      storageRef.child(widget.postId).delete();
+  try {
+    if (widget.isComment) {
+
+
+      // Delete the file in Firebase Storage
+      if (audioPath.isNotEmpty) {
+        Reference storageReference =
+            FirebaseStorage.instance.refFromURL(audioPath);
+        await storageReference.delete();
+      }
+
+      // Delete the comment document in Firestore
+      await firestore.collection('comments').doc(widget.postId).delete();
+      await firestore.collection('posts').doc(widget.postId).update({
+        'comments': FieldValue.arrayRemove([widget.postId]),
+      });
+    } else {
+
+      // Delete the file in Firebase Storage
+      if (audioPath.isNotEmpty) {
+        Reference storageReference =
+            FirebaseStorage.instance.refFromURL(audioPath);
+        await storageReference.delete();
+      }
+
+      // Delete the post document in Firestore
       await firestore.collection('posts').doc(widget.postId).delete();
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => OwnerProfilePage()));
-      dispose();
-    } catch (e) {
-      print("Error: $e");
     }
+
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => OwnerProfilePage()));
+    dispose();
+  } catch (e) {
+    print("Error: $e");
   }
+}
+
 
   void openModal(BuildContext context) {
     showModalBottomSheet(
@@ -294,11 +329,12 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     }
                   },
                   itemBuilder: (BuildContext context) => [
-                    PopupMenuItem(
-                      value: 'Modify Post',
-                      child: Text('Modify Post'),
-                      textStyle: TextStyle(color: Colors.black),
-                    ),
+                    if (!widget.isComment)
+                      PopupMenuItem(
+                        value: 'Modify Post',
+                        child: Text('Modify Post'),
+                        textStyle: TextStyle(color: Colors.black),
+                      ),
                     PopupMenuItem(
                       value: 'Delete Post',
                       child: Text('Delete Post'),

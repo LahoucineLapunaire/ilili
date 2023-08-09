@@ -24,11 +24,11 @@ class PostPage extends StatefulWidget {
 }
 
 class _PostPageState extends State<PostPage> {
+  
   @override
   void initState() {
-    super.initState();
-    print("post page init");
     getComments();
+    super.initState();
   }
 
   void getComments() async {
@@ -54,7 +54,19 @@ class _PostPageState extends State<PostPage> {
         });
       }
     });
+<<<<<<< HEAD
+=======
+    print("-------------------");
+    print(commentList);
+    print("-------------------");
+>>>>>>> 8f09491e5cd44baa5e82941ab833122ce8a4fd4e
   }
+
+ @override
+ void dispose() {
+   commentList = [];
+   super.dispose();
+ }
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +74,17 @@ class _PostPageState extends State<PostPage> {
         appBar: AppBar(
           backgroundColor: Color(0xFF6A1B9A),
           title: Text("Post"),
+          actions: [
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  commentList = [];
+                });
+                getComments();
+              },
+              icon: Icon(Icons.refresh),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           backgroundColor: Color(0xFF6A1B9A),
@@ -152,6 +175,7 @@ class _CommentSectionState extends State<CommentSection> {
     return Column(
       children: [
         for (var comment in commentList)
+        if(comment != null)
           AudioPlayerWidget(
               userId: comment["userId"],
               postId: comment["commentId"],

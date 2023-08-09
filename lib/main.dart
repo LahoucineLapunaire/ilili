@@ -4,12 +4,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ilili/components/appRouter.dart';
 import 'package:ilili/components/emailNotVerified.dart';
 import 'components/signup.dart';
-
-FirebaseAuth auth = FirebaseAuth.instance;
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  FirebaseAuth auth = FirebaseAuth.instance;
+
   auth.authStateChanges().listen((User? user) {
     if (user == null) {
       runApp(const UnLogged());
