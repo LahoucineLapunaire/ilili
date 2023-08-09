@@ -129,7 +129,7 @@ class _FormSectionState extends State<FormSection> {
         print('No user or email is already verified');
       }
     } catch (e) {
-      if(mounted){
+      if (mounted) {
         showErrorMessage(e.toString(), context);
       }
     }
@@ -163,6 +163,7 @@ class _FormSectionState extends State<FormSection> {
         'followers': [],
         'followings': [],
         'description': '',
+        'chats': [],
       });
 
       print('User signed up and document created successfully!');

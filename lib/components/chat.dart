@@ -8,6 +8,7 @@ FirebaseAuth auth = FirebaseAuth.instance;
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 CollectionReference chatRef = firestore.collection('chats');
+List<DocumentSnapshot> messageList = [];
 
 class ChatPage extends StatefulWidget {
   final String userId;
@@ -61,7 +62,6 @@ class ListSection extends StatefulWidget {
 }
 
 class _ListSectionState extends State<ListSection> {
-  late List<DocumentSnapshot> _docs;
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -74,13 +74,13 @@ class _ListSectionState extends State<ListSection> {
         if (!snapshot.hasData) {
           return const Center(child: Text('Chargement'));
         }
-        _docs = snapshot.data!.docs;
-        print(_docs);
-        if (_docs.isEmpty) {
+        messageList = snapshot.data!.docs;
+        print(messageList);
+        if (messageList.isEmpty) {
           return const Center(child: Text('Envoyez votre premier message'));
         }
         return Column(
-          children: _docs.map((document) {
+          children: messageList.map((document) {
             return document['userId'] == auth.currentUser?.uid
                 ? CurrentUserMessage(document['message'], document['timestamp'])
                 : OtherUserMessage(document['message'], document['timestamp']);
@@ -110,9 +110,35 @@ class MessageField extends StatelessWidget {
           'userId': auth.currentUser?.uid,
           'timestamp': formattedDate,
         }).then((value) {
+          addConversation();
           textField.clear();
         });
       });
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  addConversation() async {
+    try {
+      DocumentSnapshot documentSnapshot =
+          await firestore.collection("users").doc(auth.currentUser?.uid).get();
+      List<dynamic> chats = documentSnapshot.get("chats");
+      if (!chats.contains(otherUserID)) {
+        chats.add(otherUserID);
+        firestore.collection("users").doc(auth.currentUser?.uid).update({
+          "chats": chats,
+        });
+      }
+      documentSnapshot =
+          await firestore.collection("users").doc(otherUserID).get();
+      chats = documentSnapshot.get("chats");
+      if (!chats.contains(auth.currentUser?.uid)) {
+        chats.add(auth.currentUser?.uid);
+        firestore.collection("users").doc(otherUserID).update({
+          "chats": chats,
+        });
+      }
     } catch (e) {
       print(e.toString());
     }
