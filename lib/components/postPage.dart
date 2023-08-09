@@ -24,7 +24,6 @@ class PostPage extends StatefulWidget {
 }
 
 class _PostPageState extends State<PostPage> {
-  
   @override
   void initState() {
     getComments();
@@ -54,19 +53,13 @@ class _PostPageState extends State<PostPage> {
         });
       }
     });
-<<<<<<< HEAD
-=======
-    print("-------------------");
-    print(commentList);
-    print("-------------------");
->>>>>>> 8f09491e5cd44baa5e82941ab833122ce8a4fd4e
   }
 
- @override
- void dispose() {
-   commentList = [];
-   super.dispose();
- }
+  @override
+  void dispose() {
+    commentList = [];
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,12 +168,12 @@ class _CommentSectionState extends State<CommentSection> {
     return Column(
       children: [
         for (var comment in commentList)
-        if(comment != null)
-          AudioPlayerWidget(
-              userId: comment["userId"],
-              postId: comment["commentId"],
-              isOwner: comment["isOwner"],
-              isComment: true),
+          if (comment != null)
+            AudioPlayerWidget(
+                userId: comment["userId"],
+                postId: comment["commentId"],
+                isOwner: comment["isOwner"],
+                isComment: true),
       ],
     );
   }
