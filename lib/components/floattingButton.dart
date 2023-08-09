@@ -1,6 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ilili/components/changeProfile.dart';
+import 'package:ilili/components/widget.dart';
+
+FirebaseFirestore firestore = FirebaseFirestore.instance;
+FirebaseAuth auth = FirebaseAuth.instance;
 
 class FloatingActionButtonOwner extends StatefulWidget {
   FloatingActionButtonOwner({Key? key}) : super(key: key);
@@ -227,6 +232,33 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
       },
       backgroundColor: Color(0xFF6A1B9A),
       child: isOpen ? Icon(Icons.close) : Icon(Icons.menu),
+    );
+  }
+}
+
+class FloatingActionButtonUserMessage extends StatefulWidget {
+  const FloatingActionButtonUserMessage({super.key});
+
+  @override
+  State<FloatingActionButtonUserMessage> createState() =>
+      _FloatingActionButtonUserMessageState();
+}
+
+class _FloatingActionButtonUserMessageState
+    extends State<FloatingActionButtonUserMessage> {
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      backgroundColor: Color(0xFF6A1B9A),
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return UsersListModal();
+          },
+        );
+      },
+      child: Icon(Icons.add),
     );
   }
 }

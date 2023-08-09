@@ -159,7 +159,7 @@ class _FormSectionState extends State<FormSection> {
         'username': '',
         'posts': [],
         'followers': [],
-        'following': [],
+        'followings': [],
         'description': '',
       });
 
@@ -377,7 +377,10 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
       // Trigger the Google sign-in flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
+      print(googleUser?.email.toString());
+
       if (googleUser != null) {
+        print("______________________OK_________________________");
         // Obtain the authentication details from the Google sign-in
         final GoogleSignInAuthentication googleAuth =
             await googleUser.authentication;
@@ -401,7 +404,7 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
         if (userSnapshot.exists) {
           // User already exists, log in and navigate to HomePage
           // Add your own navigation logic here
-          print('User already exists');
+          print('____________________User already exists_____________________');
           // Navigate to HomePage
           // Navigator.pushReplacement(
           //   context,
@@ -419,13 +422,17 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
             'description': 'mydescription',
           });
 
-          print('New user created');
+          print('______________New user created______________');
 
           // Add your own navigation logic here to navigate to the desired page after sign-up
         }
       }
     } catch (e) {
-      showErrorMessage(e.toString().split('] ')[1], context);
+      if (mounted) {
+        print("______________________");
+        showErrorMessage(e.toString().split('] ')[1], context);
+        print("______________________");
+      }
     }
   }
 

@@ -11,6 +11,7 @@ import 'package:ilili/components/appRouter.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:ilili/components/OwnerProfile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ilili/components/chat.dart';
 import 'package:ilili/components/postPage.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -933,6 +934,81 @@ class _CommentModalState extends State<CommentModal> {
         ),
       ],
     ));
+  }
+}
+
+class UsersListModal extends StatefulWidget {
+  const UsersListModal({super.key});
+
+  @override
+  State<UsersListModal> createState() => _UsersListModalState();
+}
+
+class _UsersListModalState extends State<UsersListModal> {
+  List<dynamic> users = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getUsers();
+  }
+
+  getUsers() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+    List<String> listId = snapshot['followings'].cast<String>();
+    listId.forEach((id) async {
+      DocumentSnapshot userSnapshot =
+          await firestore.collection('users').doc(id).get();
+      setState(() {
+        users.add({
+          'id': userSnapshot.id,
+          'username': userSnapshot['username'],
+          'profilePicture': userSnapshot['profilePicture'],
+        });
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    users.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+        child: users.length == 0
+            ? Center(child: Text('No users found'))
+            : ListView.builder(
+                shrinkWrap: true,
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatPage(
+                            userId: users[index]['id'],
+                            username: users[index]['username'],
+                            profilePicture: users[index]['profilePicture'],
+                          ),
+                        ),
+                      );
+                    },
+                    leading: CircleAvatar(
+                      backgroundImage:
+                          NetworkImage(users[index]['profilePicture']),
+                    ),
+                    title: Text(users[index]['username']),
+                  );
+                },
+              ),
+      ),
+    );
   }
 }
 

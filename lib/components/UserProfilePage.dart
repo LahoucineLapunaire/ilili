@@ -69,7 +69,7 @@ class _TopSectionState extends State<TopSection> {
       profilPicture = ds.get('profilePicture');
       description = ds.get('description');
       followers = ds.get('followers');
-      followings = ds.get('following');
+      followings = ds.get('followings');
     });
   }
 

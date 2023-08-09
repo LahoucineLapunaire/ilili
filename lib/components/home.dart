@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ilili/components/UserProfilePage.dart';
 import 'package:ilili/components/changeProfile.dart';
+import 'package:ilili/components/messageList.dart';
 import 'package:ilili/components/setUsername.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ilili/components/widget.dart';
@@ -54,37 +55,41 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> getFeedPosts() async {
-    // Retrieve the Firestore posts collection
-    CollectionReference<Map<String, dynamic>> postsCollectionRef =
-        firestore.collection('posts');
+    try {
+      // Retrieve the Firestore posts collection
+      CollectionReference<Map<String, dynamic>> postsCollectionRef =
+          firestore.collection('posts');
 
-    // Query the posts collection and order by weighted score
-    QuerySnapshot<Map<String, dynamic>> querySnapshot =
-        await postsCollectionRef.get();
+      // Query the posts collection and order by weighted score
+      QuerySnapshot<Map<String, dynamic>> querySnapshot =
+          await postsCollectionRef.get();
 
-    // Extract the post documents and convert them to Post objects with weighted score
-    List<Post> postslist = querySnapshot.docs.map((doc) {
-      String user = doc.get('userId');
-      int score = doc.get('score');
-      Timestamp timestamp = doc.get('timestamp');
-      double weightedScore =
-          score.toDouble() * 0.7 + timestamp.seconds.toDouble() * 0.3;
+      // Extract the post documents and convert them to Post objects with weighted score
+      List<Post> postslist = querySnapshot.docs.map((doc) {
+        String user = doc.get('userId');
+        int score = doc.get('score');
+        Timestamp timestamp = doc.get('timestamp');
+        double weightedScore =
+            score.toDouble() * 0.7 + timestamp.seconds.toDouble() * 0.3;
 
-      return Post(
-        userId: user,
-        postId: doc.id,
-        weightedScore: weightedScore,
-        // Add other properties as per your Post class definition
-      );
-    }).toList();
+        return Post(
+          userId: user,
+          postId: doc.id,
+          weightedScore: weightedScore,
+          // Add other properties as per your Post class definition
+        );
+      }).toList();
 
-    // Sort the posts based on weighted score
-    postslist.sort((a, b) => b.weightedScore.compareTo(a.weightedScore));
+      // Sort the posts based on weighted score
+      postslist.sort((a, b) => b.weightedScore.compareTo(a.weightedScore));
 
-    setState(() {
-      posts = postslist;
-    });
-    return;
+      setState(() {
+        posts = postslist;
+      });
+      return;
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   @override
@@ -101,6 +106,13 @@ class _HomePageState extends State<HomePage> {
                     delegate: SearchDelegateWidget(usersCollectionRef));
               },
               icon: Icon(Icons.search),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => MessageListPage()));
+              },
+              icon: Icon(Icons.message),
             ),
           ],
         ),

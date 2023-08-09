@@ -54,19 +54,17 @@ class _PostPageState extends State<PostPage> {
         });
       }
     });
-
-    print("-------------------");
-    print(commentList);
-    print("-------------------");
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Color(0xFF6A1B9A),
           title: Text("Post"),
         ),
         floatingActionButton: FloatingActionButton(
+          backgroundColor: Color(0xFF6A1B9A),
           onPressed: () {
             showModalBottomSheet(
               context: context,
