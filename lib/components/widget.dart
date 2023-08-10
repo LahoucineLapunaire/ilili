@@ -202,43 +202,39 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   void deletePost() async {
-  try {
-    if (widget.isComment) {
+    try {
+      if (widget.isComment) {
+        // Delete the file in Firebase Storage
+        if (audioPath.isNotEmpty) {
+          Reference storageReference =
+              FirebaseStorage.instance.refFromURL(audioPath);
+          await storageReference.delete();
+        }
 
+        // Delete the comment document in Firestore
+        await firestore.collection('comments').doc(widget.postId).delete();
+        await firestore.collection('posts').doc(widget.postId).update({
+          'comments': FieldValue.arrayRemove([widget.postId]),
+        });
+      } else {
+        // Delete the file in Firebase Storage
+        if (audioPath.isNotEmpty) {
+          Reference storageReference =
+              FirebaseStorage.instance.refFromURL(audioPath);
+          await storageReference.delete();
+        }
 
-      // Delete the file in Firebase Storage
-      if (audioPath.isNotEmpty) {
-        Reference storageReference =
-            FirebaseStorage.instance.refFromURL(audioPath);
-        await storageReference.delete();
+        // Delete the post document in Firestore
+        await firestore.collection('posts').doc(widget.postId).delete();
       }
 
-      // Delete the comment document in Firestore
-      await firestore.collection('comments').doc(widget.postId).delete();
-      await firestore.collection('posts').doc(widget.postId).update({
-        'comments': FieldValue.arrayRemove([widget.postId]),
-      });
-    } else {
-
-      // Delete the file in Firebase Storage
-      if (audioPath.isNotEmpty) {
-        Reference storageReference =
-            FirebaseStorage.instance.refFromURL(audioPath);
-        await storageReference.delete();
-      }
-
-      // Delete the post document in Firestore
-      await firestore.collection('posts').doc(widget.postId).delete();
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => OwnerProfilePage()));
+      dispose();
+    } catch (e) {
+      print("Error: $e");
     }
-
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => OwnerProfilePage()));
-    dispose();
-  } catch (e) {
-    print("Error: $e");
   }
-}
-
 
   void openModal(BuildContext context) {
     showModalBottomSheet(
@@ -1016,6 +1012,7 @@ class _UsersListModalState extends State<UsersListModal> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
+        height: 500,
         child: users.length == 0
             ? Center(child: Text('No users found'))
             : ListView.builder(
@@ -1033,6 +1030,150 @@ class _UsersListModalState extends State<UsersListModal> {
                             profilePicture: users[index]['profilePicture'],
                           ),
                         ),
+                      );
+                    },
+                    leading: CircleAvatar(
+                      backgroundImage:
+                          NetworkImage(users[index]['profilePicture']),
+                    ),
+                    title: Text(users[index]['username']),
+                  );
+                },
+              ),
+      ),
+    );
+  }
+}
+
+class FollowersListModal extends StatefulWidget {
+  const FollowersListModal({super.key});
+
+  @override
+  State<FollowersListModal> createState() => _FollowersListModalState();
+}
+
+class _FollowersListModalState extends State<FollowersListModal> {
+  List<dynamic> users = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getUsers();
+  }
+
+  getUsers() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+    List<String> listId = snapshot['followers'].cast<String>();
+    listId.forEach((id) async {
+      DocumentSnapshot userSnapshot =
+          await firestore.collection('users').doc(id).get();
+      setState(() {
+        users.add({
+          'id': userSnapshot.id,
+          'username': userSnapshot['username'],
+          'profilePicture': userSnapshot['profilePicture'],
+        });
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    users.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+        height: 500,
+        child: users.length == 0
+            ? Center(child: Text('No users found'))
+            : ListView.builder(
+                shrinkWrap: true,
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                UserProfilePage(userId: users[index]['id'])),
+                      );
+                    },
+                    leading: CircleAvatar(
+                      backgroundImage:
+                          NetworkImage(users[index]['profilePicture']),
+                    ),
+                    title: Text(users[index]['username']),
+                  );
+                },
+              ),
+      ),
+    );
+  }
+}
+
+class FollowingsListModal extends StatefulWidget {
+  const FollowingsListModal({super.key});
+
+  @override
+  State<FollowingsListModal> createState() => _FollowingsListModallState();
+}
+
+class _FollowingsListModallState extends State<FollowingsListModal> {
+  List<dynamic> users = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getUsers();
+  }
+
+  getUsers() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+    List<String> listId = snapshot['followings'].cast<String>();
+    listId.forEach((id) async {
+      DocumentSnapshot userSnapshot =
+          await firestore.collection('users').doc(id).get();
+      setState(() {
+        users.add({
+          'id': userSnapshot.id,
+          'username': userSnapshot['username'],
+          'profilePicture': userSnapshot['profilePicture'],
+        });
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    users.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+        height: 500,
+        child: users.length == 0
+            ? Center(child: Text('No users found'))
+            : ListView.builder(
+                shrinkWrap: true,
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                UserProfilePage(userId: users[index]['id'])),
                       );
                     },
                     leading: CircleAvatar(

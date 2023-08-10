@@ -136,19 +136,39 @@ class _TopSectionState extends State<TopSection> {
           ),
           SizedBox(height: 20),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(
-              "${followers.length} followers",
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.white,
+            GestureDetector(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return FollowersListModal();
+                  },
+                );
+              },
+              child: Text(
+                "${followers.length} followers",
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.white,
+                ),
               ),
             ),
             SizedBox(width: 10),
-            Text(
-              "${followings.length} followings",
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.white,
+            GestureDetector(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return FollowingsListModal();
+                  },
+                );
+              },
+              child: Text(
+                "${followings.length} followings",
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.white,
+                ),
               ),
             ),
             SizedBox(width: 20)
