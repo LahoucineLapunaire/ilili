@@ -69,13 +69,11 @@ class _FloatingActionButtonOwnerState extends State<FloatingActionButtonOwner> {
       elevation: 8,
     ).then((selectedValue) {
       if (selectedValue == "User Account") {
-        print('Selected value: $selectedValue');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ChangeProfilePage()),
         );
       } else if (selectedValue == "Settings") {
-        print("Settings");
       } else if (selectedValue == "Logout") {
         logout();
       }

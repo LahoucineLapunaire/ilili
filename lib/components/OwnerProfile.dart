@@ -223,7 +223,6 @@ class _PostSectionState extends State<PostSection> {
             postId: post,
             userId: auth.currentUser!.uid,
             isOwner: true,
-            isComment: false,
           ),
       ],
     );

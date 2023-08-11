@@ -63,7 +63,7 @@ class _TopSectionState extends State<TopSection> {
   void getUserData() async {
     DocumentSnapshot ds =
         await firestore.collection('users').doc(widget.userId).get();
-        
+
     setState(() {
       username = ds.get('username');
       profilPicture = ds.get('profilePicture');
@@ -206,10 +206,10 @@ class _PostSectionState extends State<PostSection> {
       children: [
         for (var post in posts)
           AudioPlayerWidget(
-              postId: post,
-              userId: widget.userId,
-              isOwner: false,
-              isComment: false),
+            postId: post,
+            userId: widget.userId,
+            isOwner: false,
+          ),
       ],
     );
   }

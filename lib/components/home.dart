@@ -126,7 +126,6 @@ class _HomePageState extends State<HomePage> {
                     postId: post.postId,
                     userId: post.userId,
                     isOwner: false,
-                    isComment: false,
                   ),
               ],
             ),

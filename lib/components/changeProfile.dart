@@ -187,19 +187,20 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
         SizedBox(height: 15),
         Container(
           width: 300,
-          child: TextField(
-            controller: descriptionController,
-            maxLines: null,
-            style: TextStyle(fontSize: 16),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              prefixIcon: Icon(Icons.description),
-              labelText: 'Description',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
+          child: Container(
+            height: 200,
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: TextField(
+              controller: descriptionController,
+              maxLines: null,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Write your comment ...',
               ),
-              contentPadding: EdgeInsets.symmetric(vertical: 100),
             ),
           ),
         )
