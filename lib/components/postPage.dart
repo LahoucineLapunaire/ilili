@@ -48,6 +48,7 @@ class _PostPageState extends State<PostPage> {
           "userId": postSnapshot.data()?['userId'],
         });
       }
+      result.sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
       setState(() {
         commentList = result;
       });
@@ -103,7 +104,13 @@ class _PostPageState extends State<PostPage> {
                   userId: widget.userId,
                   isOwner: widget.isOwner,
                 ),
-                SortSection(),
+                SortSection(
+                  onSortChanged: (sortedComments) {
+                    setState(() {
+                      commentList = sortedComments;
+                    });
+                  },
+                ),
                 FutureBuilder<void>(
                     future: _getCommentsFuture,
                     builder: (context, snapshot) {
@@ -123,25 +130,32 @@ class _PostPageState extends State<PostPage> {
 }
 
 class SortSection extends StatefulWidget {
-  const SortSection({super.key});
+  final Function(List<dynamic>) onSortChanged;
+
+  const SortSection({super.key, required this.onSortChanged});
 
   @override
   State<SortSection> createState() => _SortSectionState();
 }
 
-void sortComments(sortType) {
-  if (sortType == "newest") {
-    commentList.sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
-  } else if (sortType == "oldest") {
-    commentList.sort((a, b) => a['timestamp'].compareTo(b['timestamp']));
-  } else if (sortType == "most liked") {
-    commentList.sort((a, b) => b['likes'].compareTo(a['likes']));
-  } else if (sortType == "least liked") {
-    commentList.sort((a, b) => a['likes'].compareTo(b['likes']));
-  }
-}
-
 class _SortSectionState extends State<SortSection> {
+  String sortType = "newest"; // Make sure this is declared here
+
+  void sortComments(sortType) {
+    List<dynamic> result = commentList;
+    if (sortType == "newest") {
+      result.sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
+    } else if (sortType == "oldest") {
+      result.sort((a, b) => a['timestamp'].compareTo(b['timestamp']));
+    } else if (sortType == "most liked") {
+      result.sort((a, b) => b['likes'].length.compareTo(a['likes'].length));
+    } else if (sortType == "least liked") {
+      result.sort((a, b) => a['likes'].length.compareTo(b['likes'].length));
+    }
+    widget
+        .onSortChanged(result); // Call the callback function with updated list
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -159,6 +173,9 @@ class _SortSectionState extends State<SortSection> {
               color: Colors.deepPurpleAccent,
             ),
             onChanged: (String? newValue) {
+              setState(() {
+                sortType = newValue!;
+              });
               sortComments(newValue);
             },
             items: <String>['newest', 'oldest', 'most liked', 'least liked']

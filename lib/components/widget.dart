@@ -654,11 +654,13 @@ class _CommentModalState extends State<CommentModal> {
       DocumentSnapshot snapshot =
           await firestore.collection('posts').doc(widget.postId).get();
       List comments = snapshot['comments'];
+      int score = snapshot['score'];
+      score += 5;
       comments.add(documentId);
       await firestore
           .collection('posts')
           .doc(widget.postId)
-          .update({'comments': comments});
+          .update({'comments': comments, 'score': score});
       Navigator.pop(context);
     } catch (e) {
       print(e);

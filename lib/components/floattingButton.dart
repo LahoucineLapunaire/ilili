@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ilili/components/changeProfile.dart';
+import 'package:ilili/components/chat.dart';
 import 'package:ilili/components/widget.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -117,11 +120,13 @@ class FloatingActionButtonUser extends StatefulWidget {
 class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
   bool isOpen = false;
   List<dynamic> followingList = [];
+  String username = "";
+  String profilePicture = "";
 
   @override
   void initState() {
+    getUsersInformations();
     super.initState();
-    getFollowers();
   }
 
   void toggleMenu() {
@@ -130,15 +135,19 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
     });
   }
 
-  void getFollowers() async {
+  void getUsersInformations() async {
     firestore
         .collection('users')
         .doc(widget.ownerId)
         .get()
         .then((DocumentSnapshot documentSnapshot) {
       if (documentSnapshot.exists) {
+        print(documentSnapshot['username']);
+        print(documentSnapshot['profilePicture']);
         setState(() {
           followingList = documentSnapshot['followers'];
+          username = documentSnapshot['username'];
+          profilePicture = documentSnapshot['profilePicture'];
         });
       }
     });
@@ -206,6 +215,17 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
       if (selectedValue == "Follow") {
         print('Selected value: $selectedValue');
         follow();
+      }
+      if (selectedValue == "Message") {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ChatPage(
+                    userId: widget.ownerId,
+                    username: username,
+                    profilePicture: profilePicture,
+                  )),
+        );
       }
       toggleMenu();
     }).whenComplete(() {
