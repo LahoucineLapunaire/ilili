@@ -200,17 +200,30 @@ class _PostSectionState extends State<PostSection> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      shrinkWrap: true,
-      physics: ClampingScrollPhysics(),
-      children: [
-        for (var post in posts)
-          AudioPlayerWidget(
-            postId: post,
-            userId: widget.userId,
-            isOwner: false,
-          ),
-      ],
-    );
+    return posts.length == 0
+        ? Container(
+            height: 200,
+            child: Center(
+              child: Text(
+                "No posts yet",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          )
+        : ListView(
+            shrinkWrap: true,
+            physics: ClampingScrollPhysics(),
+            children: [
+              for (var post in posts)
+                AudioPlayerWidget(
+                  postId: post,
+                  userId: auth.currentUser!.uid,
+                  isOwner: true,
+                ),
+            ],
+          );
   }
 }

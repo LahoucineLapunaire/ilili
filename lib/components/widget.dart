@@ -173,11 +173,13 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             FirebaseStorage.instance.refFromURL(audioPath);
         await storageReference.delete();
       }
-
+      for (String comment in comments) {
+        await firestore.collection('comments').doc(comment).delete();
+      }
       // Delete the post document in Firestore
       await firestore.collection('posts').doc(widget.postId).delete();
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => OwnerProfilePage()));
+          context, MaterialPageRoute(builder: (context) => AppRouter()));
       dispose();
     } catch (e) {
       print("Error: $e");
@@ -859,31 +861,36 @@ class _FollowersListModalState extends State<FollowersListModal> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        height: 500,
-        child: users.length == 0
-            ? Center(child: Text('No users found'))
-            : ListView.builder(
-                shrinkWrap: true,
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                UserProfilePage(userId: users[index]['id'])),
-                      );
-                    },
-                    leading: CircleAvatar(
-                      backgroundImage:
-                          NetworkImage(users[index]['profilePicture']),
+          padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+          height: 500,
+          child: users.length == 0
+              ? Center(child: Text('No users found'))
+              : Column(
+                  children: [
+                    Text("Followers : ${users.length}"),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: users.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UserProfilePage(
+                                      userId: users[index]['id'])),
+                            );
+                          },
+                          leading: CircleAvatar(
+                            backgroundImage:
+                                NetworkImage(users[index]['profilePicture']),
+                          ),
+                          title: Text(users[index]['username']),
+                        );
+                      },
                     ),
-                    title: Text(users[index]['username']),
-                  );
-                },
-              ),
-      ),
+                  ],
+                )),
     );
   }
 }
@@ -931,31 +938,36 @@ class _FollowingsListModallState extends State<FollowingsListModal> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        height: 500,
-        child: users.length == 0
-            ? Center(child: Text('No users found'))
-            : ListView.builder(
-                shrinkWrap: true,
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                UserProfilePage(userId: users[index]['id'])),
-                      );
-                    },
-                    leading: CircleAvatar(
-                      backgroundImage:
-                          NetworkImage(users[index]['profilePicture']),
+          padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+          height: 500,
+          child: users.length == 0
+              ? Center(child: Text('No users found'))
+              : Column(
+                  children: [
+                    Text("Followings : ${users.length}"),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: users.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UserProfilePage(
+                                      userId: users[index]['id'])),
+                            );
+                          },
+                          leading: CircleAvatar(
+                            backgroundImage:
+                                NetworkImage(users[index]['profilePicture']),
+                          ),
+                          title: Text(users[index]['username']),
+                        );
+                      },
                     ),
-                    title: Text(users[index]['username']),
-                  );
-                },
-              ),
-      ),
+                  ],
+                )),
     );
   }
 }

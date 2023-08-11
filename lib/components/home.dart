@@ -118,17 +118,30 @@ class _HomePageState extends State<HomePage> {
         ),
         body: SingleChildScrollView(
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (Post post in posts)
-                  AudioPlayerWidget(
-                    postId: post.postId,
-                    userId: post.userId,
-                    isOwner: false,
+            child: posts.length == 0
+                ? Container(
+                    height: 200,
+                    child: Center(
+                      child: Text(
+                        "No posts yet, please follow users to see their posts.",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (Post post in posts)
+                        AudioPlayerWidget(
+                          postId: post.postId,
+                          userId: post.userId,
+                          isOwner: false,
+                        ),
+                    ],
                   ),
-              ],
-            ),
           ),
         ));
   }

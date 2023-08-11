@@ -189,14 +189,29 @@ class _CommentSectionState extends State<CommentSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        for (var comment in commentList)
-          if (comment != null)
-            CommentWidget(
-                commentId: comment["commentId"], userId: comment["userId"])
-      ],
-    );
+    return commentList.length == 0
+        ? Container(
+            height: 200,
+            child: Center(
+              child: Text(
+                "No comment yet.",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          )
+        : Column(
+            children: [
+              for (var comment in commentList)
+                if (comment != null)
+                  CommentWidget(
+                      commentId: comment["commentId"],
+                      userId: comment["userId"])
+            ],
+          );
+    ;
   }
 }
 
