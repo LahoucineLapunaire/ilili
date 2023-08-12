@@ -22,6 +22,7 @@ class _HomePageState extends State<HomePage> {
     "username": "",
     "profilPicture": "",
   };
+  int unreadMessages = 0;
   TextEditingController textEditingController = TextEditingController();
   late CollectionReference<Map<String, dynamic>> usersCollectionRef;
   List<dynamic> posts = [];
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     checkUsername();
     getFeedPosts();
+    getNumbersLastMessage();
     setState(() {
       usersCollectionRef = firestore.collection('users');
     });
@@ -53,6 +55,33 @@ class _HomePageState extends State<HomePage> {
           userInfo['profilPicture'] = ds.get('profilePicture');
         });
       }
+    }
+  }
+
+  void getNumbersLastMessage() async {
+    DocumentSnapshot userDoc =
+        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+    int _unreadMessages = 0;
+
+    List<String> chats = List<String>.from(userDoc['chats']);
+    List<dynamic> result = [];
+    String lastMessage = '';
+    for (String chatId in chats) {
+      QuerySnapshot<Map<String, dynamic>> chatSnapshot = await firestore
+          .collection('chats')
+          .doc(auth.currentUser!.uid)
+          .collection(chatId)
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .get();
+      if (chatSnapshot.docs.isNotEmpty) {
+        if (!chatSnapshot.docs.first['read']) {
+          _unreadMessages++;
+        }
+      }
+      setState(() {
+        unreadMessages = _unreadMessages;
+      });
     }
   }
 
@@ -109,13 +138,49 @@ class _HomePageState extends State<HomePage> {
               },
               icon: Icon(Icons.search),
             ),
-            IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => MessageListPage()));
-              },
-              icon: Icon(Icons.message),
-            ),
+            unreadMessages == 0
+                ? IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MessageListPage()));
+                    },
+                    icon: Icon(Icons.message),
+                  )
+                : Stack(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MessageListPage()));
+                        },
+                        icon: Icon(Icons.message),
+                      ),
+                      if (unreadMessages > 0)
+                        Positioned(
+                          top: 5,
+                          right: 5,
+                          child: Container(
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.red,
+                            ),
+                            child: Text(
+                              unreadMessages.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  )
           ],
         ),
         body: SingleChildScrollView(

@@ -90,42 +90,41 @@ class _MessageListPageState extends State<MessageListPage> {
               );
             }
 
-            return Expanded(
-              child: ListView.builder(
-                itemCount: chatIds.length,
-                itemBuilder: (context, index) {
-                  return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                    stream: firestore
-                        .collection('chats')
-                        .doc(auth.currentUser!.uid)
-                        .collection(chatIds[index])
-                        .orderBy('timestamp', descending: true)
-                        .limit(1)
-                        .snapshots(),
-                    builder: (context, chatSnapshot) {
-                      if (chatSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return Container();
-                      }
-                      String lastMessage = chatSnapshot.hasData
-                          ? chatSnapshot.data!.docs.isNotEmpty
-                              ? chatSnapshot.data!.docs.first['message']
-                              : ''
-                          : '';
-                      print("lastMessage: $lastMessage");
-                      return UserCardSection(
-                        userId: chatIds[index],
-                        lastMessage: lastMessage,
-                        isRead: chatSnapshot.hasData
-                            ? chatSnapshot.data!.docs.isNotEmpty
-                                ? chatSnapshot.data!.docs.first['read']
-                                : false
-                            : false,
+            return ListView.builder(
+              itemCount: chatIds.length,
+              itemBuilder: (context, index) {
+                return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: firestore
+                      .collection('chats')
+                      .doc(auth.currentUser!.uid)
+                      .collection(chatIds[index])
+                      .orderBy('timestamp', descending: true)
+                      .limit(1)
+                      .snapshots(),
+                  builder: (context, chatSnapshot) {
+                    if (chatSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return Center(
+                        child: Container(child: Text("loading ...")),
                       );
-                    },
-                  );
-                },
-              ),
+                    }
+                    String lastMessage = chatSnapshot.hasData
+                        ? chatSnapshot.data!.docs.isNotEmpty
+                            ? chatSnapshot.data!.docs.first['message']
+                            : ''
+                        : '';
+                    return UserCardSection(
+                      userId: chatIds[index],
+                      lastMessage: lastMessage,
+                      isRead: chatSnapshot.hasData
+                          ? chatSnapshot.data!.docs.isNotEmpty
+                              ? chatSnapshot.data!.docs.first['read']
+                              : false
+                          : false,
+                    );
+                  },
+                );
+              },
             );
           },
         ),
@@ -184,7 +183,7 @@ class _UserCardSectionState extends State<UserCardSection> {
                     profilePicture: profilePicture)));
       },
       child: Container(
-        padding: const EdgeInsets.fromLTRB(15, 10, 10, 10),
+        padding: EdgeInsets.fromLTRB(15, 10, 10, 10),
         child: Row(
           children: [
             SizedBox(
