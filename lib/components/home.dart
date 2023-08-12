@@ -47,10 +47,12 @@ class _HomePageState extends State<HomePage> {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => SetUsernamePage()));
     } else {
-      setState(() {
-        userInfo['username'] = ds.get('username');
-        userInfo['profilPicture'] = ds.get('profilePicture');
-      });
+      if (mounted) {
+        setState(() {
+          userInfo['username'] = ds.get('username');
+          userInfo['profilPicture'] = ds.get('profilePicture');
+        });
+      }
     }
   }
 

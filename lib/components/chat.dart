@@ -26,6 +26,14 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  void initState() {
+    super.initState();
+  }
+
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,27 +70,61 @@ class ListSection extends StatefulWidget {
 }
 
 class _ListSectionState extends State<ListSection> {
+  void markAllAsRead() async {
+    try {
+      QuerySnapshot querySnapshot = await chatRef
+          .doc(auth.currentUser!.uid)
+          .collection(widget.otherUserID)
+          .get();
+      for (QueryDocumentSnapshot document in querySnapshot.docs) {
+        await chatRef
+            .doc(auth.currentUser!.uid)
+            .collection(widget.otherUserID)
+            .doc(document.id)
+            .update({'read': true});
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: chatRef
-          .doc(auth.currentUser?.uid)
-          .collection(widget.otherUserID)
+          .doc(widget.otherUserID)
+          .collection(auth.currentUser!.uid)
           .orderBy('timestamp')
           .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: Text('Chargement'));
+          return const Center(child: Text('Loading...'));
         }
         messageList = snapshot.data!.docs;
-        print(messageList);
         if (messageList.isEmpty) {
-          return const Center(child: Text('Envoyez votre premier message'));
+          return Container(
+            height: 200,
+            child: Center(
+              child: Text(
+                "No message yet, please send a message to start a chat.",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          );
         }
         return Column(
           children: messageList.map((document) {
+            if (!document["read"]) {
+              print("document : ${document} is ${document["read"]}");
+              markAllAsRead();
+              print("document : ${document} is ${document["read"]}");
+            }
             return document['userId'] == auth.currentUser?.uid
-                ? CurrentUserMessage(document['message'], document['timestamp'])
+                ? CurrentUserMessage(document['message'], document['timestamp'],
+                    document["read"])
                 : OtherUserMessage(document['message'], document['timestamp']);
           }).toList(),
         );
@@ -104,11 +146,13 @@ class MessageField extends StatelessWidget {
         'message': textField.text,
         'userId': auth.currentUser?.uid,
         'timestamp': formattedDate,
+        'read': true,
       }).then((value) {
         chatRef.doc(otherUserID).collection(auth.currentUser?.uid ?? "").add({
           'message': textField.text,
           'userId': auth.currentUser?.uid,
           'timestamp': formattedDate,
+          'read': false,
         }).then((value) {
           addConversation();
           textField.clear();
@@ -161,7 +205,7 @@ class MessageField extends StatelessWidget {
                     border: InputBorder.none,
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: 'Entrez votre  message',
+                    hintText: 'Write your message...',
                   ),
                 ),
               ),
@@ -180,7 +224,9 @@ class MessageField extends StatelessWidget {
 class CurrentUserMessage extends StatelessWidget {
   final String textMessage;
   final String dateMessage;
-  const CurrentUserMessage(this.textMessage, this.dateMessage, {Key? key})
+  final bool isRead;
+  const CurrentUserMessage(this.textMessage, this.dateMessage, this.isRead,
+      {Key? key})
       : super(key: key);
 
   @override
@@ -190,11 +236,25 @@ class CurrentUserMessage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text(
-            dateMessage.toString().substring(13, 18),
-            style: TextStyle(
-              color: Colors.grey[400],
-            ),
+          Row(
+            children: [
+              Text(
+                dateMessage.toString().substring(13, 18),
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+              SizedBox(width: 10),
+              isRead
+                  ? const Icon(
+                      Icons.done_all,
+                      color: Colors.blue,
+                      size: 20,
+                    )
+                  : const Icon(
+                      Icons.done,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
+            ],
           ),
           SizedBox(width: 10), // Add some spacing
           Flexible(

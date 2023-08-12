@@ -167,7 +167,6 @@ class _FormSectionState extends State<FormSection> {
       });
 
       print('User signed up and document created successfully!');
-
       sendEmailVerification();
       showInfoMessage("User signed up successfully!", context);
     } catch (e) {

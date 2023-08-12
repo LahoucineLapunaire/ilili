@@ -50,7 +50,6 @@ class _MessageListPageState extends State<MessageListPage> {
     setState(() {
       chatList = result;
     });
-    print(result);
   }
 
   @override
@@ -63,6 +62,19 @@ class _MessageListPageState extends State<MessageListPage> {
       ),
       body: Center(
         child: Column(children: [
+          if (chatList.isEmpty)
+            Container(
+              height: 200,
+              child: Center(
+                child: Text(
+                  "No message yet, to start a chat, please press the + button.",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
           Expanded(
             child: ListView.builder(
               itemCount: chatList.length,

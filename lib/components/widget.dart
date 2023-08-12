@@ -787,6 +787,7 @@ class _UsersListModalState extends State<UsersListModal> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
+        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
         height: 500,
         child: users.length == 0
             ? Center(child: Text('No users found'))
@@ -794,24 +795,29 @@ class _UsersListModalState extends State<UsersListModal> {
                 shrinkWrap: true,
                 itemCount: users.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatPage(
-                            userId: users[index]['id'],
-                            username: users[index]['username'],
-                            profilePicture: users[index]['profilePicture'],
-                          ),
+                  return Column(
+                    children: [
+                      Text("Followings : ${users.length}"),
+                      ListTile(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatPage(
+                                userId: users[index]['id'],
+                                username: users[index]['username'],
+                                profilePicture: users[index]['profilePicture'],
+                              ),
+                            ),
+                          );
+                        },
+                        leading: CircleAvatar(
+                          backgroundImage:
+                              NetworkImage(users[index]['profilePicture']),
                         ),
-                      );
-                    },
-                    leading: CircleAvatar(
-                      backgroundImage:
-                          NetworkImage(users[index]['profilePicture']),
-                    ),
-                    title: Text(users[index]['username']),
+                        title: Text(users[index]['username']),
+                      )
+                    ],
                   );
                 },
               ),
