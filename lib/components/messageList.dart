@@ -61,32 +61,74 @@ class _MessageListPageState extends State<MessageListPage> {
         title: Text("Messages"),
       ),
       body: Center(
-        child: Column(children: [
-          if (chatList.isEmpty)
-            Container(
-              height: 200,
-              child: Center(
-                child: Text(
-                  "No message yet, to start a chat, please press the + button.",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+        child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: firestore
+              .collection('users')
+              .doc(auth.currentUser!.uid)
+              .snapshots(),
+          builder: (context, userSnapshot) {
+            if (userSnapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            }
+
+            List<String> chatIds = userSnapshot.data!['chats'] != null
+                ? List<String>.from(userSnapshot.data!['chats'])
+                : [];
+
+            if (chatIds.isEmpty) {
+              return Container(
+                height: 200,
+                child: Center(
+                  child: Text(
+                    "No message yet, to start a chat, please press the + button.",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
+              );
+            }
+
+            return Expanded(
+              child: ListView.builder(
+                itemCount: chatIds.length,
+                itemBuilder: (context, index) {
+                  return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: firestore
+                        .collection('chats')
+                        .doc(auth.currentUser!.uid)
+                        .collection(chatIds[index])
+                        .orderBy('timestamp', descending: true)
+                        .limit(1)
+                        .snapshots(),
+                    builder: (context, chatSnapshot) {
+                      if (chatSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return Container();
+                      }
+                      String lastMessage = chatSnapshot.hasData
+                          ? chatSnapshot.data!.docs.isNotEmpty
+                              ? chatSnapshot.data!.docs.first['message']
+                              : ''
+                          : '';
+                      print("lastMessage: $lastMessage");
+                      return UserCardSection(
+                        userId: chatIds[index],
+                        lastMessage: lastMessage,
+                        isRead: chatSnapshot.hasData
+                            ? chatSnapshot.data!.docs.isNotEmpty
+                                ? chatSnapshot.data!.docs.first['read']
+                                : false
+                            : false,
+                      );
+                    },
+                  );
+                },
               ),
-            ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: chatList.length,
-              itemBuilder: (context, index) {
-                return UserCardSection(
-                  userId: chatList[index]['userId'],
-                  lastMessage: chatList[index]['lastMessage'],
-                );
-              },
-            ),
-          ),
-        ]),
+            );
+          },
+        ),
       ),
     );
   }
@@ -95,9 +137,12 @@ class _MessageListPageState extends State<MessageListPage> {
 class UserCardSection extends StatefulWidget {
   final String userId;
   final String lastMessage;
-
+  final bool isRead;
   const UserCardSection(
-      {super.key, required this.userId, required this.lastMessage});
+      {super.key,
+      required this.userId,
+      required this.lastMessage,
+      required this.isRead});
 
   @override
   State<UserCardSection> createState() => _UserCardSectionState();
@@ -112,21 +157,9 @@ class _UserCardSectionState extends State<UserCardSection> {
   void initState() {
     super.initState();
     getUserInfo();
-    if (widget.lastMessage.length > 20) {
-      setState(() {
-        message = widget.lastMessage.substring(0, 20) + '...';
-      });
-    } else {
-      setState(() {
-        message = widget.lastMessage;
-      });
-    }
   }
 
   getUserInfo() {
-    if (widget.lastMessage.length > 20) {
-      message = widget.lastMessage.substring(0, 20) + '...';
-    }
     firestore.collection('users').doc(widget.userId).get().then((value) {
       setState(() {
         username = value['username'];
@@ -168,8 +201,20 @@ class _UserCardSectionState extends State<UserCardSection> {
                 Text(username,
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Text(message,
-                    style: TextStyle(fontSize: 12, color: Colors.grey)),
+                widget.isRead
+                    ? Text(
+                        widget.lastMessage.length > 20
+                            ? widget.lastMessage.substring(0, 20) + '...'
+                            : widget.lastMessage,
+                        style: TextStyle(fontSize: 12, color: Colors.grey))
+                    : Text(
+                        widget.lastMessage.length > 20
+                            ? widget.lastMessage.substring(0, 20) + '...'
+                            : widget.lastMessage,
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold)),
               ],
             ),
           ],
