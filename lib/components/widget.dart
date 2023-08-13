@@ -203,6 +203,43 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     }
   }
 
+  void showDeleteAlert(BuildContext context) {
+    // Create a AlertDialog
+    AlertDialog alertDialog = AlertDialog(
+      title: Text("Do you want to delete this post?"),
+      actions: [
+        // OK button
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+          ),
+          child: Text('No', style: TextStyle(color: Colors.black)),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF6A1B9A),
+          ),
+          child: Text('Yes', style: TextStyle(color: Colors.white)),
+          onPressed: () {
+            deletePost();
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+
+    // Show the alert dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alertDialog;
+      },
+    );
+  }
+
   void openModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -287,7 +324,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     if (value == "Modify Post") {
                       openModal(context);
                     } else if (value == "Delete Post") {
-                      deletePost();
+                      showDeleteAlert(context);
                     }
                   },
                   itemBuilder: (BuildContext context) => [
