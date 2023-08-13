@@ -53,6 +53,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   List<dynamic> likes = [];
   List<dynamic> comments = [];
   bool shouldReload = false;
+  String title = "";
+  bool isTapped = false;
 
   @override
   void initState() {
@@ -86,18 +88,33 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       likes = ds.data()!['likes'];
       comments = ds.data()!['comments'];
       postDate = formatTimestamp(ds.data()!['timestamp']);
+      title = ds.data()!['title'];
     });
-    audioPlayer.setSourceUrl(audioPath);
-    audioPlayer.onDurationChanged.listen((Duration duration) {
-      setState(() {
-        audioDuration = duration;
-      });
-      audioPlayer.onPositionChanged.listen((Duration pos) {
+  }
+
+  Future<void> loadAudio() async {
+    try {
+      audioPlayer.setSourceUrl(audioPath);
+      audioPlayer.onDurationChanged.listen((Duration duration) {
         setState(() {
-          position = pos;
+          audioDuration = duration;
+        });
+        audioPlayer.onPositionChanged.listen((Duration pos) {
+          setState(() {
+            position = pos;
+          });
         });
       });
-    });
+      setState(() {
+        isTapped = true;
+        isPlaying = true;
+      });
+      if (audioPath != null) {
+        await audioPlayer.play(UrlSource(audioPath)).then((value) {});
+      }
+    } catch (e) {
+      showErrorMessage(e.toString(), context);
+    }
   }
 
   Future<void> playPause() async {
@@ -288,38 +305,68 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-                onPressed: () {
-                  playPause();
-                },
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(formatPosition(position.inMilliseconds)),
-                  Slider(
-                    activeColor: Color(0xFF6A1B9A),
-                    inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
-                    min: 0.0,
-                    max: audioDuration.inSeconds.toDouble(),
-                    value: position.inSeconds
-                        .toDouble()
-                        .clamp(0.0, audioDuration.inSeconds.toDouble()),
-                    onChanged: (double value) {
-                      setState(() {
-                        _seekToSecond(value.toInt());
-                      });
-                    },
-                  ),
-                  Text(formatPosition(audioDuration.inMilliseconds)),
-                ],
-              )
-            ],
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          SizedBox(height: 10),
+          // ---------------------
+          isTapped
+              ? Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                        onPressed: () {
+                          playPause();
+                        },
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(formatPosition(position.inMilliseconds)),
+                          Slider(
+                            activeColor: Color(0xFF6A1B9A),
+                            inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
+                            min: 0.0,
+                            max: audioDuration.inSeconds.toDouble(),
+                            value: position.inSeconds
+                                .toDouble()
+                                .clamp(0.0, audioDuration.inSeconds.toDouble()),
+                            onChanged: (double value) {
+                              setState(() {
+                                _seekToSecond(value.toInt());
+                              });
+                            },
+                          ),
+                          Text(formatPosition(audioDuration.inMilliseconds)),
+                        ],
+                      )
+                    ],
+                  ),
+                )
+              : Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xFF6A1B9A), // Background color
+                    shape:
+                        BoxShape.circle, // You can change the shape if needed
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      loadAudio();
+                    },
+                    icon: Icon(
+                      Icons.play_arrow,
+                      color: Colors.white, // Icon color
+                    ),
+                  ),
+                ),
+          // ---------------------
+          SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [

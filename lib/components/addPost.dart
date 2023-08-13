@@ -17,6 +17,7 @@ AudioPlayer audioPlayer = AudioPlayer();
 String audioPath = '';
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseStorage storage = FirebaseStorage.instance;
+TextEditingController titleController = TextEditingController();
 
 class AddPostPage extends StatelessWidget {
   const AddPostPage({super.key});
@@ -40,6 +41,8 @@ class AddPostPage extends StatelessWidget {
               child: Text(
                   "To add a post, please record an audio file or upload one, and add some tags to it, and then click on the 'Add Post' button."),
             ),
+            SizedBox(height: 20),
+            TitleSection(),
             SizedBox(height: 10),
             ButtonSection(),
             SizedBox(height: 20),
@@ -52,6 +55,33 @@ class AddPostPage extends StatelessWidget {
             SizedBox(height: 20),
             SendButtonSection(),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class TitleSection extends StatefulWidget {
+  const TitleSection({super.key});
+
+  @override
+  State<TitleSection> createState() => _TitleSectionState();
+}
+
+class _TitleSectionState extends State<TitleSection> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 350,
+      child: TextField(
+        controller: titleController,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          labelText: 'title',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
         ),
       ),
     );
@@ -458,21 +488,29 @@ class _SendButtonSectionState extends State<SendButtonSection> {
     return [];
   }
 
-
-
   Future postAudio() async {
     try {
       String name = generateUniqueFileName();
       List<dynamic> posts = await getPosts();
+
+      posts.add(name);
+      String title = titleController.text;
+
+      if (title == "" || tagsList.isEmpty || audioPath == "") {
+        showErrorMessage(
+            "please add an audio and fill title and tags", context);
+        return;
+      }
+
       Reference postRef = storageRef.child(name);
       UploadTask uploadTask = postRef.putFile(File(audioPath));
-      posts.add(name);
 
       await uploadTask.whenComplete(() async {
         String downloadURL = await postRef.getDownloadURL();
 
         FirebaseFirestore.instance.collection('posts').doc(name).set({
           'userId': auth.currentUser!.uid,
+          "title": title,
           'audio': downloadURL,
           'tags': tagsList,
           'likes': [],
@@ -499,11 +537,48 @@ class _SendButtonSectionState extends State<SendButtonSection> {
     }
   }
 
+  void showConfirmAlert(BuildContext context) {
+    // Create a AlertDialog
+    AlertDialog alertDialog = AlertDialog(
+      title: Text("Do you want to post this audio?"),
+      actions: [
+        // OK button
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+          ),
+          child: Text('No', style: TextStyle(color: Colors.black)),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF6A1B9A),
+          ),
+          child: Text('Yes', style: TextStyle(color: Colors.white)),
+          onPressed: () {
+            postAudio();
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+
+    // Show the alert dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alertDialog;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        postAudio();
+        showConfirmAlert(context);
       },
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         Icon(Icons.send),
