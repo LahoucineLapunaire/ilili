@@ -74,7 +74,9 @@ class _EmailSectionState extends State<EmailSection> {
           confirmation = true;
         });
       });
-      showInfoMessage('Password reset email sent successfully', context);
+      showInfoMessage('Password reset email sent successfully', context, () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      });
       print('Password reset email sent successfully');
     } catch (e) {
       showErrorMessage(e.toString().split('] ')[1], context);

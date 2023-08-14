@@ -205,7 +205,7 @@ class _HomePageState extends State<HomePage> {
                         AudioPlayerWidget(
                           postId: post.postId,
                           userId: post.userId,
-                          isOwner: false,
+                          isOwner: post.userId == auth.currentUser!.uid,
                         ),
                     ],
                   ),

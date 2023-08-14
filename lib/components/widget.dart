@@ -319,29 +319,49 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                   ],
                 ),
               ),
-              if (widget.isOwner)
-                PopupMenuButton<String>(
-                  onSelected: (String value) {
-                    // Handle menu item selection
-                    if (value == "Modify Post") {
-                      openModal(context);
-                    } else if (value == "Delete Post") {
-                      showDeleteAlert(context);
-                    }
-                  },
-                  itemBuilder: (BuildContext context) => [
+              PopupMenuButton<String>(
+                onSelected: (String value) {
+                  // Handle menu item selection
+                  if (value == "Modify Post") {
+                    openModal(context);
+                  } else if (value == "Delete Post") {
+                    showDeleteAlert(context);
+                  } else if (value == "Report Post") {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return ReportModal(
+                          isPost: true,
+                          reportId: widget.postId,
+                          username: username,
+                          userId: widget.userId,
+                          title: title,
+                          content: audioPath,
+                        );
+                      },
+                    );
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  if (widget.isOwner)
                     PopupMenuItem(
                       value: 'Modify Post',
                       child: Text('Modify Post'),
                       textStyle: TextStyle(color: Colors.black),
                     ),
+                  if (widget.isOwner)
                     PopupMenuItem(
                       value: 'Delete Post',
                       child: Text('Delete Post'),
                       textStyle: TextStyle(color: Colors.red),
                     ),
-                  ],
-                ),
+                  PopupMenuItem(
+                    value: 'Report Post',
+                    child: Text('Report Post'),
+                    textStyle: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
             ],
           ),
           Text(
@@ -747,6 +767,9 @@ class _CommentModalState extends State<CommentModal> {
           .collection('posts')
           .doc(widget.postId)
           .update({'comments': comments, 'score': score});
+      showInfoMessage("Comment is posted !", context, () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      });
       Navigator.pop(context);
     } catch (e) {
       print(e);
@@ -1344,7 +1367,8 @@ void showErrorMessage(String message, BuildContext context) {
   );
 }
 
-void showInfoMessage(String message, BuildContext context) {
+void showInfoMessage(
+    String message, BuildContext context, VoidCallback hideCallback) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Stack(
@@ -1390,7 +1414,7 @@ void showInfoMessage(String message, BuildContext context) {
                     icon: Icon(Icons.close),
                     color: Colors.white,
                     onPressed: () {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      hideCallback;
                     },
                   ),
                 ],

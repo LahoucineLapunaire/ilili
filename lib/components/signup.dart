@@ -122,7 +122,10 @@ class _FormSectionState extends State<FormSection> {
 
       if (user != null && !user.emailVerified) {
         await user.sendEmailVerification();
-        showInfoMessage('Email verification sent to ${user.email}', context);
+        showInfoMessage('Email verification sent to ${user.email}', context,
+            () {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        });
         print('Email verification sent to ${user.email}');
       } else {
         showErrorMessage('No user or email is already verified', context);
@@ -168,7 +171,9 @@ class _FormSectionState extends State<FormSection> {
 
       print('User signed up and document created successfully!');
       sendEmailVerification();
-      showInfoMessage("User signed up successfully!", context);
+      showInfoMessage("User signed up successfully!", context, () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      });
     } catch (e) {
       print('Error signing up user and creating document: $e');
       if (mounted) {

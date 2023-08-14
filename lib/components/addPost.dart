@@ -526,6 +526,9 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           'posts': posts,
         });
       });
+      showInfoMessage("Your post is posted !", context, () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      });
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

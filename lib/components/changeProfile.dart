@@ -299,6 +299,9 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
           'description': descriptionController.text,
         });
       }
+      showInfoMessage("User info changed !", context, () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      });
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
