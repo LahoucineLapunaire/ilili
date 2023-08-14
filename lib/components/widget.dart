@@ -15,6 +15,8 @@ import 'package:ilili/components/chat.dart';
 import 'package:ilili/components/postPage.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart' as path;
@@ -1060,6 +1062,220 @@ class _FollowingsListModallState extends State<FollowingsListModal> {
                     ),
                   ],
                 )),
+    );
+  }
+}
+
+class ReportModal extends StatefulWidget {
+  final bool isPost;
+  final String reportId;
+  final String username;
+  final String userId;
+  final String title;
+  final String content;
+  const ReportModal(
+      {super.key,
+      required this.isPost,
+      required this.username,
+      required this.userId,
+      required this.content,
+      required this.reportId,
+      required this.title});
+
+  @override
+  State<ReportModal> createState() => _ReportModalState();
+}
+
+class _ReportModalState extends State<ReportModal> {
+  TextEditingController reportController = TextEditingController();
+
+  reportComment() async {
+    try {
+      final smtpServer =
+          gmail('moderation.ilili@gmail.com', 'gpubnhzldelidwcq');
+
+      // Create a message
+      final message = Message()
+        ..from = Address('moderation.ilili@gmail.com', 'Moderation')
+        ..recipients.add('moderation.ilili@gmail.com')
+        ..subject = 'Report of the comment ${widget.reportId}'
+        ..html = '''
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 20px;
+  }
+  h2 {
+    color: #333;
+    margin-bottom: 10px;
+  }
+  h3 {
+    color: #666;
+    margin-bottom: 5px;
+  }
+  p {
+    color: #555;
+    margin-bottom: 5px;
+  }
+</style>
+</head>
+<body>
+  <h2>The user ${auth.currentUser!.uid}, email address ${auth.currentUser?.email}, reported the following comment:</h2>
+  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px;">
+    <h3>User: ${widget.username} (User ID: ${widget.userId})</h3>
+    <p>Comment ID: ${widget.reportId}</p>
+    <p>Comment content:</p>
+    <div style="background-color: #f9f9f9; border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+      ${widget.content}
+    </div>
+  </div>
+  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
+    <h3>The reason for this report is:</h3>
+    <p>${reportController.text}</p>
+    <p>Reported at: ${DateTime.now().toString()}</p>
+  </div>
+</body>
+</html>
+''';
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ${sendReport.toString()}');
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error sending email: $e');
+    }
+  }
+
+  reportPost() async {
+    try {
+      final smtpServer =
+          gmail('moderation.ilili@gmail.com', 'gpubnhzldelidwcq');
+
+      // Create a message
+      final message = Message()
+        ..from = Address('moderation.ilili@gmail.com', 'Moderation')
+        ..recipients.add('moderation.ilili@gmail.com')
+        ..subject = 'Report of the comment ${widget.reportId}'
+        ..html = '''
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 20px;
+  }
+  h2 {
+    color: #333;
+    margin-bottom: 10px;
+  }
+  h3 {
+    color: #666;
+    margin-bottom: 5px;
+  }
+  p {
+    color: #555;
+    margin-bottom: 5px;
+  }
+</style>
+</head>
+<body>
+  <h2>The user ${auth.currentUser!.uid}, email address ${auth.currentUser?.email}, reported the following post:</h2>
+  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px;">
+    <h3>User: ${widget.username} (User ID: ${widget.userId})</h3>
+    <p>Post ID: ${widget.reportId}</p>
+    <p>Post title: ${widget.title}</p>
+    <p>Post content:</p>
+    <div style="background-color: #f9f9f9; border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+      ${widget.content}
+    </div>
+  </div>
+  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
+    <h3>The reason for this report is:</h3>
+    <p>${reportController.text}</p>
+    <p>Reported at: ${DateTime.now().toString()}</p>
+  </div>
+</body>
+</html>
+''';
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ${sendReport.toString()}');
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error sending email: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+        height: 500,
+        child: Column(
+          children: [
+            Text(
+              "Report of ${widget.isPost ? 'post' : 'comment'}",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Why do you want to report this ${widget.isPost ? 'post' : 'comment'}",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            Container(
+              height: 200,
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: TextField(
+                maxLines: null,
+                controller: reportController,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Write the report reason ...',
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                widget.isPost ? reportPost() : reportComment();
+              },
+              child:
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(Icons.report),
+                SizedBox(width: 10),
+                widget.isPost ? Text('Report post') : Text('Report comment')
+              ]),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                fixedSize:
+                    Size(180, 35), // Set the width and height of the button
+                backgroundColor:
+                    Color(0xFF6A1B9A), // Set the background color of the button
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }

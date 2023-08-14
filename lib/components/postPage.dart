@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ilili/components/widget.dart';
+import 'package:mailer/smtp_server.dart';
+import 'package:mailer/mailer.dart';
 
 String sortType = "newest";
 List<dynamic> commentList = [];
@@ -251,6 +253,8 @@ class _CommentWidgetState extends State<CommentWidget> {
   List<dynamic> likes = [];
   Timestamp timestamp = Timestamp.now();
   bool isLiked = false;
+  String email = "";
+  String reportReason = "";
 
   void initState() {
     super.initState();
@@ -352,25 +356,57 @@ class _CommentWidgetState extends State<CommentWidget> {
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(40.0),
-                child: Image.network(
-                  profilePicture, // Replace with the actual path and filename of your image file
-                  width: 40,
-                  height: 40,
-                  fit: BoxFit.cover,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(40.0),
+                    child: Image.network(
+                      profilePicture, // Replace with the actual path and filename of your image file
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    username,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(width: 10),
-              Text(
-                username,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              PopupMenuButton<String>(
+                onSelected: (String value) {
+                  // Handle menu item selection
+                  if (value == "Report Comment") {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return ReportModal(
+                          isPost: false,
+                          reportId: widget.commentId,
+                          username: username,
+                          userId: widget.userId,
+                          title: "",
+                          content: comment,
+                        );
+                      },
+                    );
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  PopupMenuItem(
+                    value: 'Report Comment',
+                    child: Text('Report Comment'),
+                    textStyle: TextStyle(color: Colors.black),
+                  ),
+                ],
+              )
             ],
           ),
           SizedBox(height: 10),
