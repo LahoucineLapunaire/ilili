@@ -70,6 +70,10 @@ class ListSection extends StatefulWidget {
 }
 
 class _ListSectionState extends State<ListSection> {
+  void initState() {
+    super.initState();
+  }
+
   void markAllAsRead() async {
     try {
       QuerySnapshot querySnapshot = await chatRef
@@ -97,6 +101,7 @@ class _ListSectionState extends State<ListSection> {
           .orderBy('timestamp')
           .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        markAllAsRead();
         if (!snapshot.hasData) {
           return const Center(child: Text('Loading...'));
         }
@@ -118,8 +123,6 @@ class _ListSectionState extends State<ListSection> {
         return Column(
           children: messageList.map((document) {
             if (!document["read"]) {
-              print("document : ${document} is ${document["read"]}");
-              markAllAsRead();
               print("document : ${document} is ${document["read"]}");
             }
             return document['userId'] == auth.currentUser?.uid

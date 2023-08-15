@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ilili/components/addPost.dart';
 import 'package:ilili/components/home.dart';
 import 'package:ilili/components/OwnerProfile.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AppRouter extends StatefulWidget {
   @override
@@ -16,6 +17,10 @@ class _AppRouterState extends State<AppRouter> {
     AddPostPage(),
     OwnerProfilePage(),
   ];
+
+  void initState() {
+    super.initState();
+  }
 
   void _onTabTapped(int index) {
     setState(() {

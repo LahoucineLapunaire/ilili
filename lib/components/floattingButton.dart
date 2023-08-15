@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:ilili/components/chat.dart';
@@ -142,8 +143,6 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
         .get()
         .then((DocumentSnapshot documentSnapshot) {
       if (documentSnapshot.exists) {
-        print(documentSnapshot['username']);
-        print(documentSnapshot['profilePicture']);
         setState(() {
           followingList = documentSnapshot['followers'];
           username = documentSnapshot['username'];
@@ -174,6 +173,28 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
       setState(() {
         followingList.add(auth.currentUser!.uid);
       });
+    }
+  }
+
+  void sendNotification() {
+    try {
+      FirebaseMessaging.instance
+          .sendMessage(
+              to: '/topics/follow'.toString(),
+              data: {
+                "title": "New Follower",
+                "body": "A user started following you",
+              },
+              ttl: 10,
+              messageId: "azerty123",
+              messageType: "follow",
+              collapseKey: "aqwzsx")
+          .catchError((e) {
+        print("error sending notification : ${e.toString()}");
+      });
+      print("notification sent");
+    } catch (e) {
+      print("error sending notification : ${e.toString()}");
     }
   }
 

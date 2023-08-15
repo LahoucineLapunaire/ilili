@@ -381,13 +381,13 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
 
   Future<void> signupWithGoogle() async {
     try {
+      print("IamHere");
       // Trigger the Google sign-in flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
       print(googleUser?.email.toString());
 
       if (googleUser != null) {
-        print("______________________OK_________________________");
         // Obtain the authentication details from the Google sign-in
         final GoogleSignInAuthentication googleAuth =
             await googleUser.authentication;
@@ -409,14 +409,6 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
             await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
         if (userSnapshot.exists) {
-          // User already exists, log in and navigate to HomePage
-          // Add your own navigation logic here
-          print('____________________User already exists_____________________');
-          // Navigate to HomePage
-          // Navigator.pushReplacement(
-          //   context,
-          //   MaterialPageRoute(builder: (context) => HomePage()),
-          // );
         } else {
           // User does not exist, create a new document in Firestore
           await firestore.collection('users').doc(uid).set({
@@ -426,15 +418,13 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
             'posts': [],
             'followers': [],
             'followings': [],
+            'chats': [],
             'description': 'mydescription',
           });
-
-          print('______________New user created______________');
-
-          // Add your own navigation logic here to navigate to the desired page after sign-up
         }
       }
     } catch (e) {
+      print("error google signup");
       if (mounted) {
         print("______________________");
         showErrorMessage(e.toString().split('] ')[1], context);

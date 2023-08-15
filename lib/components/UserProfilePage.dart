@@ -150,7 +150,7 @@ class _TopSectionState extends State<TopSection> {
             ),
             SizedBox(width: 10),
             Text(
-              "${followings.length} following",
+              "${followings.length} followings",
               style: TextStyle(
                 fontSize: 15,
                 color: Colors.white,

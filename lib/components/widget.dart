@@ -13,17 +13,14 @@ import 'package:ilili/components/OwnerProfile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ilili/components/chat.dart';
 import 'package:ilili/components/postPage.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_sound/flutter_sound.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:path/path.dart' as path;
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 Reference storageRef = FirebaseStorage.instance.ref("comments");
 FirebaseAuth auth = FirebaseAuth.instance;
+final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
 class AudioPlayerWidget extends StatefulWidget {
   final String userId;
@@ -314,6 +311,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ],
@@ -720,6 +718,7 @@ class CommentModal extends StatefulWidget {
 
 class _CommentModalState extends State<CommentModal> {
   String username = "";
+  String ownerId = "";
   String profilePicture =
       "https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=db72d8e7-aa9d-4b64-886c-549987962cb2";
   TextEditingController commentController = TextEditingController();
@@ -727,6 +726,15 @@ class _CommentModalState extends State<CommentModal> {
   void initState() {
     super.initState();
     getUser();
+    getPostOwner();
+  }
+
+  void getPostOwner() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await firestore.collection('posts').doc(widget.postId).get();
+    setState(() {
+      ownerId = snapshot['userId'];
+    });
   }
 
   void getUser() async {
@@ -767,12 +775,13 @@ class _CommentModalState extends State<CommentModal> {
           .collection('posts')
           .doc(widget.postId)
           .update({'comments': comments, 'score': score});
+
       showInfoMessage("Comment is posted !", context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
       Navigator.pop(context);
     } catch (e) {
-      print(e);
+      print("Error posting comment : ${e.toString()}");
     }
   }
 
