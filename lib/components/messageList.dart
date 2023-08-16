@@ -102,12 +102,6 @@ class _MessageListPageState extends State<MessageListPage> {
                       .limit(1)
                       .snapshots(),
                   builder: (context, chatSnapshot) {
-                    if (chatSnapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return Center(
-                        child: Container(child: Text("loading ...")),
-                      );
-                    }
                     String lastMessage = chatSnapshot.hasData
                         ? chatSnapshot.data!.docs.isNotEmpty
                             ? chatSnapshot.data!.docs.first['message']

@@ -4,11 +4,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:intl/intl.dart';
-
 import 'notification.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
-
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 CollectionReference chatRef = firestore.collection('chats');
 List<DocumentSnapshot> messageList = [];
@@ -29,8 +27,24 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  final ScrollController scrollController = ScrollController();
+
   void initState() {
     super.initState();
+    // Use addPostFrameCallback to perform actions after widget is built
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      Future.delayed(Duration(milliseconds: 500), () {
+        scrollToBottom();
+      });
+    });
+  }
+
+  void scrollToBottom() {
+    try {
+      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   void dispose() {
@@ -57,11 +71,12 @@ class _ChatPageState extends State<ChatPage> {
         ),
         bottomNavigationBar: MessageField(widget.userId, widget.username),
         body: SingleChildScrollView(
+            controller: scrollController,
             child: Center(
-          child: Column(
-            children: [ListSection(widget.userId)],
-          ),
-        )));
+              child: Column(
+                children: [ListSection(widget.userId)],
+              ),
+            )));
   }
 }
 
@@ -125,9 +140,6 @@ class _ListSectionState extends State<ListSection> {
         }
         return Column(
           children: messageList.map((document) {
-            if (!document["read"]) {
-              print("document : ${document} is ${document["read"]}");
-            }
             return document['userId'] == auth.currentUser?.uid
                 ? CurrentUserMessage(document['message'], document['timestamp'],
                     document["read"])
