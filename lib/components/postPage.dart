@@ -306,7 +306,8 @@ class _CommentWidgetState extends State<CommentWidget> {
     try {
       if (isLiked) {
         firestore.collection('comments').doc(widget.commentId).update({
-          "likes": FieldValue.arrayRemove([auth.currentUser!.uid])
+          "likes": FieldValue.arrayRemove([auth.currentUser!.uid]),
+          "score": FieldValue.increment(-1)
         });
         setState(() {
           likes.remove(auth.currentUser!.uid);
@@ -316,7 +317,8 @@ class _CommentWidgetState extends State<CommentWidget> {
           likes.add(auth.currentUser!.uid);
         });
         firestore.collection('comments').doc(widget.commentId).update({
-          "likes": FieldValue.arrayUnion([auth.currentUser!.uid])
+          "likes": FieldValue.arrayUnion([auth.currentUser!.uid]),
+          "score": FieldValue.increment(1)
         });
       }
       setState(() {

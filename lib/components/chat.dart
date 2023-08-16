@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:intl/intl.dart';
 
+import 'notification.dart';
+
 FirebaseAuth auth = FirebaseAuth.instance;
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -53,7 +55,7 @@ class _ChatPageState extends State<ChatPage> {
             ],
           ),
         ),
-        bottomNavigationBar: MessageField(widget.userId),
+        bottomNavigationBar: MessageField(widget.userId, widget.username),
         body: SingleChildScrollView(
             child: Center(
           child: Column(
@@ -139,8 +141,9 @@ class _ListSectionState extends State<ListSection> {
 
 class MessageField extends StatelessWidget {
   final String otherUserID;
+  final String username;
   final textField = TextEditingController();
-  MessageField(this.otherUserID, {Key? key}) : super(key: key);
+  MessageField(this.otherUserID, this.username, {Key? key}) : super(key: key);
 
   Future<void> sendMessage() async {
     DateTime now = DateTime.now();
@@ -162,30 +165,14 @@ class MessageField extends StatelessWidget {
           textField.clear();
         });
       });
+      sendNotificationToTopic("chat", "$username", "${textField.text}", {
+        "sender": auth.currentUser!.uid,
+        "receiver": otherUserID,
+        "type": "chat",
+        "click_action": "FLUTTER_CHAT_CLICK",
+      });
     } catch (e) {
       print(e.toString());
-    }
-  }
-
-  void sendNotification() {
-    try {
-      FirebaseMessaging.instance
-          .sendMessage(
-              to: '/topics/chat',
-              data: {
-                "title": "New message",
-                "body": "A newmessage from a user",
-              },
-              ttl: 10,
-              messageId: "azerty123",
-              messageType: "follow",
-              collapseKey: "aqwzsx")
-          .catchError((e) {
-        print("error sending notification : ${e.toString()}");
-      });
-      print("notification sent");
-    } catch (e) {
-      print("error sending notification : ${e.toString()}");
     }
   }
 

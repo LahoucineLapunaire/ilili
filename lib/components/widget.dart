@@ -17,6 +17,8 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+import 'notification.dart';
+
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 Reference storageRef = FirebaseStorage.instance.ref("comments");
 FirebaseAuth auth = FirebaseAuth.instance;
@@ -778,32 +780,16 @@ class _CommentModalState extends State<CommentModal> {
       showInfoMessage("Comment is posted !", context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
-      sendNotification();
+      sendNotificationToTopic(
+          "comment", "New comment !", "$username commented on your post !", {
+        "sender": auth.currentUser!.uid,
+        "receiver": ownerId,
+        "type": "comment",
+        "click_action": "FLUTTER_COMMENT_CLICK",
+      });
       Navigator.pop(context);
     } catch (e) {
       print("Error posting comment : ${e.toString()}");
-    }
-  }
-
-  void sendNotification() {
-    try {
-      FirebaseMessaging.instance
-          .sendMessage(
-              to: '/topics/comment',
-              data: {
-                "title": "New Comment",
-                "body": "A user has commented your post",
-              },
-              ttl: 10,
-              messageId: "azerty123",
-              messageType: "follow",
-              collapseKey: "aqwzsx")
-          .catchError((e) {
-        print("error sending notification : ${e.toString()}");
-      });
-      print("notification sent");
-    } catch (e) {
-      print("error sending notification : ${e.toString()}");
     }
   }
 

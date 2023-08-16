@@ -1,12 +1,17 @@
+import 'dart:js';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ilili/components/UserProfilePage.dart';
 import 'package:ilili/components/appRouter.dart';
+import 'package:ilili/components/chat.dart';
 import 'package:ilili/components/emailNotVerified.dart';
+import 'package:ilili/components/postPage.dart';
 import 'components/signup.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,14 +48,19 @@ void initNotification() async {
   print('User granted permission: ${settings.authorizationStatus}');
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print("You received a message");
-    print("onMessage: ${message.notification?.body}");
+    if (message.data["receiver"] == auth.currentUser!.uid) {
+      print("You received a message");
+      print("onMessage: ${message.notification?.body}");
+      print("onMessage: ${message.data}");
+    }
   });
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("Handling a background message: ${message.messageId}");
-  print("onMessage: ${message.notification?.body}");
+  if (message.data["receiver"] == auth.currentUser!.uid) {
+    print("Handling a background message: ${message.messageId}");
+    print("onMessage: ${message.notification?.body}");
+  }
 }
 
 class UnLogged extends StatelessWidget {

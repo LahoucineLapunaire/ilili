@@ -220,7 +220,7 @@ class _PostSectionState extends State<PostSection> {
               for (var post in posts)
                 AudioPlayerWidget(
                   postId: post,
-                  userId: auth.currentUser!.uid,
+                  userId: widget.userId,
                   isOwner: true,
                 ),
             ],
