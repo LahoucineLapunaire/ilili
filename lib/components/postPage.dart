@@ -255,6 +255,7 @@ class _CommentWidgetState extends State<CommentWidget> {
   bool isLiked = false;
   String email = "";
   String reportReason = "";
+  bool isPictureLoaded = false;
 
   void initState() {
     super.initState();
@@ -295,6 +296,7 @@ class _CommentWidgetState extends State<CommentWidget> {
         setState(() {
           username = postSnapshot.data()?['username'];
           profilePicture = postSnapshot.data()?['profilePicture'];
+          isPictureLoaded = true;
         });
       });
     } catch (e) {
@@ -363,15 +365,19 @@ class _CommentWidgetState extends State<CommentWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(40.0),
-                    child: Image.network(
-                      profilePicture, // Replace with the actual path and filename of your image file
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+                  isPictureLoaded
+                      ? SizedBox(
+                          height: 0,
+                          width: 40,
+                          child: CircleAvatar(
+                            backgroundImage: NetworkImage(profilePicture),
+                          ),
+                        )
+                      : Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.grey,
+                          ),
+                        ),
                   SizedBox(width: 10),
                   Text(
                     username,

@@ -146,6 +146,7 @@ class _UserCardSectionState extends State<UserCardSection> {
   String profilePicture =
       'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=db72d8e7-aa9d-4b64-886c-549987962cb2';
   String message = '';
+  bool isPictureLoaded = false;
 
   void initState() {
     super.initState();
@@ -157,6 +158,7 @@ class _UserCardSectionState extends State<UserCardSection> {
       setState(() {
         username = value['username'];
         profilePicture = value['profilePicture'];
+        isPictureLoaded = true;
         if (widget.lastMessage.length > 20) {
           message = widget.lastMessage.substring(0, 20) + '...';
         }
@@ -180,13 +182,19 @@ class _UserCardSectionState extends State<UserCardSection> {
         padding: EdgeInsets.fromLTRB(15, 10, 10, 10),
         child: Row(
           children: [
-            SizedBox(
-              height: 50,
-              width: 50,
-              child: CircleAvatar(
-                backgroundImage: NetworkImage(profilePicture),
-              ),
-            ),
+            isPictureLoaded
+                ? SizedBox(
+                    height: 50,
+                    width: 50,
+                    child: CircleAvatar(
+                      backgroundImage: NetworkImage(profilePicture),
+                    ),
+                  )
+                : Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.grey,
+                    ),
+                  ),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

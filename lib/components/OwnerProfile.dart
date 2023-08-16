@@ -43,6 +43,7 @@ class _TopSectionState extends State<TopSection> {
   String description = "";
   List<dynamic> followers = [];
   List<dynamic> followings = [];
+  bool isPictureLoad = false;
 
   @override
   void initState() {
@@ -62,6 +63,7 @@ class _TopSectionState extends State<TopSection> {
     setState(() {
       username = ds.get('username');
       profilPicture = ds.get('profilePicture');
+      isPictureLoad = true;
       description = ds.get('description');
       followers = ds.get('followers');
       followings = ds.get('followings');
@@ -106,13 +108,19 @@ class _TopSectionState extends State<TopSection> {
                 ),
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(200),
-              child: Image.network(
-                "$profilPicture",
-                fit: BoxFit.cover,
-              ),
-            ),
+            child: isPictureLoad
+                ? SizedBox(
+                    height: 50,
+                    width: 50,
+                    child: CircleAvatar(
+                      backgroundImage: NetworkImage(profilPicture),
+                    ),
+                  )
+                : Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.grey,
+                    ),
+                  ),
           ),
           SizedBox(height: 10),
           Text(

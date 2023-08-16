@@ -81,7 +81,6 @@ class _ProfilPictureSectionState extends State<ProfilPictureSection> {
 
     setState(() {
       profilePicture = ds.get('profilePicture');
-      print("profilePicture: " + profilePicture);
     });
   }
 

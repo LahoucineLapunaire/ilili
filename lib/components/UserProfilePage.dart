@@ -48,6 +48,7 @@ class _TopSectionState extends State<TopSection> {
   String description = "";
   List<dynamic> followers = [];
   List<dynamic> followings = [];
+  bool isPictureLoad = false;
 
   @override
   void initState() {
@@ -70,6 +71,7 @@ class _TopSectionState extends State<TopSection> {
       description = ds.get('description');
       followers = ds.get('followers');
       followings = ds.get('followings');
+      isPictureLoad = true;
     });
   }
 
@@ -96,29 +98,32 @@ class _TopSectionState extends State<TopSection> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(4),
-            height: 150,
-            width: 150,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(75),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.4),
-                  spreadRadius: 1,
-                  blurRadius: 2,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(200),
-              child: Image.network(
-                "$profilPicture",
-                fit: BoxFit.cover,
+              padding: const EdgeInsets.all(4),
+              height: 150,
+              width: 150,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(75),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.4),
+                    spreadRadius: 1,
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
               ),
-            ),
-          ),
+              child: isPictureLoad
+                  ? SizedBox(
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(profilPicture),
+                      ),
+                    )
+                  : Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.grey,
+                      ),
+                    )),
           SizedBox(height: 10),
           Text(
             "$username",

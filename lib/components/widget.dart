@@ -56,6 +56,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   bool shouldReload = false;
   String title = "";
   bool isTapped = false;
+  bool isPictureLoaded = false;
 
   @override
   void initState() {
@@ -76,6 +77,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         await firestore.collection('users').doc(widget.userId).get();
     setState(() {
       profilePicture = ds.data()!['profilePicture'];
+      isPictureLoaded = true;
       username = ds.data()!['username'];
     });
   }
@@ -293,20 +295,23 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             children: [
               GestureDetector(
                 onTap: () {
-                  redirectToUser(); // Call the redirectToUser() function on tap
+                  redirectToUser();
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(40.0),
-                      child: Image.network(
-                        profilePicture, // Replace with the actual path and filename of your image file
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                    isPictureLoaded
+                        ? SizedBox(
+                            height: 50,
+                            width: 50,
+                            child: CircleAvatar(
+                              backgroundImage: NetworkImage(profilePicture),
+                            ),
+                          )
+                        : Center(
+                            child:
+                                CircularProgressIndicator(color: Colors.grey),
+                          ),
                     SizedBox(width: 10),
                     Text(
                       username,
