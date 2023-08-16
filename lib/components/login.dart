@@ -112,9 +112,9 @@ class _FormSectionState extends State<FormSection> {
   void login() async {
     try {
       if (emailController.text == '' || passwordController.text == '') {
-      showErrorMessage("All fields must be filled", context);
-      return;
-    }
+        showErrorMessage("All fields must be filled", context);
+        return;
+      }
       await auth
           .signInWithEmailAndPassword(
               email: emailController.text, password: passwordController.text)
@@ -298,7 +298,6 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
         // Check if the user already exists
         final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
             await FirebaseFirestore.instance.collection('users').doc(uid).get();
-            
 
         if (userSnapshot.exists) {
           // User already exists, log in and navigate to HomePage
@@ -312,14 +311,14 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
         } else {
           // User does not exist, create a new document in Firestore
           await firestore.collection('users').doc(uid).set({
-        'profilePicture':
-            'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
-        'username': '',
-        'posts': [],
-        'followers': [],
-        'following': [],
-        'description': '',
-      });
+            'profilePicture':
+                'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
+            'username': '',
+            'posts': [],
+            'followers': [],
+            'following': [],
+            'description': '',
+          });
 
           print('New user created');
 

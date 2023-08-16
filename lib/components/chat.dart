@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:intl/intl.dart';
@@ -163,6 +164,28 @@ class MessageField extends StatelessWidget {
       });
     } catch (e) {
       print(e.toString());
+    }
+  }
+
+  void sendNotification() {
+    try {
+      FirebaseMessaging.instance
+          .sendMessage(
+              to: '/topics/chat',
+              data: {
+                "title": "New message",
+                "body": "A newmessage from a user",
+              },
+              ttl: 10,
+              messageId: "azerty123",
+              messageType: "follow",
+              collapseKey: "aqwzsx")
+          .catchError((e) {
+        print("error sending notification : ${e.toString()}");
+      });
+      print("notification sent");
+    } catch (e) {
+      print("error sending notification : ${e.toString()}");
     }
   }
 

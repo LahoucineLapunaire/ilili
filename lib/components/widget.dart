@@ -758,7 +758,6 @@ class _CommentModalState extends State<CommentModal> {
         'timestamp': DateTime.now(),
         'likes': [],
       };
-
       // Set the document.
       await documentReference.set(data);
 
@@ -779,9 +778,32 @@ class _CommentModalState extends State<CommentModal> {
       showInfoMessage("Comment is posted !", context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
+      sendNotification();
       Navigator.pop(context);
     } catch (e) {
       print("Error posting comment : ${e.toString()}");
+    }
+  }
+
+  void sendNotification() {
+    try {
+      FirebaseMessaging.instance
+          .sendMessage(
+              to: '/topics/comment',
+              data: {
+                "title": "New Comment",
+                "body": "A user has commented your post",
+              },
+              ttl: 10,
+              messageId: "azerty123",
+              messageType: "follow",
+              collapseKey: "aqwzsx")
+          .catchError((e) {
+        print("error sending notification : ${e.toString()}");
+      });
+      print("notification sent");
+    } catch (e) {
+      print("error sending notification : ${e.toString()}");
     }
   }
 

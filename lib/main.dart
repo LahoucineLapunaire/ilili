@@ -17,6 +17,8 @@ Future<void> main() async {
   auth.authStateChanges().listen((User? user) {
     if (user == null) {
       runApp(const UnLogged());
+    } else if (user.emailVerified == false) {
+      runApp(const EmailNotVerified());
     } else {
       runApp(const Logged());
     }
@@ -42,6 +44,7 @@ void initNotification() async {
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print("You received a message");
+    print("onMessage: ${message.notification?.body}");
   });
 }
 
