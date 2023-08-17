@@ -6,12 +6,14 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ilili/components/UserProfilePage.dart';
 import 'package:ilili/components/appRouter.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:ilili/components/OwnerProfile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ilili/components/chat.dart';
+import 'package:ilili/components/google_ads.dart';
 import 'package:ilili/components/postPage.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
@@ -729,6 +731,7 @@ class _CommentModalState extends State<CommentModal> {
   String profilePicture =
       "https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=db72d8e7-aa9d-4b64-886c-549987962cb2";
   TextEditingController commentController = TextEditingController();
+  InterstitialAd? interstitialAd;
 
   void initState() {
     super.initState();
@@ -751,6 +754,30 @@ class _CommentModalState extends State<CommentModal> {
       username = snapshot['username'];
       profilePicture = snapshot['profilePicture'];
     });
+  }
+
+  void loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdHelper.interstitialAdUnitId,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              postComment();
+            },
+          );
+
+          setState(() {
+            interstitialAd = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          postComment();
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
   }
 
   void postComment() async {

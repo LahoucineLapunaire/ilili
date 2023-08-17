@@ -60,6 +60,8 @@
 <key>NSCameraUsageDescription</key>
 <string>Allow access to camera to capture photos</string>
 
+<key>GADApplicationIdentifier</key>
+<string>ca-app-pub-5863565056037942~4963240651</string>
 
 <key>NSMicrophoneUsageDescription</key>
 <string>Allow access to microphone</string>

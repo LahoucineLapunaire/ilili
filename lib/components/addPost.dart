@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:ilili/components/google_ads.dart';
 import 'package:ilili/components/widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -383,6 +385,7 @@ class _TagsSectionState extends State<TagsSection> {
       setState(() {
         tagsList.add(tagController.text);
       });
+      tagController.clear();
     } catch (e) {
       showErrorMessage(e.toString(), context);
     }
@@ -453,6 +456,31 @@ class SendButtonSection extends StatefulWidget {
 class _SendButtonSectionState extends State<SendButtonSection> {
   Reference storageRef = storage.ref("posts");
   String audioLink = "";
+  InterstitialAd? interstitialAd;
+
+  void loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdHelper.interstitialAdUnitId,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              postAudio();
+            },
+          );
+
+          setState(() {
+            interstitialAd = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          postAudio();
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
+  }
 
   String generateUniqueFileName() {
     String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
@@ -561,7 +589,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           ),
           child: Text('Yes', style: TextStyle(color: Colors.white)),
           onPressed: () {
-            postAudio();
+            loadInterstitialAd();
             Navigator.of(context).pop();
           },
         ),
