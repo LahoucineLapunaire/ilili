@@ -420,6 +420,7 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
             'followings': [],
             'chats': [],
             'description': 'mydescription',
+            'subscription': false,
           });
         }
       }

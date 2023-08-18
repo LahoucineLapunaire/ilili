@@ -737,6 +737,7 @@ class _CommentModalState extends State<CommentModal> {
     super.initState();
     getUser();
     getPostOwner();
+    loadInterstitialAd();
   }
 
   void getPostOwner() async {
@@ -763,9 +764,7 @@ class _CommentModalState extends State<CommentModal> {
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) {
-              postComment();
-            },
+            onAdDismissedFullScreenContent: (ad) {},
           );
 
           setState(() {
@@ -773,7 +772,6 @@ class _CommentModalState extends State<CommentModal> {
           });
         },
         onAdFailedToLoad: (err) {
-          postComment();
           print('Failed to load an interstitial ad: ${err.message}');
         },
       ),
@@ -876,6 +874,11 @@ class _CommentModalState extends State<CommentModal> {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
+                    if (interstitialAd != null) {
+                      interstitialAd?.show();
+                    } else {
+                      print("Interstitial ad is null !");
+                    }
                     postComment();
                   },
                   child: Row(

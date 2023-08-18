@@ -79,9 +79,11 @@ class _HomePageState extends State<HomePage> {
           _unreadMessages++;
         }
       }
-      setState(() {
-        unreadMessages = _unreadMessages;
-      });
+      if (mounted) {
+        setState(() {
+          unreadMessages = _unreadMessages;
+        });
+      }
     }
   }
 

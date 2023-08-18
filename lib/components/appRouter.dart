@@ -68,9 +68,9 @@ class _AppRouterState extends State<AppRouter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
-      bottomNavigationBar: SafeArea(
-        child: Stack(
+        body: _pages[_currentIndex],
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (bannerAd != null)
               Align(
@@ -99,10 +99,8 @@ class _AppRouterState extends State<AppRouter> {
                   label: 'Profile',
                 ),
               ],
-            ),
+            )
           ],
-        ),
-      ),
-    );
+        ));
   }
 }

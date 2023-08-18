@@ -5,6 +5,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ilili/components/google_ads.dart';
+import 'package:ilili/components/subscription.dart';
+import 'package:ilili/components/subscription.dart';
 import 'package:ilili/components/widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,6 +15,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart' as path;
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 List<String> tagsList = [];
 AudioPlayer audioPlayer = AudioPlayer();
@@ -20,12 +23,16 @@ String audioPath = '';
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseStorage storage = FirebaseStorage.instance;
 TextEditingController titleController = TextEditingController();
+bool subscription = false;
 
 class AddPostPage extends StatelessWidget {
   const AddPostPage({super.key});
 
   @override
   void dispose() {
+    audioPath = '';
+    tagsList = [];
+    titleController.clear();
     audioPlayer.release();
     audioPlayer.dispose();
   }
@@ -34,30 +41,91 @@ class AddPostPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFECEFF1),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-              child: Text(
-                  "To add a post, please record an audio file or upload one, and add some tags to it, and then click on the 'Add Post' button."),
-            ),
-            SizedBox(height: 20),
-            TitleSection(),
-            SizedBox(height: 10),
-            ButtonSection(),
-            SizedBox(height: 20),
-            AudioPlayerSection(),
-            Divider(
-              height: 50,
-              thickness: 2,
-            ),
-            TagsSection(),
-            SizedBox(height: 20),
-            SendButtonSection(),
-          ],
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: 50),
+              subscription ? Container() : SubscriptionSection(),
+              SizedBox(height: 20),
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Text(
+                    "To add a post, please record an audio file or upload one, and add some tags to it, and then click on the 'Add Post' button."),
+              ),
+              SizedBox(height: 20),
+              TitleSection(),
+              SizedBox(height: 10),
+              ButtonSection(),
+              SizedBox(height: 20),
+              AudioPlayerSection(),
+              Divider(
+                height: 50,
+                thickness: 2,
+              ),
+              TagsSection(),
+              SizedBox(height: 20),
+              SendButtonSection(),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class SubscriptionSection extends StatelessWidget {
+  const SubscriptionSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 80,
+      color: Colors.deepPurple, // Change this color to match your UI
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Upgrade to ilili Subscription",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                "Get more visibility for your posts \n and a Certified badge!",
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SubscriptionPage(),
+                ),
+              );
+            },
+            child: Text(
+              "Subscribe",
+              style: TextStyle(color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  Colors.black, // Change this color to match your UI
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -71,6 +139,25 @@ class TitleSection extends StatefulWidget {
 }
 
 class _TitleSectionState extends State<TitleSection> {
+  void initState() {
+    super.initState();
+    getSubcription();
+  }
+
+  void getSubcription() {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(auth.currentUser!.uid)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        setState(() {
+          subscription = documentSnapshot.get('subscription');
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -176,7 +263,6 @@ class _ButtonSectionState extends State<ButtonSection> {
 
       if (result != null) {
         PlatformFile file = result.files.first;
-        print("File path: ${file.path}");
         setState(() {
           audioPath = file.path!;
           audioPlayer.setSourceUrl(file.path!);
@@ -458,28 +544,34 @@ class _SendButtonSectionState extends State<SendButtonSection> {
   String audioLink = "";
   InterstitialAd? interstitialAd;
 
-  void loadInterstitialAd() {
-    InterstitialAd.load(
-      adUnitId: AdHelper.interstitialAdUnitId,
-      request: AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) {
-              postAudio();
-            },
-          );
+  void initState() {
+    super.initState();
+    loadInterstitialAd();
+  }
 
-          setState(() {
-            interstitialAd = ad;
-          });
-        },
-        onAdFailedToLoad: (err) {
-          postAudio();
-          print('Failed to load an interstitial ad: ${err.message}');
-        },
-      ),
-    );
+  void loadInterstitialAd() {
+    try {
+      InterstitialAd.load(
+        adUnitId: AdHelper.interstitialAdUnitId,
+        request: AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            ad.fullScreenContentCallback = FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (ad) {},
+            );
+
+            setState(() {
+              interstitialAd = ad;
+            });
+          },
+          onAdFailedToLoad: (err) {
+            print('Failed to load an interstitial ad: ${err.message}');
+          },
+        ),
+      );
+    } catch (e) {
+      print("error interstitial ad : ${e.toString()}");
+    }
   }
 
   String generateUniqueFileName() {
@@ -589,7 +681,13 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           ),
           child: Text('Yes', style: TextStyle(color: Colors.white)),
           onPressed: () {
-            loadInterstitialAd();
+            print("post audio");
+            if (interstitialAd != null) {
+              interstitialAd!.show();
+            } else {
+              print("interstitialAd is null");
+            }
+            postAudio();
             Navigator.of(context).pop();
           },
         ),

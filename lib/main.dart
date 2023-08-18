@@ -2,11 +2,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ilili/components/UserProfilePage.dart';
 import 'package:ilili/components/appRouter.dart';
-import 'package:ilili/components/chat.dart';
 import 'package:ilili/components/emailNotVerified.dart';
-import 'package:ilili/components/postPage.dart';
 import 'components/signup.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
