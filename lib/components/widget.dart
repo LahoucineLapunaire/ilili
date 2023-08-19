@@ -9,7 +9,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ilili/components/UserProfilePage.dart';
 import 'package:ilili/components/appRouter.dart';
-import 'package:ilili/components/changeProfile.dart';
 import 'package:ilili/components/OwnerProfile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ilili/components/chat.dart';
@@ -1234,7 +1233,7 @@ class _ReportModalState extends State<ReportModal> {
       final message = Message()
         ..from = Address('moderation.ilili@gmail.com', 'Moderation')
         ..recipients.add('moderation.ilili@gmail.com')
-        ..subject = 'Report of the comment ${widget.reportId}'
+        ..subject = 'Report of the post ${widget.reportId}'
         ..html = '''
 <!DOCTYPE html>
 <html>
