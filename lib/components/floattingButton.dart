@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:ilili/components/chat.dart';
+import 'package:ilili/components/settings.dart';
 import 'package:ilili/components/widget.dart';
 
 import 'notification.dart';
@@ -77,6 +78,10 @@ class _FloatingActionButtonOwnerState extends State<FloatingActionButtonOwner> {
           MaterialPageRoute(builder: (context) => ChangeProfilePage()),
         );
       } else if (selectedValue == "Settings") {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => SettingsPage()),
+        );
       } else if (selectedValue == "Logout") {
         logout();
       }

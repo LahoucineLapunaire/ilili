@@ -6,7 +6,6 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ilili/components/google_ads.dart';
 import 'package:ilili/components/subscription.dart';
-import 'package:ilili/components/subscription.dart';
 import 'package:ilili/components/widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -15,7 +14,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart' as path;
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter_stripe/flutter_stripe.dart';
 
 List<String> tagsList = [];
 AudioPlayer audioPlayer = AudioPlayer();
@@ -25,9 +23,14 @@ FirebaseStorage storage = FirebaseStorage.instance;
 TextEditingController titleController = TextEditingController();
 bool subscription = false;
 
-class AddPostPage extends StatelessWidget {
+class AddPostPage extends StatefulWidget {
   const AddPostPage({super.key});
 
+  @override
+  State<AddPostPage> createState() => _AddPostPageState();
+}
+
+class _AddPostPageState extends State<AddPostPage> {
   @override
   void dispose() {
     audioPath = '';
@@ -35,6 +38,7 @@ class AddPostPage extends StatelessWidget {
     titleController.clear();
     audioPlayer.release();
     audioPlayer.dispose();
+    super.dispose();
   }
 
   @override
@@ -379,11 +383,9 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
         await audioPlayer.pause();
         setState(() => isPlaying = false);
       } else {
-        if (audioPath != null) {
-          print(audioPath);
-          await audioPlayer.play(UrlSource(audioPath));
-          setState(() => isPlaying = true);
-        }
+        print(audioPath);
+        await audioPlayer.play(UrlSource(audioPath));
+        setState(() => isPlaying = true);
       }
     } catch (e) {
       showErrorMessage(e.toString(), context);
