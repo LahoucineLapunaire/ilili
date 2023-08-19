@@ -3,9 +3,11 @@ import 'package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:ilili/components/PrivacyPolicy.dart';
 import 'package:ilili/components/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:ilili/components/termsOfService.dart';
 import 'package:ilili/components/widget.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -306,6 +308,45 @@ class _FormSectionState extends State<FormSection> {
               ),
             ],
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => TermsOfServicePage()),
+                  );
+                },
+                child: Text(
+                  'Terms of Use',
+                  style: TextStyle(
+                    decoration: termOfUses ? TextDecoration.lineThrough : null,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+              SizedBox(width: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => PrivacyPolicyPage()),
+                  );
+                },
+                child: Text(
+                  'Privacy Policy',
+                  style: TextStyle(
+                    decoration: termOfUses ? TextDecoration.lineThrough : null,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
               signup();

@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:ilili/components/PrivacyPolicy.dart';
 import 'package:ilili/components/changeProfile.dart';
+import 'package:ilili/components/legalnotice.dart';
 import 'package:ilili/components/resetEmail.dart';
 import 'package:ilili/components/resetPassword.dart';
 import 'package:ilili/components/subscription.dart';
+import 'package:ilili/components/termsOfService.dart';
 import 'package:ilili/components/widget.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
@@ -395,12 +398,28 @@ class AboutSection extends StatelessWidget {
           ),
           ListTile(
             title: Text("Legal Notice"),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => (LegalNoticePage())));
+            },
           ),
           ListTile(
             title: Text("Terms of Service"),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => (TermsOfServicePage())));
+            },
           ),
           ListTile(
             title: Text("Privacy Policy"),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => (PrivacyPolicyPage())));
+            },
           ),
         ],
       ),
