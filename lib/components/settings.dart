@@ -6,7 +6,6 @@ import 'package:ilili/components/changeProfile.dart';
 import 'package:ilili/components/legalnotice.dart';
 import 'package:ilili/components/resetEmail.dart';
 import 'package:ilili/components/resetPassword.dart';
-import 'package:ilili/components/subscription.dart';
 import 'package:ilili/components/termsOfService.dart';
 import 'package:ilili/components/widget.dart';
 import 'package:mailer/mailer.dart';
@@ -515,8 +514,9 @@ class _ContactSupportModalState extends State<ContactSupportModal> {
 
   void sendSupportMessage() async {
     try {
-      final smtpServer =
-          gmail('moderation.ilili@gmail.com', 'gpubnhzldelidwcq');
+      final prefs = await SharedPreferences.getInstance();
+      var smtpkey = await prefs.getString('smtp_key') ?? '';
+      final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
 
       // Create a message
       final message = Message()
@@ -651,8 +651,9 @@ class _ReportProblemModalState extends State<ReportProblemModal> {
 
   void sendReportProblem() async {
     try {
-      final smtpServer =
-          gmail('moderation.ilili@gmail.com', 'gpubnhzldelidwcq');
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var smtpkey = await prefs.getString('smtp_key') ?? '';
+      final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
 
       // Create a message
       final message = Message()

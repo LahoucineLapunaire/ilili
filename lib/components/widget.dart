@@ -17,6 +17,7 @@ import 'package:ilili/components/postPage.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'notification.dart';
 
@@ -1226,8 +1227,9 @@ class _ReportModalState extends State<ReportModal> {
 
   reportPost() async {
     try {
-      final smtpServer =
-          gmail('moderation.ilili@gmail.com', 'gpubnhzldelidwcq');
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var smtpkey = await prefs.getString('smtp_key') ?? '';
+      final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
 
       // Create a message
       final message = Message()

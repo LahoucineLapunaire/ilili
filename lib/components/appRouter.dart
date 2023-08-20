@@ -1,9 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:ilili/components/addPost.dart';
 import 'package:ilili/components/home.dart';
 import 'package:ilili/components/OwnerProfile.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ilili/components/google_ads.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+FirebaseAuth auth = FirebaseAuth.instance;
 
 class AppRouter extends StatefulWidget {
   @override

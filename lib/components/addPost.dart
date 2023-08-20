@@ -5,7 +5,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ilili/components/google_ads.dart';
-import 'package:ilili/components/subscription.dart';
 import 'package:ilili/components/widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -50,9 +49,6 @@ class _AddPostPageState extends State<AddPostPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 50),
-              subscription ? Container() : SubscriptionSection(),
-              SizedBox(height: 20),
               Container(
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: Text(
@@ -74,62 +70,6 @@ class _AddPostPageState extends State<AddPostPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class SubscriptionSection extends StatelessWidget {
-  const SubscriptionSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 80,
-      color: Colors.deepPurple, // Change this color to match your UI
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Upgrade to ilili Subscription",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                "Get more visibility for your posts \n and a Certified badge!",
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SubscriptionPage(),
-                ),
-              );
-            },
-            child: Text(
-              "Subscribe",
-              style: TextStyle(color: Colors.white),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  Colors.black, // Change this color to match your UI
-            ),
-          ),
-        ],
       ),
     );
   }

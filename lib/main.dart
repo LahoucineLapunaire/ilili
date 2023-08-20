@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,6 +21,7 @@ Future<void> main() async {
   initSharedPreferences();
   auth.authStateChanges().listen((User? user) {
     if (user == null) {
+      GetKeysFromRemoteConfig();
       runApp(const UnLogged());
     } else if (user.emailVerified == false) {
       runApp(const EmailNotVerified());
@@ -27,6 +29,31 @@ Future<void> main() async {
       runApp(const Logged());
     }
   });
+}
+
+Future<void> GetKeysFromRemoteConfig() async {
+  try {
+    if (auth.currentUser != null) {
+      // Initialize Firebase Remote Config.
+      final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
+      await remoteConfig.fetchAndActivate();
+
+      final secretKeyId = remoteConfig.getString('private_key_id');
+      final secretKey = remoteConfig.getString('private_key');
+      final smtpKey = remoteConfig.getString('smtp_key');
+
+      // Create a SharedPreferences instance.
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      // Save the keys to SharedPreferences.
+      prefs.setString("private_key_id", secretKeyId);
+      prefs.setString("private_key", secretKey);
+      prefs.setString("smtp_key", smtpKey);
+      print("keys saved to shared preferences");
+    }
+  } catch (e) {
+    print("error getting keys: ${e.toString()}");
+  }
 }
 
 Future<bool> checkPermission() async {
