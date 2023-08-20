@@ -116,6 +116,7 @@ class _FormSectionState extends State<FormSection> {
       TextEditingController();
   bool passwordSame = false;
   String infoMessage = "";
+  String passwordStrength = "";
 
   Future<void> sendEmailVerification() async {
     try {
@@ -151,6 +152,14 @@ class _FormSectionState extends State<FormSection> {
       showErrorMessage("You must accept the terms of use", context);
       return;
     }
+    if (passwordController.text != passwordConfirmationController.text) {
+      showErrorMessage("Passwords must be the same", context);
+      return;
+    }
+    if (passwordStrength != "Strong") {
+      showErrorMessage("Password must be strong", context);
+      return;
+    }
     try {
       UserCredential userCredential = await auth.createUserWithEmailAndPassword(
         email: emailController.text,
@@ -182,6 +191,33 @@ class _FormSectionState extends State<FormSection> {
         showErrorMessage(e.toString().split('] ')[1], context);
       }
     }
+  }
+
+  void verifyStrongPassword() {
+    bool lenght = passwordController.text.length >= 8;
+    bool upperCase = passwordController.text.contains(RegExp(r'[A-Z]'));
+    bool specialChar =
+        passwordController.text.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    bool number = passwordController.text.contains(RegExp(r'[0-9]'));
+    String message = "";
+    if (!lenght || !upperCase || !specialChar || !number) {
+      message = "Please enter a password that contains : ";
+    }
+    if (!lenght) {
+      message += "\nat least 8 characters, ";
+    }
+    if (!upperCase) {
+      message += "\nat least one uppercase letter, ";
+    }
+    if (!specialChar) {
+      message += "\nat least one special character, ";
+    }
+    if (!number) {
+      message += "\nat least one number, ";
+    }
+    setState(() {
+      passwordStrength = message;
+    });
   }
 
   @override
@@ -223,6 +259,9 @@ class _FormSectionState extends State<FormSection> {
           SizedBox(height: 10),
           TextField(
             obscureText: true,
+            onChanged: (value) {
+              verifyStrongPassword();
+            },
             controller: passwordController,
             decoration: InputDecoration(
               filled: true,
@@ -234,6 +273,24 @@ class _FormSectionState extends State<FormSection> {
               ),
             ),
           ),
+          if (passwordStrength != '')
+            Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  Icon(Icons.error, color: Colors.red),
+                  SizedBox(width: 5),
+                  Container(
+                    width: 250,
+                    child: Text(
+                      "${passwordStrength}",
+                      style: TextStyle(
+                          color: Colors.red, fontWeight: FontWeight.bold),
+                    ),
+                  )
+                ],
+              ),
+            ),
           SizedBox(height: 10),
           TextField(
             obscureText: true,
