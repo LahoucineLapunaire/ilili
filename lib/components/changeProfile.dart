@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ilili/components/appRouter.dart';
-import 'package:ilili/components/signup.dart';
 import 'package:ilili/components/widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -27,33 +27,67 @@ class ChangeProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF6A1B9A),
+        backgroundColor: Color(0xFFFAFAFA),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         title: Text(
-          "Change Profile",
+          "Profile",
           style: TextStyle(
-            fontSize: 20,
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
         ),
       ),
-      backgroundColor: Color(0xFFECEFF1),
+      backgroundColor: Color(0xFFFAFAFA),
       body: Center(
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          HeaderSection(),
+          SizedBox(height: 25),
           ProfilPictureSection(),
-          SizedBox(height: 20),
+          SizedBox(height: 25),
           UserInfoWidget(),
-          SizedBox(height: 20),
+          SizedBox(height: 25),
           ChangeInfoButton(),
         ],
       )),
+    );
+  }
+}
+
+class HeaderSection extends StatelessWidget {
+  const HeaderSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(left: 20),
+      width: double.maxFinite,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(
+          "Account Information",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          "You can change your profile picture, username and description here",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 18,
+            fontWeight: FontWeight.w400,
+          ),
+        )
+      ]),
     );
   }
 }
@@ -109,6 +143,7 @@ class _ProfilPictureSectionState extends State<ProfilPictureSection> {
         width: 100,
         height: 100,
         decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey, width: 5),
           borderRadius: BorderRadius.circular(50),
         ),
         child: ClipRRect(
@@ -324,7 +359,7 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        fixedSize: Size(200, 30), // Set the width and height of the button
+        minimumSize: Size(250, 50), // Set the width and height of the button
         backgroundColor:
             Color(0xFF6A1B9A), // Set the background color of the button
       ),
