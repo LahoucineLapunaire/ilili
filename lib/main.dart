@@ -8,7 +8,6 @@ import 'package:ilili/components/emailNotVerified.dart';
 import 'package:ilili/components/getStarted.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'components/signup.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -20,9 +19,9 @@ Future<void> main() async {
   await checkPermission();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   initSharedPreferences();
+  GetKeysFromRemoteConfig();
   auth.authStateChanges().listen((User? user) {
     if (user == null) {
-      GetKeysFromRemoteConfig();
       runApp(const UnLogged());
     } else if (user.emailVerified == false) {
       runApp(const EmailNotVerified());
@@ -45,7 +44,6 @@ Future<void> GetKeysFromRemoteConfig() async {
 
       // Create a SharedPreferences instance.
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-
       // Save the keys to SharedPreferences.
       prefs.setString("private_key_id", secretKeyId);
       prefs.setString("private_key", secretKey);

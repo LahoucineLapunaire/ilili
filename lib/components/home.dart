@@ -198,7 +198,7 @@ class _HomePageState extends State<HomePage> {
         ),
         body: SingleChildScrollView(
             child: DelayedDisplay(
-          delay: Duration(milliseconds: 500),
+          delay: Duration(milliseconds: 300),
           child: Center(
             child: posts.length == 0
                 ? Container(
