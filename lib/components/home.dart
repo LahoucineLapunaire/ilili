@@ -1,3 +1,4 @@
+import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ilili/components/UserProfilePage.dart';
@@ -128,9 +129,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Color(0xFFFAFAFA),
         appBar: AppBar(
-          title: Text("Search"),
-          backgroundColor: Color(0xFF6A1B9A),
+          title: Text(
+            "Search",
+            style: TextStyle(color: Colors.grey),
+          ),
+          backgroundColor: Color(0xFFFAFAFA),
           actions: [
             IconButton(
               onPressed: () {
@@ -138,7 +143,10 @@ class _HomePageState extends State<HomePage> {
                     context: context,
                     delegate: SearchDelegateWidget(usersCollectionRef));
               },
-              icon: Icon(Icons.search),
+              icon: Icon(
+                Icons.search,
+                color: Colors.black,
+              ),
             ),
             unreadMessages == 0
                 ? IconButton(
@@ -148,7 +156,10 @@ class _HomePageState extends State<HomePage> {
                           MaterialPageRoute(
                               builder: (context) => MessageListPage()));
                     },
-                    icon: Icon(Icons.message),
+                    icon: Icon(
+                      Icons.message,
+                      color: Colors.black,
+                    ),
                   )
                 : Stack(
                     children: [
@@ -159,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                               MaterialPageRoute(
                                   builder: (context) => MessageListPage()));
                         },
-                        icon: Icon(Icons.message),
+                        icon: Icon(Icons.message, color: Colors.black),
                       ),
                       if (unreadMessages > 0)
                         Positioned(
@@ -186,6 +197,8 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         body: SingleChildScrollView(
+            child: DelayedDisplay(
+          delay: Duration(milliseconds: 500),
           child: Center(
             child: posts.length == 0
                 ? Container(
@@ -212,7 +225,7 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
           ),
-        ));
+        )));
   }
 }
 

@@ -53,12 +53,14 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   String username = '';
   String postDate = '';
   List<dynamic> tags = [];
+  String tagsText = '';
   List<dynamic> likes = [];
   List<dynamic> comments = [];
   bool shouldReload = false;
   String title = "";
   bool isTapped = false;
   bool isPictureLoaded = false;
+  bool isAudioLoading = false;
 
   @override
   void initState() {
@@ -87,6 +89,11 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   void getPostInfo() async {
     DocumentSnapshot<Map<String, dynamic>> ds =
         await firestore.collection('posts').doc(widget.postId).get();
+    String _tagsText = "";
+    for (var tag in ds.data()!['tags']) {
+      _tagsText += ", $tag";
+    }
+    _tagsText = _tagsText.substring(2);
     setState(() {
       audioPath = ds.data()!['audio'];
       tags = ds.data()!['tags'];
@@ -94,25 +101,29 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       comments = ds.data()!['comments'];
       postDate = formatTimestamp(ds.data()!['timestamp']);
       title = ds.data()!['title'];
+      tagsText = _tagsText;
     });
   }
 
   Future<void> loadAudio() async {
     try {
       audioPlayer.setSourceUrl(audioPath);
+      setState(() {
+        isAudioLoading = true;
+      });
       audioPlayer.onDurationChanged.listen((Duration duration) {
         setState(() {
           audioDuration = duration;
+          isAudioLoading = false;
+          isTapped = true;
+          isPlaying = true;
         });
+
         audioPlayer.onPositionChanged.listen((Duration pos) {
           setState(() {
             position = pos;
           });
         });
-      });
-      setState(() {
-        isTapped = true;
-        isPlaying = true;
       });
       if (audioPath != null) {
         await audioPlayer.play(UrlSource(audioPath)).then((value) {});
@@ -279,15 +290,10 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.fromLTRB(10, 5, 10, 5),
       padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.black,
-            width: 0.5,
-          ),
-        ),
+        color: Colors.white,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -318,9 +324,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     Text(
                       username,
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
+                        fontSize: 16,
                       ),
                     ),
                   ],
@@ -371,15 +375,15 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               ),
             ],
           ),
+          SizedBox(height: 25),
           Text(
             title,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 10),
-          // ---------------------
+          SizedBox(height: 20),
           isTapped
               ? Container(
                   child: Row(
@@ -421,48 +425,28 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     shape:
                         BoxShape.circle, // You can change the shape if needed
                   ),
-                  child: IconButton(
-                    onPressed: () {
-                      loadAudio();
-                    },
-                    icon: Icon(
-                      Icons.play_arrow,
-                      color: Colors.white, // Icon color
-                    ),
-                  ),
+                  child: isAudioLoading
+                      ? CircularProgressIndicator(color: Colors.black)
+                      : IconButton(
+                          onPressed: () {
+                            loadAudio();
+                          },
+                          icon: Icon(
+                            Icons.play_arrow,
+                            color: Colors.white, // Icon color
+                          ),
+                        ),
                 ),
-          // ---------------------
-          SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              for (var tag in tags)
-                Container(
-                  padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF009688),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        offset: Offset(0,
-                            2), // Controls the shadow position, positive value for bottom
-                        blurRadius:
-                            2, // Determines the blurriness of the shadow
-                        spreadRadius: 0, // Controls the spread of the shadow
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    tag,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                )
-            ],
+          SizedBox(height: 20),
+          Text(
+            tagsText,
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+            ),
           ),
+          SizedBox(height: 30),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
