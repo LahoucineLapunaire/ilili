@@ -1,8 +1,10 @@
+import 'package:delayed_display/delayed_display.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ilili/components/PrivacyPolicy.dart';
 import 'package:ilili/components/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,30 +30,27 @@ class SignupPage extends StatelessWidget {
         height: MediaQuery.of(context).size.height,
         width: double.maxFinite,
         decoration: BoxDecoration(
-            gradient: LinearGradient(
-          colors: [
-            Color(0xFF6A1B9A),
-            Color(0xFFCD7CFF),
-          ],
-          begin: Alignment.bottomLeft,
-          end: Alignment.topRight,
-        )),
+          color: Color(0xFF),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            LogoSection(),
-            SizedBox(height: 20),
-            TitleSection(),
-            SizedBox(height: 20),
-            FormSection(),
+            DelayedDisplay(
+                child: HeaderSection(), delay: Duration(milliseconds: 1000)),
+            SizedBox(height: 50),
+            DelayedDisplay(
+                child: FormSection(), delay: Duration(milliseconds: 1200)),
             SizedBox(height: 10),
-            ToLogin(),
-            Divider(
-              color: Colors.white,
-              height: 20,
-              thickness: 2,
-            ),
-            GoogleSignupForm(),
+            DelayedDisplay(
+                child: ToLogin(), delay: Duration(milliseconds: 1400)),
+            DelayedDisplay(
+                child: Divider(
+                  height: 10,
+                  thickness: 2,
+                ),
+                delay: Duration(milliseconds: 1400)),
+            DelayedDisplay(
+                child: GoogleSignupForm(), delay: Duration(milliseconds: 1400)),
           ],
         ),
       ))),
@@ -59,45 +58,32 @@ class SignupPage extends StatelessWidget {
   }
 }
 
-class LogoSection extends StatelessWidget {
-  LogoSection({super.key});
+class HeaderSection extends StatelessWidget {
+  const HeaderSection({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 200,
-      height: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        image: DecorationImage(
-          image: AssetImage('assets/images/ic_launcher.png'),
-          fit: BoxFit.cover,
+      padding: EdgeInsets.only(left: 20),
+      width: double.maxFinite,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(
+          "Create Account",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-    );
-  }
-}
-
-class TitleSection extends StatelessWidget {
-  const TitleSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text("ilili",
-            style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.w900,
-                color: Colors.white)),
-        SizedBox(width: 10),
-        Text("signup",
-            style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF009688))),
-      ],
+        Text(
+          "Connect and share today !",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 18,
+            fontWeight: FontWeight.w400,
+          ),
+        )
+      ]),
     );
   }
 }
@@ -115,8 +101,8 @@ class _FormSectionState extends State<FormSection> {
   TextEditingController passwordConfirmationController =
       TextEditingController();
   bool passwordSame = false;
-  String infoMessage = "";
   String passwordStrength = "";
+  bool obscureText = true;
 
   Future<void> sendEmailVerification() async {
     try {
@@ -226,53 +212,77 @@ class _FormSectionState extends State<FormSection> {
       width: 300,
       child: Column(
         children: [
-          if (infoMessage != '')
-            Padding(
-              padding: EdgeInsets.only(bottom: 10),
-              child: Row(
+          Container(
+              width: 300,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.check, color: Colors.green),
-                  SizedBox(width: 5),
-                  Container(
-                    width: 250,
-                    child: Text(
-                      "${infoMessage}",
-                      style: TextStyle(
-                          color: Colors.green, fontWeight: FontWeight.bold),
+                  Text(
+                    "Email Address",
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.poppins().fontFamily,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
                     ),
-                  )
+                  ),
+                  SizedBox(height: 5),
+                  TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: Icon(Icons.email),
+                      labelText: 'Enter your email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
                 ],
-              ),
-            ),
-          TextField(
-            controller: emailController,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              prefixIcon: Icon(Icons.email),
-              labelText: 'Email',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
-          SizedBox(height: 10),
-          TextField(
-            obscureText: true,
-            onChanged: (value) {
-              verifyStrongPassword();
-            },
-            controller: passwordController,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              prefixIcon: Icon(Icons.lock),
-              labelText: 'Password',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
+              )),
+          SizedBox(height: 20),
+          Container(
+              width: 300,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Password",
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.poppins().fontFamily,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  TextField(
+                    obscureText: obscureText,
+                    onChanged: (value) {
+                      verifyStrongPassword();
+                    },
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscureText ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            obscureText = !obscureText;
+                          });
+                        },
+                      ),
+                      labelText: 'Enter your password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ],
+              )),
           if (passwordStrength != '')
             Padding(
               padding: EdgeInsets.only(bottom: 10),
@@ -291,31 +301,57 @@ class _FormSectionState extends State<FormSection> {
                 ],
               ),
             ),
-          SizedBox(height: 10),
-          TextField(
-            obscureText: true,
-            controller: passwordConfirmationController,
-            onChanged: (value) {
-              if (passwordController.text == value) {
-                setState(() {
-                  passwordSame = false;
-                });
-              } else {
-                setState(() {
-                  passwordSame = true;
-                });
-              }
-            },
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              prefixIcon: Icon(Icons.lock),
-              labelText: 'Password Confirmation',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
+          SizedBox(height: 20),
+          Container(
+              width: 300,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Password Confirmation",
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.poppins().fontFamily,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  TextField(
+                    obscureText: obscureText,
+                    controller: passwordConfirmationController,
+                    onChanged: (value) {
+                      if (passwordController.text == value) {
+                        setState(() {
+                          passwordSame = false;
+                        });
+                      } else {
+                        setState(() {
+                          passwordSame = true;
+                        });
+                      }
+                    },
+                    decoration: InputDecoration(
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscureText ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            obscureText = !obscureText;
+                          });
+                        },
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: Icon(Icons.lock),
+                      labelText: 'Enter your password again',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ],
+              )),
           SizedBox(height: 10),
           if (passwordSame)
             Padding(
@@ -359,65 +395,20 @@ class _FormSectionState extends State<FormSection> {
                     style: TextStyle(
                         decoration:
                             termOfUses ? TextDecoration.lineThrough : null,
-                        color: Colors.white),
+                        color: Colors.black),
                   ),
                 ),
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => TermsOfServicePage()),
-                  );
-                },
-                child: Text(
-                  'Terms of Use',
-                  style: TextStyle(
-                    decoration: termOfUses ? TextDecoration.lineThrough : null,
-                    color: Colors.blue,
-                  ),
-                ),
-              ),
-              SizedBox(width: 10),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => PrivacyPolicyPage()),
-                  );
-                },
-                child: Text(
-                  'Privacy Policy',
-                  style: TextStyle(
-                    decoration: termOfUses ? TextDecoration.lineThrough : null,
-                    color: Colors.blue,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10),
+          SizedBox(height: 15),
           ElevatedButton(
-            onPressed: () {
-              signup();
-            },
-            child: Text('Signup'),
             style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              fixedSize:
-                  Size(200, 50), // Set the width and height of the button
-              backgroundColor:
-                  Color(0xFF009688), // Set the background color of the button
+              backgroundColor: Color(0xFF6A1B9A),
+              minimumSize: Size(250, 50),
             ),
+            onPressed: () => signup(),
+            child: Text("Join Now !"),
           ),
         ],
       ),
@@ -438,25 +429,34 @@ class ToLogin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        redirectToLogin(context);
-      },
-      child: Text("Already have an account? Login"),
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(
-            Colors.transparent), // Set the background color to transparent
-        elevation: MaterialStateProperty.all<double>(
-            0), // Remove the button's elevation
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-                8), // Customize the button's border radius as desired
-            side: BorderSide(
-                color: Colors.transparent), // Remove the button's border
+        onPressed: () => redirectToLogin(context),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          minimumSize: Size(250, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
           ),
         ),
-      ),
-    );
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Already an account ?",
+              style: TextStyle(
+                color: Colors.black,
+              ),
+            ),
+            SizedBox(width: 5),
+            Text(
+              "Login",
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+          ],
+        ));
   }
 }
 
@@ -539,6 +539,7 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
       children: [
         Container(
           width: 250,
+          height: 50,
           child: ElevatedButton(
             onPressed: () {
               verifyTermsOfUses();
