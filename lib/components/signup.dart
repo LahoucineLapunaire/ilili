@@ -24,25 +24,25 @@ class SignupPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-          child: SingleChildScrollView(
+      body: SingleChildScrollView(
+          child: Center(
               child: Container(
         height: MediaQuery.of(context).size.height,
         width: double.maxFinite,
         decoration: BoxDecoration(
-          color: Color(0xFF),
+          color: Color(0xFFFAFAFA),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             DelayedDisplay(
-                child: HeaderSection(), delay: Duration(milliseconds: 1000)),
+                child: HeaderSection(), delay: Duration(milliseconds: 500)),
             SizedBox(height: 50),
             DelayedDisplay(
-                child: FormSection(), delay: Duration(milliseconds: 1200)),
+                child: FormSection(), delay: Duration(milliseconds: 800)),
             SizedBox(height: 10),
             DelayedDisplay(
-                child: ToLogin(), delay: Duration(milliseconds: 1400)),
+                child: ToLogin(), delay: Duration(milliseconds: 1000)),
             DelayedDisplay(
                 child: Divider(
                   height: 10,
@@ -50,7 +50,7 @@ class SignupPage extends StatelessWidget {
                 ),
                 delay: Duration(milliseconds: 1400)),
             DelayedDisplay(
-                child: GoogleSignupForm(), delay: Duration(milliseconds: 1400)),
+                child: GoogleSignupForm(), delay: Duration(milliseconds: 1000)),
           ],
         ),
       ))),

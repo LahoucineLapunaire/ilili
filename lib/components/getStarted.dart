@@ -29,7 +29,7 @@ class GetStartedPage extends StatelessWidget {
               delay: Duration(milliseconds: 500), child: LogoSection()),
           SizedBox(height: 100),
           DelayedDisplay(
-              delay: Duration(milliseconds: 1000),
+              delay: Duration(milliseconds: 800),
               child: Text(
                 "Ilili: Where your voice matters.",
                 style: TextStyle(
@@ -40,7 +40,7 @@ class GetStartedPage extends StatelessWidget {
               )),
           SizedBox(height: 20),
           DelayedDisplay(
-              delay: Duration(milliseconds: 1500),
+              delay: Duration(milliseconds: 1200),
               child: Text(
                 "Let's Get Started",
                 style: TextStyle(
@@ -51,7 +51,7 @@ class GetStartedPage extends StatelessWidget {
               )),
           SizedBox(height: 50),
           DelayedDisplay(
-              delay: Duration(milliseconds: 2000), child: ButtonSetion()),
+              delay: Duration(milliseconds: 1500), child: ButtonSetion()),
         ]),
       ))),
     );

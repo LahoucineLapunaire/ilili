@@ -1,5 +1,7 @@
+import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ilili/components/resetPassword.dart';
 import 'package:ilili/components/signup.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -23,31 +25,30 @@ class LoginPage extends StatelessWidget {
         height: MediaQuery.of(context).size.height,
         width: double.maxFinite,
         decoration: BoxDecoration(
-            gradient: LinearGradient(
-          colors: [
-            Color(0xFF6A1B9A),
-            Color(0xFFCD7CFF),
-          ],
-          begin: Alignment.bottomRight,
-          end: Alignment.topLeft,
-        )),
+          color: Color(0xFFFAFAFA),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            LogoSection(),
+            DelayedDisplay(
+                child: HeaderSection(), delay: Duration(milliseconds: 500)),
+            SizedBox(height: 50),
+            DelayedDisplay(
+                child: FormSection(), delay: Duration(milliseconds: 800)),
             SizedBox(height: 20),
-            TitleSection(),
-            SizedBox(height: 20),
-            FormSection(),
-            SizedBox(height: 20),
-            ToSignup(),
-            ToForgottedPassword(),
-            Divider(
-              color: Colors.white,
-              height: 20,
-              thickness: 2,
-            ),
-            GoogleLoginForm(),
+            DelayedDisplay(
+                child: ToSignup(), delay: Duration(milliseconds: 1000)),
+            DelayedDisplay(
+                child: ToForgottedPassword(),
+                delay: Duration(milliseconds: 1000)),
+            DelayedDisplay(
+                child: Divider(
+                  height: 20,
+                  thickness: 2,
+                ),
+                delay: Duration(milliseconds: 1000)),
+            DelayedDisplay(
+                child: GoogleLoginForm(), delay: Duration(milliseconds: 1200)),
           ],
         ),
       ))),
@@ -55,45 +56,32 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-class LogoSection extends StatelessWidget {
-  LogoSection({super.key});
+class HeaderSection extends StatelessWidget {
+  const HeaderSection({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 200,
-      height: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        image: DecorationImage(
-          image: AssetImage('assets/images/ic_launcher.png'),
-          fit: BoxFit.cover,
+      padding: EdgeInsets.only(left: 20),
+      width: double.maxFinite,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(
+          "Hey, Welcome back !",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-    );
-  }
-}
-
-class TitleSection extends StatelessWidget {
-  const TitleSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text("ilili",
-            style: TextStyle(
-                fontSize: 50,
-                fontWeight: FontWeight.w900,
-                color: Colors.white)),
-        SizedBox(width: 10),
-        Text("login",
-            style: TextStyle(
-                fontSize: 50,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF009688))),
-      ],
+        Text(
+          "Hello again, you have been missed !",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 18,
+            fontWeight: FontWeight.w400,
+          ),
+        )
+      ]),
     );
   }
 }
@@ -108,6 +96,7 @@ class FormSection extends StatefulWidget {
 class _FormSectionState extends State<FormSection> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool obscureText = true;
 
   void login() async {
     try {
@@ -146,47 +135,82 @@ class _FormSectionState extends State<FormSection> {
       width: 300,
       child: Column(
         children: [
-          TextField(
-            controller: emailController,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              prefixIcon: Icon(Icons.email),
-              labelText: 'Email',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
-          SizedBox(height: 10),
-          TextField(
-            obscureText: true,
-            controller: passwordController,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              prefixIcon: Icon(Icons.lock),
-              labelText: 'Password',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
-          SizedBox(height: 10),
+          Container(
+              width: 300,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Email Address",
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.poppins().fontFamily,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: Icon(Icons.email),
+                      labelText: 'Enter your email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ],
+              )),
+          SizedBox(height: 20),
+          Container(
+              width: 300,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Password",
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.poppins().fontFamily,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  TextField(
+                    obscureText: obscureText,
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscureText ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            obscureText = !obscureText;
+                          });
+                        },
+                      ),
+                      labelText: 'Enter your password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ],
+              )),
+          SizedBox(height: 15),
           ElevatedButton(
-            onPressed: () {
-              login();
-            },
-            child: Text('Login'),
             style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              fixedSize:
-                  Size(200, 50), // Set the width and height of the button
-              backgroundColor:
-                  Color(0xFF009688), // Set the background color of the button
+              backgroundColor: Color(0xFF6A1B9A),
+              minimumSize: Size(250, 50),
             ),
+            onPressed: () => login(),
+            child: Text("Login"),
           ),
         ],
       ),
@@ -197,67 +221,65 @@ class _FormSectionState extends State<FormSection> {
 class ToSignup extends StatelessWidget {
   const ToSignup({super.key});
 
-  void redirectToLogin(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SignupPage()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        redirectToLogin(context);
-      },
-      child: Text("No account ? Register now "),
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(
-            Colors.transparent), // Set the background color to transparent
-        elevation: MaterialStateProperty.all<double>(
-            0), // Remove the button's elevation
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-                8), // Customize the button's border radius as desired
-            side: BorderSide(
-                color: Colors.transparent), // Remove the button's border
+        onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SignupPage()),
+            ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          minimumSize: Size(250, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
           ),
         ),
-      ),
-    );
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Don't have an account ?",
+              style: TextStyle(
+                color: Colors.black,
+              ),
+            ),
+            SizedBox(width: 5),
+            Text(
+              "Sign Up",
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+          ],
+        ));
   }
 }
 
 class ToForgottedPassword extends StatelessWidget {
   const ToForgottedPassword({super.key});
 
-  void redirectToLogin(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ResetPassword()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        redirectToLogin(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ResetPassword()),
+        );
       },
-      child: Text("password forgotten ?"),
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(
-            Colors.transparent), // Set the background color to transparent
-        elevation: MaterialStateProperty.all<double>(
-            0), // Remove the button's elevation
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-                8), // Customize the button's border radius as desired
-            side: BorderSide(
-                color: Colors.transparent), // Remove the button's border
-          ),
+      child: Text(
+        "password forgotten ?",
+        style: TextStyle(color: Colors.black),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        minimumSize: Size(250, 50),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
     );
