@@ -61,6 +61,8 @@ dependencies:
   firebase_remote_config: ^4.2.5
   delayed_display: ^2.0.0
   google_fonts: ^5.1.0
+  carousel_slider: ^4.2.1
+  dots_indicator: ^2.1.1
   
 
 dev_dependencies:

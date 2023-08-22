@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ilili/components/google_ads.dart';
 import 'package:ilili/components/widget.dart';
@@ -13,6 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart' as path;
 import 'dart:async';
 import 'dart:io';
+import 'package:carousel_slider/carousel_slider.dart';
 
 List<String> tagsList = [];
 AudioPlayer audioPlayer = AudioPlayer();
@@ -46,22 +48,22 @@ class _AddPostPageState extends State<AddPostPage> {
       backgroundColor: Color(0xFFECEFF1),
       body: SingleChildScrollView(
         child: Center(
+            child: Container(
+          height: MediaQuery.of(context).size.height,
+          width: double.maxFinite,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                child: Text(
-                    "To add a post, please record an audio file or upload one, and add some tags to it, and then click on the 'Add Post' button."),
-              ),
+              HeaderSection(),
               SizedBox(height: 20),
               TitleSection(),
-              SizedBox(height: 10),
-              ButtonSection(),
               SizedBox(height: 20),
+              ButtonSection(),
+              SizedBox(height: 30),
               AudioPlayerSection(),
+              SizedBox(height: 30),
               Divider(
-                height: 50,
+                height: 30,
                 thickness: 2,
               ),
               TagsSection(),
@@ -69,8 +71,38 @@ class _AddPostPageState extends State<AddPostPage> {
               SendButtonSection(),
             ],
           ),
-        ),
+        )),
       ),
+    );
+  }
+}
+
+class HeaderSection extends StatelessWidget {
+  const HeaderSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(left: 20),
+      width: double.maxFinite,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(
+          "What's new ?",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          "Record or upload an audio file, and add some tags to it, and then click on the 'Add Post' button.",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 18,
+            fontWeight: FontWeight.w400,
+          ),
+        )
+      ]),
     );
   }
 }
@@ -105,11 +137,12 @@ class _TitleSectionState extends State<TitleSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 350,
+      width: 300,
       child: TextField(
         controller: titleController,
         decoration: InputDecoration(
           filled: true,
+          prefixIcon: Icon(Icons.title),
           fillColor: Colors.white,
           labelText: 'title',
           border: OutlineInputBorder(
@@ -240,8 +273,7 @@ class _ButtonSectionState extends State<ButtonSection> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              fixedSize:
-                  Size(170, 35), // Set the width and height of the button
+              fixedSize: Size(175, 40),
               backgroundColor:
                   Color(0xFF6A1B9A), // Set the background color of the button
             ),
@@ -260,13 +292,21 @@ class _ButtonSectionState extends State<ButtonSection> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              fixedSize:
-                  Size(170, 35), // Set the width and height of the button
+              fixedSize: Size(175, 40),
               backgroundColor:
                   Color(0xFF6A1B9A), // Set the background color of the button
             ),
           ),
-        SizedBox(width: 20),
+        SizedBox(width: 5),
+        Text(
+          "Or",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        SizedBox(width: 5),
         ElevatedButton(
           onPressed: () {
             pickAudioFile();
@@ -280,7 +320,7 @@ class _ButtonSectionState extends State<ButtonSection> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            fixedSize: Size(170, 35), // Set the width and height of the button
+            fixedSize: Size(175, 40), // Set the width and height of the button
             backgroundColor:
                 Color(0xFF6A1B9A), // Set the background color of the button
           ),
@@ -660,7 +700,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        fixedSize: Size(170, 35), // Set the width and height of the button
+        fixedSize: Size(250, 50), // Set the width and height of the button
         backgroundColor:
             Color(0xFF6A1B9A), // Set the background color of the button
       ),
