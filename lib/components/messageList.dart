@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ilili/components/chat.dart';
 import 'package:ilili/components/floattingButton.dart';
 
@@ -57,8 +58,22 @@ class _MessageListPageState extends State<MessageListPage> {
     return Scaffold(
       floatingActionButton: FloatingActionButtonUserMessage(),
       appBar: AppBar(
-        backgroundColor: Color(0xFF6A1B9A),
-        title: Text("Messages"),
+        backgroundColor: Color(0xFFFAFAFA),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text(
+          "Message",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
       ),
       body: Center(
         child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -179,7 +194,8 @@ class _UserCardSectionState extends State<UserCardSection> {
                     profilePicture: profilePicture)));
       },
       child: Container(
-        padding: EdgeInsets.fromLTRB(15, 10, 10, 10),
+        color: Colors.white,
+        padding: EdgeInsets.fromLTRB(20, 15, 15, 15),
         child: Row(
           children: [
             isPictureLoaded
@@ -200,20 +216,25 @@ class _UserCardSectionState extends State<UserCardSection> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(username,
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    )),
                 widget.isRead
                     ? Text(
                         widget.lastMessage.length > 20
                             ? widget.lastMessage.substring(0, 20) + '...'
                             : widget.lastMessage,
-                        style: TextStyle(fontSize: 12, color: Colors.grey))
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w400))
                     : Text(
                         widget.lastMessage.length > 20
                             ? widget.lastMessage.substring(0, 20) + '...'
                             : widget.lastMessage,
                         style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 14,
                             color: Colors.black,
                             fontWeight: FontWeight.bold)),
               ],

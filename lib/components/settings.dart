@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ilili/components/PrivacyPolicy.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:ilili/components/legalnotice.dart';
@@ -51,8 +52,24 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Color(0xFFFAFAFA),
         appBar: AppBar(
-          title: Text('Settings'),
+          backgroundColor: Color(0xFFFAFAFA),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          title: Text(
+            "Settings",
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
         ),
         body: SingleChildScrollView(
           child: Container(
@@ -109,7 +126,8 @@ class ProfileSection extends StatelessWidget {
             title: Text(
               'Account Settings', // Text for the title
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                fontWeight: FontWeight.w600,
                 fontSize: 18,
               ),
             ),
@@ -182,15 +200,25 @@ class _NotificationSectionState extends State<NotificationSection> {
             title: Text(
               'Notifications', // Text for the title
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                fontWeight: FontWeight.w600,
                 fontSize: 18,
               ),
             ),
           ),
           ListTile(
-            title: Text("Followers"),
-            subtitle: Text("Turn on/off notifications about followers"),
+            title: Text(
+              "Followers",
+              style: TextStyle(
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              ),
+            ),
+            subtitle: Text("Turn on/off notifications about followers",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
             trailing: Switch(
+              activeColor: Color(0xFF6A1B9A),
               value: followers,
               onChanged: (value) {
                 setState(() {
@@ -201,9 +229,16 @@ class _NotificationSectionState extends State<NotificationSection> {
             ),
           ),
           ListTile(
-            title: Text("Chat messages"),
-            subtitle: Text("Turn on/off notifications about messages"),
+            title: Text("Chat messages",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
+            subtitle: Text("Turn on/off notifications about messages",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
             trailing: Switch(
+              activeColor: Color(0xFF6A1B9A),
               value: chat,
               onChanged: (value) {
                 setState(() {
@@ -214,9 +249,16 @@ class _NotificationSectionState extends State<NotificationSection> {
             ),
           ),
           ListTile(
-            title: Text("Comments"),
-            subtitle: Text("Turn on/off notifications about comments"),
+            title: Text("Comments",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
+            subtitle: Text("Turn on/off notifications about comments",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
             trailing: Switch(
+              activeColor: Color(0xFF6A1B9A),
               value: comments,
               onChanged: (value) {
                 setState(() {
@@ -276,7 +318,8 @@ class _AppSectionState extends State<AppSection> {
             title: Text(
               'General Settings', // Text for the title
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                fontWeight: FontWeight.w600,
                 fontSize: 18,
               ),
             ),
@@ -315,16 +358,26 @@ class SubscriptionSection extends StatelessWidget {
             title: Text(
               'Subscription', // Text for the title
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                fontWeight: FontWeight.w600,
                 fontSize: 18,
               ),
             ),
           ),
           ListTile(
-            title: Text("Available soon"),
+            title: Text("Available soon",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
             subtitle: subscription
-                ? Text("You are subscribed to ilili subsciption")
-                : Text("You are not subscribed to ilili subsciption"),
+                ? Text("You are subscribed to ilili subsciption",
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.poppins().fontFamily,
+                    ))
+                : Text("You are not subscribed to ilili subsciption",
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.poppins().fontFamily,
+                    )),
           )
         ],
       ),
@@ -345,13 +398,17 @@ class HelpSection extends StatelessWidget {
             title: Text(
               'Help and Support', // Text for the title
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                fontWeight: FontWeight.w600,
                 fontSize: 18,
               ),
             ),
           ),
           ListTile(
-            title: Text("Contact support"),
+            title: Text("Contact support",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
             onTap: () {
               showModalBottomSheet(
                 context: context,
@@ -360,10 +417,16 @@ class HelpSection extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text("View FAQs or Help Center"),
+            title: Text("View FAQs or Help Center",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
           ),
           ListTile(
-            title: Text("Report a problem or bug"),
+            title: Text("Report a problem or bug",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
             onTap: () {
               showModalBottomSheet(
                 context: context,
@@ -390,20 +453,27 @@ class AboutSection extends StatelessWidget {
             title: Text(
               'About and Legal', // Text for the title
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                fontWeight: FontWeight.w600,
                 fontSize: 18,
               ),
             ),
           ),
           ListTile(
-            title: Text("Legal Notice"),
+            title: Text("Legal Notice",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
             onTap: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => (LegalNoticePage())));
             },
           ),
           ListTile(
-            title: Text("Terms of Service"),
+            title: Text("Terms of Service",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
             onTap: () {
               Navigator.push(
                   context,
@@ -412,7 +482,10 @@ class AboutSection extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text("Privacy Policy"),
+            title: Text("Privacy Policy",
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                )),
             onTap: () {
               Navigator.push(
                   context,
@@ -491,6 +564,7 @@ class LogoutSection extends StatelessWidget {
         child: Text(
           "Logout",
           style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,,
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.red,

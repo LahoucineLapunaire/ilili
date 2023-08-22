@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ilili/components/changeProfile.dart';
 import 'package:intl/intl.dart';
 import 'notification.dart';
@@ -54,17 +55,29 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Color(0xFFFAFAFA),
         appBar: AppBar(
-          backgroundColor: Color(0xFF6A1B9A),
+          backgroundColor: Color(0xFFFAFAFA),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
           title: Row(
             children: [
               CircleAvatar(
                 backgroundImage: NetworkImage(widget.profilePicture),
               ),
-              SizedBox(width: 20),
+              SizedBox(width: 10),
               Text(
                 widget.username,
-                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
             ],
           ),
@@ -265,7 +278,11 @@ class CurrentUserMessage extends StatelessWidget {
             children: [
               Text(
                 dateMessage.toString().substring(13, 18),
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                  color: Colors.grey,
+                  fontSize: 12,
+                ),
               ),
               SizedBox(width: 10),
               isRead
@@ -335,6 +352,7 @@ class OtherUserMessage extends StatelessWidget {
           Text(
             dateMessage.toString().substring(13, 18),
             style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
               color: Colors.grey.shade400,
             ),
           ),

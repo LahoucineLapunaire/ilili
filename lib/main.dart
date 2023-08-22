@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ilili/components/appRouter.dart';
 import 'package:ilili/components/emailNotVerified.dart';
 import 'package:ilili/components/getStarted.dart';
+import 'package:ilili/components/setUsername.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
