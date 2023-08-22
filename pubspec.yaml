@@ -59,6 +59,8 @@ dependencies:
   flutter_dotenv: ^5.1.0
   shared_preferences: ^2.2.0
   firebase_remote_config: ^4.2.5
+  delayed_display: ^2.0.0
+  google_fonts: ^5.1.0
   
 
 dev_dependencies:

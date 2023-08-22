@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ilili/components/appRouter.dart';
 import 'package:ilili/components/emailNotVerified.dart';
+import 'package:ilili/components/getStarted.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'components/signup.dart';
@@ -144,7 +145,7 @@ class UnLogged extends StatelessWidget {
         ),
         title: 'ilili',
         home: Scaffold(
-          body: SignupPage(),
+          body: GetStartedPage(),
         ));
   }
 }
