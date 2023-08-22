@@ -564,7 +564,7 @@ class LogoutSection extends StatelessWidget {
         child: Text(
           "Logout",
           style: TextStyle(
-            fontFamily: GoogleFonts.poppins().fontFamily,,
+            fontFamily: GoogleFonts.poppins().fontFamily,
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.red,

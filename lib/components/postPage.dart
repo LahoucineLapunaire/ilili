@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ilili/components/widget.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:mailer/mailer.dart';
@@ -68,9 +69,24 @@ class _PostPageState extends State<PostPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Color(0xFFFAFAFA),
         appBar: AppBar(
-          backgroundColor: Color(0xFF6A1B9A),
-          title: Text("Post"),
+          backgroundColor: Color(0xFFFAFAFA),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          title: Text(
+            "Post Page",
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
           actions: [
             IconButton(
               onPressed: () {
@@ -79,7 +95,7 @@ class _PostPageState extends State<PostPage> {
                 });
                 getComments();
               },
-              icon: Icon(Icons.refresh),
+              icon: Icon(Icons.refresh, color: Colors.black),
             ),
           ],
         ),
@@ -230,7 +246,6 @@ class _CommentSectionState extends State<CommentSection> {
                       userId: comment["userId"])
             ],
           );
-    ;
   }
 }
 
@@ -347,15 +362,10 @@ class _CommentWidgetState extends State<CommentWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.only(bottom: 15),
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.black,
-            width: 0.5,
-          ),
-        ),
+        color: Colors.white,
       ),
       child: Column(
         children: [
