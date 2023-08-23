@@ -818,7 +818,10 @@ class _CommentModalState extends State<CommentModal> {
         "type": "comment",
         "click_action": "FLUTTER_COMMENT_CLICK",
       });
-      Navigator.pop(context);
+      Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PostPage(postId: widget.postId, userId: ownerId, isOwner: ownerId == auth.currentUser!.uid,)),
+                );
     } catch (e) {
       print("Error posting comment : ${e.toString()}");
     }

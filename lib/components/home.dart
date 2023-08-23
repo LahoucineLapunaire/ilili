@@ -129,7 +129,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void redirectToAddPost(BuildContext context) {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => AppRouter(index : 1)),
     );
@@ -147,23 +147,16 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: Color(0xFF6A1B9A),
         ),
         appBar: AppBar(
-          title: Text(
-            "Search",
-            style: TextStyle(color: Colors.grey),
-          ),
           backgroundColor: Color(0xFFFAFAFA),
+          title : SizedBox(
+                        height: 40,
+                        width: 40,
+                        child: CircleAvatar(
+                          backgroundImage: AssetImage('assets/images/ic_launcher.png'),
+                        ),
+                      ),
+          centerTitle: true,
           actions: [
-            IconButton(
-              onPressed: () {
-                showSearch(
-                    context: context,
-                    delegate: SearchDelegateWidget(usersCollectionRef));
-              },
-              icon: Icon(
-                Icons.search,
-                color: Colors.black,
-              ),
-            ),
             unreadMessages == 0
                 ? IconButton(
                     onPressed: () {
