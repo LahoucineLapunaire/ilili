@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ilili/components/appRouter.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:Ilili/components/appRouter.dart';
+import 'package:Ilili/components/widget.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -30,8 +30,6 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
 
     for (int i = 0; i < querySnapshot.docs.length; i++) {
       usernameList.add(querySnapshot.docs[i].get('username'));
-      print("Username: ${querySnapshot.docs[i].get('username')}");
-      ;
     }
   }
 
@@ -75,44 +73,50 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextTop(),
-          SizedBox(height: 30),
-          Container(
-            width: 300,
-            child: TextField(
-              controller: usernameController,
-              onChanged: (value) {
-                checkUsername();
-              },
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                prefixIcon: Icon(Icons.person),
-                labelText: 'Username',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+        body: WillPopScope(
+      onWillPop: () async {
+        print("Back Pressed");
+        return false;
+      },
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextTop(),
+            SizedBox(height: 30),
+            Container(
+              width: 300,
+              child: TextField(
+                controller: usernameController,
+                onChanged: (value) {
+                  checkUsername();
+                },
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  prefixIcon: Icon(Icons.person),
+                  labelText: 'Username',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(height: 30),
-          ElevatedButton(
-            onPressed: () {
-              setUsername();
-            },
-            child: Text(
-              "Set My Username",
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF6A1B9A),
-              minimumSize: Size(250, 50),
-            ),
-          )
-        ],
+            SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                setUsername();
+              },
+              child: Text(
+                "Set My Username",
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF6A1B9A),
+                minimumSize: Size(250, 50),
+              ),
+            )
+          ],
+        ),
       ),
     ));
   }

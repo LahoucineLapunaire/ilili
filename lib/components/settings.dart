@@ -2,15 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ilili/components/PrivacyPolicy.dart';
-import 'package:ilili/components/changeProfile.dart';
-import 'package:ilili/components/legalnotice.dart';
-import 'package:ilili/components/resetEmail.dart';
-import 'package:ilili/components/resetPassword.dart';
-import 'package:ilili/components/termsOfService.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:Ilili/components/PrivacyPolicy.dart';
+import 'package:Ilili/components/changeProfile.dart';
+import 'package:Ilili/components/legalnotice.dart';
+import 'package:Ilili/components/resetEmail.dart';
+import 'package:Ilili/components/resetPassword.dart';
+import 'package:Ilili/components/termsOfService.dart';
+import 'package:Ilili/components/widget.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
@@ -539,9 +541,19 @@ class LogoutSection extends StatelessWidget {
     );
   }
 
-  void logout() {
+  Future<void> deleteCacheDir() async {
+    final cacheDir = await getTemporaryDirectory();
+
+    if (cacheDir.existsSync()) {
+      cacheDir.deleteSync(recursive: true);
+    }
+  }
+
+  void logout() async {
     try {
       auth.signOut();
+      final googleSignIn = GoogleSignIn();
+      await googleSignIn.signOut();
     } catch (e) {
       print(e);
     }

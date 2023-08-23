@@ -1,10 +1,11 @@
+import 'package:Ilili/components/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ilili/components/appRouter.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:Ilili/components/appRouter.dart';
+import 'package:Ilili/components/widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 

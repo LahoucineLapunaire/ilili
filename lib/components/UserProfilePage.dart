@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ilili/components/changeProfile.dart';
-import 'package:ilili/components/chat.dart';
-import 'package:ilili/components/floattingButton.dart';
-import 'package:ilili/components/notification.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:Ilili/components/changeProfile.dart';
+import 'package:Ilili/components/chat.dart';
+import 'package:Ilili/components/floattingButton.dart';
+import 'package:Ilili/components/notification.dart';
+import 'package:Ilili/components/widget.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -22,6 +22,12 @@ class UserProfilePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xFFFAFAFA),
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         title: Text(
           "Profile",
           style: TextStyle(

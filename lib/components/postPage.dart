@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:Ilili/components/widget.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:mailer/mailer.dart';
 

@@ -1,15 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:ilili/components/google_ads.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:Ilili/components/google_ads.dart';
+import 'package:Ilili/components/widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:ilili/components/appRouter.dart';
+import 'package:Ilili/components/appRouter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart' as path;
 import 'dart:async';
@@ -54,21 +55,40 @@ class _AddPostPageState extends State<AddPostPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              HeaderSection(),
+              DelayedDisplay(
+                delay: Duration(milliseconds: 500),
+                child: HeaderSection(),
+              ),
               SizedBox(height: 20),
-              TitleSection(),
+              DelayedDisplay(
+                delay: Duration(milliseconds: 700),
+                child: TitleSection(),
+              ),
               SizedBox(height: 20),
-              ButtonSection(),
+              DelayedDisplay(
+                delay: Duration(milliseconds: 900),
+                child: ButtonSection(),
+              ),
               SizedBox(height: 30),
-              AudioPlayerSection(),
+              DelayedDisplay(
+                delay: Duration(milliseconds: 1100),
+                child: AudioPlayerSection(),
+              ),
               SizedBox(height: 30),
               Divider(
                 height: 30,
                 thickness: 2,
               ),
-              TagsSection(),
+              DelayedDisplay(
+                delay: Duration(milliseconds: 1300),
+                child: TagsSection(),
+              ),
               SizedBox(height: 20),
-              SendButtonSection(),
+              DelayedDisplay(
+                delay: Duration(milliseconds: 1500),
+                child: SendButtonSection(),
+              ),
+              SizedBox(height: 20),
             ],
           ),
         )),

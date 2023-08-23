@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:ilili/components/changeProfile.dart';
-import 'package:ilili/components/chat.dart';
-import 'package:ilili/components/settings.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:Ilili/components/changeProfile.dart';
+import 'package:Ilili/components/chat.dart';
+import 'package:Ilili/components/settings.dart';
+import 'package:Ilili/components/widget.dart';
 
 import 'notification.dart';
 

@@ -5,12 +5,12 @@ import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ilili/components/PrivacyPolicy.dart';
-import 'package:ilili/components/login.dart';
+import 'package:Ilili/components/PrivacyPolicy.dart';
+import 'package:Ilili/components/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:ilili/components/termsOfService.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:Ilili/components/termsOfService.dart';
+import 'package:Ilili/components/widget.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 CollectionReference usersCollection = firestore.collection('users');

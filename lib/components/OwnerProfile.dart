@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ilili/components/floattingButton.dart';
-import 'package:ilili/components/settings.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:Ilili/components/floattingButton.dart';
+import 'package:Ilili/components/settings.dart';
+import 'package:Ilili/components/widget.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;

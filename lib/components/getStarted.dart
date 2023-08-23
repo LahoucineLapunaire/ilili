@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:delayed_display/delayed_display.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ilili/components/login.dart';
-import 'package:ilili/components/signup.dart';
+import 'package:Ilili/components/login.dart';
+import 'package:Ilili/components/signup.dart';
 
 class GetStartedPage extends StatelessWidget {
   const GetStartedPage({super.key});
