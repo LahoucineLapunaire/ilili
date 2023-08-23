@@ -6,35 +6,40 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ilili/components/UserProfilePage.dart';
-import 'package:ilili/components/appRouter.dart';
-import 'package:ilili/components/changeProfile.dart';
-import 'package:ilili/components/OwnerProfile.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:Ilili/components/UserProfilePage.dart';
+import 'package:Ilili/components/appRouter.dart';
+import 'package:Ilili/components/OwnerProfile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ilili/components/postPage.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_sound/flutter_sound.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:path/path.dart' as path;
+import 'package:Ilili/components/chat.dart';
+import 'package:Ilili/components/google_ads.dart';
+import 'package:Ilili/components/postPage.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'notification.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 Reference storageRef = FirebaseStorage.instance.ref("comments");
 FirebaseAuth auth = FirebaseAuth.instance;
+final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
 class AudioPlayerWidget extends StatefulWidget {
   final String userId;
   final String postId;
+  final bool inPostPage;
   bool isOwner = false;
-  bool isComment = false;
 
-  AudioPlayerWidget(
-      {Key? key,
-      required this.userId,
-      required this.postId,
-      required this.isOwner,
-      required this.isComment})
-      : super(key: key);
+  AudioPlayerWidget({
+    Key? key,
+    required this.userId,
+    required this.postId,
+    required this.isOwner,
+    required this.inPostPage,
+  }) : super(key: key);
 
   @override
   State<AudioPlayerWidget> createState() => AudioPlayerWidgetState();
@@ -51,9 +56,14 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   String username = '';
   String postDate = '';
   List<dynamic> tags = [];
+  String tagsText = '';
   List<dynamic> likes = [];
   List<dynamic> comments = [];
   bool shouldReload = false;
+  String title = "";
+  bool isTapped = false;
+  bool isPictureLoaded = false;
+  bool isAudioLoading = false;
 
   @override
   void initState() {
@@ -74,43 +84,56 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         await firestore.collection('users').doc(widget.userId).get();
     setState(() {
       profilePicture = ds.data()!['profilePicture'];
+      isPictureLoaded = true;
       username = ds.data()!['username'];
     });
-    print('profilePicture: $profilePicture');
   }
 
   void getPostInfo() async {
-    if (widget.isComment) {
-      DocumentSnapshot<Map<String, dynamic>> ds =
-          await firestore.collection('comments').doc(widget.postId).get();
-      setState(() {
-        audioPath = ds.data()!['audio'];
-        tags = [];
-        likes = ds.data()!['likes'];
-        postDate = formatTimestamp(ds.data()!['timestamp']);
-      });
-    } else {
-      DocumentSnapshot<Map<String, dynamic>> ds =
-          await firestore.collection('posts').doc(widget.postId).get();
-      setState(() {
-        audioPath = ds.data()!['audio'];
-        tags = ds.data()!['tags'];
-        likes = ds.data()!['likes'];
-        comments = ds.data()!['comments'];
-        postDate = formatTimestamp(ds.data()!['timestamp']);
-      });
+    DocumentSnapshot<Map<String, dynamic>> ds =
+        await firestore.collection('posts').doc(widget.postId).get();
+    String _tagsText = "";
+    for (var tag in ds.data()!['tags']) {
+      _tagsText += ", $tag";
     }
-    audioPlayer.setSourceUrl(audioPath);
-    audioPlayer.onDurationChanged.listen((Duration duration) {
+    _tagsText = _tagsText.substring(2);
+    setState(() {
+      audioPath = ds.data()!['audio'];
+      tags = ds.data()!['tags'];
+      likes = ds.data()!['likes'];
+      comments = ds.data()!['comments'];
+      postDate = formatTimestamp(ds.data()!['timestamp']);
+      title = ds.data()!['title'];
+      tagsText = _tagsText;
+    });
+  }
+
+  Future<void> loadAudio() async {
+    try {
+      audioPlayer.setSourceUrl(audioPath);
       setState(() {
-        audioDuration = duration;
+        isAudioLoading = true;
       });
-      audioPlayer.onPositionChanged.listen((Duration pos) {
+      audioPlayer.onDurationChanged.listen((Duration duration) {
         setState(() {
-          position = pos;
+          audioDuration = duration;
+          isAudioLoading = false;
+          isTapped = true;
+          isPlaying = true;
+        });
+
+        audioPlayer.onPositionChanged.listen((Duration pos) {
+          setState(() {
+            position = pos;
+          });
         });
       });
-    });
+      if (audioPath != null) {
+        await audioPlayer.play(UrlSource(audioPath)).then((value) {});
+      }
+    } catch (e) {
+      showErrorMessage(e.toString(), context);
+    }
   }
 
   Future<void> playPause() async {
@@ -133,42 +156,20 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   Future<void> likePost() async {
     try {
-      if (widget.isComment) {
-        if (likes.contains(auth.currentUser!.uid)) {
-          await firestore.collection('comments').doc(widget.postId).update({
-            'likes': FieldValue.arrayRemove([auth.currentUser!.uid])
-          });
-          print("unliked");
-          setState(() {
-            likes.remove(auth.currentUser!.uid);
-          });
-        } else {
-          await firestore.collection('comments').doc(widget.postId).update({
-            'likes': FieldValue.arrayUnion([auth.currentUser!.uid])
-          });
-          print("liked");
-          setState(() {
-            likes.add(auth.currentUser!.uid);
-          });
-        }
+      if (likes.contains(auth.currentUser!.uid)) {
+        await firestore.collection('posts').doc(widget.postId).update({
+          'likes': FieldValue.arrayRemove([auth.currentUser!.uid])
+        });
+        setState(() {
+          likes.remove(auth.currentUser!.uid);
+        });
       } else {
-        if (likes.contains(auth.currentUser!.uid)) {
-          await firestore.collection('posts').doc(widget.postId).update({
-            'likes': FieldValue.arrayRemove([auth.currentUser!.uid])
-          });
-          print("unliked");
-          setState(() {
-            likes.remove(auth.currentUser!.uid);
-          });
-        } else {
-          await firestore.collection('posts').doc(widget.postId).update({
-            'likes': FieldValue.arrayUnion([auth.currentUser!.uid])
-          });
-          print("liked");
-          setState(() {
-            likes.add(auth.currentUser!.uid);
-          });
-        }
+        await firestore.collection('posts').doc(widget.postId).update({
+          'likes': FieldValue.arrayUnion([auth.currentUser!.uid])
+        });
+        setState(() {
+          likes.add(auth.currentUser!.uid);
+        });
       }
     } catch (e) {
       print('Error: $e');
@@ -201,43 +202,62 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   void deletePost() async {
-  try {
-    if (widget.isComment) {
-
-
+    try {
       // Delete the file in Firebase Storage
       if (audioPath.isNotEmpty) {
         Reference storageReference =
             FirebaseStorage.instance.refFromURL(audioPath);
         await storageReference.delete();
       }
-
-      // Delete the comment document in Firestore
-      await firestore.collection('comments').doc(widget.postId).delete();
-      await firestore.collection('posts').doc(widget.postId).update({
-        'comments': FieldValue.arrayRemove([widget.postId]),
-      });
-    } else {
-
-      // Delete the file in Firebase Storage
-      if (audioPath.isNotEmpty) {
-        Reference storageReference =
-            FirebaseStorage.instance.refFromURL(audioPath);
-        await storageReference.delete();
+      for (String comment in comments) {
+        await firestore.collection('comments').doc(comment).delete();
       }
-
       // Delete the post document in Firestore
       await firestore.collection('posts').doc(widget.postId).delete();
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => AppRouter(index: 0)));
+      dispose();
+    } catch (e) {
+      print("Error: $e");
     }
-
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => OwnerProfilePage()));
-    dispose();
-  } catch (e) {
-    print("Error: $e");
   }
-}
 
+  void showDeleteAlert(BuildContext context) {
+    // Create a AlertDialog
+    AlertDialog alertDialog = AlertDialog(
+      title: Text("Do you want to delete this post?"),
+      actions: [
+        // OK button
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+          ),
+          child: Text('No', style: TextStyle(color: Colors.black)),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF6A1B9A),
+          ),
+          child: Text('Yes', style: TextStyle(color: Colors.white)),
+          onPressed: () {
+            deletePost();
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+
+    // Show the alert dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alertDialog;
+      },
+    );
+  }
 
   void openModal(BuildContext context) {
     showModalBottomSheet(
@@ -273,138 +293,166 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.fromLTRB(10, 5, 10, 5),
       padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.black,
-            width: 0.5,
-          ),
-        ),
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  redirectToUser(); // Call the redirectToUser() function on tap
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(40.0),
-                      child: Image.network(
-                        profilePicture, // Replace with the actual path and filename of your image file
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Text(
-                      username,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.grey,
+                  width: 0.5,
                 ),
               ),
-              if (widget.isOwner)
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    redirectToUser();
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      isPictureLoaded
+                          ? SizedBox(
+                              height: 50,
+                              width: 50,
+                              child: CircleAvatar(
+                                backgroundImage: NetworkImage(profilePicture),
+                              ),
+                            )
+                          : Center(
+                              child:
+                                  CircularProgressIndicator(color: Colors.grey),
+                            ),
+                      SizedBox(width: 10),
+                      Text(
+                        username,
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 PopupMenuButton<String>(
                   onSelected: (String value) {
                     // Handle menu item selection
                     if (value == "Modify Post") {
-                      print('Selected value: $value');
                       openModal(context);
                     } else if (value == "Delete Post") {
-                      deletePost();
+                      showDeleteAlert(context);
+                    } else if (value == "Report Post") {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return ReportModal(
+                            isPost: true,
+                            reportId: widget.postId,
+                            username: username,
+                            userId: widget.userId,
+                            title: title,
+                            content: audioPath,
+                          );
+                        },
+                      );
                     }
                   },
                   itemBuilder: (BuildContext context) => [
-                    if (!widget.isComment)
+                    if (widget.isOwner)
                       PopupMenuItem(
                         value: 'Modify Post',
                         child: Text('Modify Post'),
                         textStyle: TextStyle(color: Colors.black),
                       ),
+                    if (widget.isOwner)
+                      PopupMenuItem(
+                        value: 'Delete Post',
+                        child: Text('Delete Post'),
+                        textStyle: TextStyle(color: Colors.red),
+                      ),
                     PopupMenuItem(
-                      value: 'Delete Post',
-                      child: Text('Delete Post'),
-                      textStyle: TextStyle(color: Colors.red),
+                      value: 'Report Post',
+                      child: Text('Report Post'),
+                      textStyle: TextStyle(color: Colors.black),
                     ),
                   ],
                 ),
-            ],
+              ],
+            ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-                onPressed: () {
-                  playPause();
-                },
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(formatPosition(position.inMilliseconds)),
-                  Slider(
-                    activeColor: Color(0xFF6A1B9A),
-                    inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
-                    min: 0.0,
-                    max: audioDuration.inSeconds.toDouble(),
-                    value: position.inSeconds
-                        .toDouble()
-                        .clamp(0.0, audioDuration.inSeconds.toDouble()),
-                    onChanged: (double value) {
-                      setState(() {
-                        _seekToSecond(value.toInt());
-                      });
-                    },
-                  ),
-                  Text(formatPosition(audioDuration.inMilliseconds)),
-                ],
-              )
-            ],
+          SizedBox(height: 25),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              for (var tag in tags)
-                Container(
-                  padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF009688),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        offset: Offset(0,
-                            2), // Controls the shadow position, positive value for bottom
-                        blurRadius:
-                            2, // Determines the blurriness of the shadow
-                        spreadRadius: 0, // Controls the spread of the shadow
+          SizedBox(height: 20),
+          isTapped
+              ? Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                        onPressed: () {
+                          playPause();
+                        },
                       ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(formatPosition(position.inMilliseconds)),
+                          Slider(
+                            activeColor: Color(0xFF6A1B9A),
+                            inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
+                            min: 0.0,
+                            max: audioDuration.inSeconds.toDouble(),
+                            value: position.inSeconds
+                                .toDouble()
+                                .clamp(0.0, audioDuration.inSeconds.toDouble()),
+                            onChanged: (double value) {
+                              setState(() {
+                                _seekToSecond(value.toInt());
+                              });
+                            },
+                          ),
+                          Text(formatPosition(audioDuration.inMilliseconds)),
+                        ],
+                      )
                     ],
                   ),
-                  child: Text(
-                    tag,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
                 )
-            ],
-          ),
+              : Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xFF6A1B9A), // Background color
+                    shape:
+                        BoxShape.circle, // You can change the shape if needed
+                  ),
+                  child: isAudioLoading
+                      ? CircularProgressIndicator(color: Colors.black)
+                      : IconButton(
+                          onPressed: () {
+                            loadAudio();
+                          },
+                          icon: Icon(
+                            Icons.play_arrow,
+                            color: Colors.white, // Icon color
+                          ),
+                        ),
+                ),
+          SizedBox(height: 30),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -436,26 +484,33 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                   ),
                   SizedBox(width: 5),
                   Visibility(
-                    visible: !widget.isComment,
                     child: Row(
                       children: [
                         Text(comments.length.toString()),
                         IconButton(
                           icon: Icon(Icons.comment),
                           onPressed: () {
-                            setState(() {
-                              print("comments : $comments");
-                            });
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PostPage(
-                                  postId: widget.postId,
-                                  userId: widget.userId,
-                                  isOwner: widget.isOwner,
+                            if (widget.inPostPage) {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CommentModal(
+                                    postId: widget.postId,
+                                  );
+                                },
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PostPage(
+                                    postId: widget.postId,
+                                    userId: widget.userId,
+                                    isOwner: widget.isOwner,
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
                         ),
                       ],
@@ -672,303 +727,633 @@ class CommentModal extends StatefulWidget {
 }
 
 class _CommentModalState extends State<CommentModal> {
-  AudioPlayer audioPlayer = AudioPlayer();
-  String audioPath = '';
-  bool isPlaying = false;
-  Duration audioDuration = Duration();
-  Duration position = Duration();
-  FlutterSoundRecorder? audioRecorder;
-  FlutterSoundPlayer? player;
-  bool isRecording = false;
+  String username = "";
+  String ownerId = "";
+  String profilePicture =
+      "https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=db72d8e7-aa9d-4b64-886c-549987962cb2";
+  TextEditingController commentController = TextEditingController();
+  InterstitialAd? interstitialAd;
 
   void initState() {
     super.initState();
-    audioPlayer.onDurationChanged.listen((Duration duration) {
-      setState(() {
-        audioDuration = duration;
-      });
+    getUser();
+    getPostOwner();
+    loadInterstitialAd();
+  }
+
+  void getPostOwner() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await firestore.collection('posts').doc(widget.postId).get();
+    setState(() {
+      ownerId = snapshot['userId'];
     });
+  }
 
-    audioPlayer.onPositionChanged.listen((Duration pos) {
-      setState(() {
-        position = pos;
-      });
+  void getUser() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+    setState(() {
+      username = snapshot['username'];
+      profilePicture = snapshot['profilePicture'];
     });
   }
 
-  Future<bool> checkPermission() async {
-    var status = await Permission.microphone.request();
-    if (status != PermissionStatus.granted) {
-      throw RecordingPermissionException('Microphone permission not granted');
-    }
-    if (await Permission.microphone.request().isGranted) {
-      print('Permission granted');
-      return true;
-    } else {
-      print('Permission denied');
-      return false;
-    }
+  void loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdHelper.interstitialAdUnitId,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {},
+          );
+
+          setState(() {
+            interstitialAd = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
   }
 
-  void startRecording() async {
+  void postComment() async {
     try {
-      if (audioRecorder != null) {
-        // Stop any ongoing recording before starting a new one
-        await audioRecorder!.stopRecorder();
-      }
-      File existingFile = File('audio.aac');
-      if (existingFile.existsSync()) {
-        await existingFile.delete();
-        print('Existing file deleted');
-      }
-      await checkPermission();
-      audioRecorder = FlutterSoundRecorder();
+      DocumentReference documentReference =
+          firestore.collection("comments").doc();
+      // Set the data for the document.
+      Map<String, dynamic> data = {
+        'postId': widget.postId,
+        'userId': auth.currentUser!.uid,
+        'comment': commentController.text,
+        'timestamp': DateTime.now(),
+        'likes': [],
+      };
+      // Set the document.
+      await documentReference.set(data);
 
-      // Start recording audio
-      await audioRecorder?.openRecorder();
-      await audioRecorder!.startRecorder(toFile: 'audio.aac');
-      setState(() {
-        isRecording = true;
+      // Get the id of the document.
+      String documentId = documentReference.id;
+
+      DocumentSnapshot snapshot =
+          await firestore.collection('posts').doc(widget.postId).get();
+      List comments = snapshot['comments'];
+      int score = snapshot['score'];
+      score += 5;
+      comments.add(documentId);
+      await firestore
+          .collection('posts')
+          .doc(widget.postId)
+          .update({'comments': comments, 'score': score});
+
+      showInfoMessage("Comment is posted !", context, () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
-    } catch (e) {
-      print('Error starting recording: $e');
-    }
-  }
-
-  void stopRecording() async {
-    try {
-      if (audioRecorder != null) {
-        // Stop the ongoing recording
-        await audioRecorder!.stopRecorder();
-        await audioRecorder!.closeRecorder();
-        audioRecorder = null;
-        print("Recording stopped");
-        setState(() {
-          audioPath = 'audio.aac';
-          isRecording = false;
-        });
-
-        String filePath = '/data/user/0/com.example.ilili/cache/audio.aac';
-        audioPath = filePath;
-      }
-      ;
-    } catch (e) {
-      print('Error stopping recording or playing audio: $e');
-    }
-  }
-
-  Future<void> pickAudioFile() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.audio,
-      );
-
-      if (result != null) {
-        PlatformFile file = result.files.first;
-        print("File path: ${file.path}");
-        setState(() {
-          audioPath = file.path!;
-          audioPlayer.setSourceUrl(file.path!);
-        });
-      }
-    } catch (e) {
-      print("Error while picking the file: ${e.toString()}");
-    }
-  }
-
-  void playPause() async {
-    try {
-      if (isPlaying) {
-        await audioPlayer.pause();
-        setState(() => isPlaying = false);
-      } else {
-        if (audioPath != null) {
-          print(audioPath);
-          await audioPlayer.play(UrlSource(audioPath));
-          setState(() => isPlaying = true);
-        }
-      }
-    } catch (e) {
-      showErrorMessage("Please select a valid audio file", context);
-    }
-  }
-
-  void _seekToSecond(int second) {
-    Duration newDuration = Duration(seconds: second);
-    audioPlayer.seek(newDuration);
-  }
-
-  String formatPosition(int position) {
-    double result = position / 1000;
-    String minutes = (result / 60).floor().toString();
-    String secondes = (result % 60).floor().toString();
-    return minutes + ':' + secondes;
-  }
-
-  String generateUniqueFileName() {
-    String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    String randomString = path.basenameWithoutExtension(
-        path.basenameWithoutExtension(path.basenameWithoutExtension(
-            path.basenameWithoutExtension(path.basenameWithoutExtension(
-                path.basenameWithoutExtension(path.basenameWithoutExtension(
-                    path.basenameWithoutExtension(timestamp))))))));
-    String fileName = 'audio_$randomString.aac';
-    return fileName;
-  }
-
-  Future<void> postComment() async {
-    try {
-      String name = generateUniqueFileName();
-      Reference postRef = storageRef.child(name);
-      UploadTask uploadTask = postRef.putFile(File(audioPath));
-      await uploadTask.whenComplete(() async {
-        String downloadURL = await postRef.getDownloadURL();
-        FirebaseFirestore.instance.collection('comments').doc(name).set({
-          'userId': auth.currentUser!.uid,
-          'audio': downloadURL,
-          'likes': [],
-          'commentFor': widget.postId,
-          'timestamp': DateTime.now(),
-        });
-        await firestore.collection('posts').doc(widget.postId).update({
-          'comments': FieldValue.arrayUnion([name]),
-        });
+      sendNotificationToTopic(
+          "comment", "New comment !", "$username commented on your post !", {
+        "sender": auth.currentUser!.uid,
+        "receiver": ownerId,
+        "type": "comment",
+        "click_action": "FLUTTER_COMMENT_CLICK",
       });
       Navigator.pop(context);
     } catch (e) {
-      print(e.toString());
+      print("Error posting comment : ${e.toString()}");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Column(
-      children: [
-        SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (isRecording)
-              ElevatedButton(
-                onPressed: () {
-                  stopRecording();
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+    return SingleChildScrollView(
+      child: Center(
+        child: Container(
+            padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+            height: 500,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Icon(Icons.stop),
-                    SizedBox(width: 5),
-                    Text('Stop Recording'),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(40.0),
+                      child: Image.network(
+                        profilePicture, // Replace with the actual path and filename of your image file
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      username,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                SizedBox(height: 20),
+                Container(
+                  height: 200,
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  fixedSize:
-                      Size(170, 35), // Set the width and height of the button
-                  backgroundColor: Color(
-                      0xFF6A1B9A), // Set the background color of the button
+                  child: TextField(
+                    maxLines: null,
+                    controller: commentController,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Write your comment ...',
+                    ),
+                  ),
                 ),
-              ),
-            if (!isRecording)
-              ElevatedButton(
-                onPressed: () {
-                  startRecording();
-                },
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    if (interstitialAd != null) {
+                      interstitialAd?.show();
+                    } else {
+                      print("Interstitial ad is null !");
+                    }
+                    postComment();
+                  },
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.send),
+                        SizedBox(width: 10),
+                        Text('Post Comment')
+                      ]),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    fixedSize:
+                        Size(170, 35), // Set the width and height of the button
+                    backgroundColor: Color(
+                        0xFF6A1B9A), // Set the background color of the button
+                  ),
+                )
+              ],
+            )),
+      ),
+    );
+  }
+}
+
+class UsersListModal extends StatefulWidget {
+  const UsersListModal({super.key});
+
+  @override
+  State<UsersListModal> createState() => _UsersListModalState();
+}
+
+class _UsersListModalState extends State<UsersListModal> {
+  List<dynamic> users = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getUsers();
+  }
+
+  getUsers() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+    List<String> listId = snapshot['followings'].cast<String>();
+    listId.forEach((id) async {
+      DocumentSnapshot userSnapshot =
+          await firestore.collection('users').doc(id).get();
+      setState(() {
+        users.add({
+          'id': userSnapshot.id,
+          'username': userSnapshot['username'],
+          'profilePicture': userSnapshot['profilePicture'],
+        });
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    users.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+        height: 500,
+        child: users.length == 0
+            ? Center(child: Text('No users found'))
+            : ListView.builder(
+                shrinkWrap: true,
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  return Column(
                     children: [
-                      Icon(Icons.mic),
-                      SizedBox(width: 5),
-                      Text('Record Audio')
-                    ]),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  fixedSize:
-                      Size(170, 35), // Set the width and height of the button
-                  backgroundColor: Color(
-                      0xFF6A1B9A), // Set the background color of the button
+                      Text("Followings : ${users.length}"),
+                      ListTile(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatPage(
+                                userId: users[index]['id'],
+                                username: users[index]['username'],
+                                profilePicture: users[index]['profilePicture'],
+                              ),
+                            ),
+                          );
+                        },
+                        leading: CircleAvatar(
+                          backgroundImage:
+                              NetworkImage(users[index]['profilePicture']),
+                        ),
+                        title: Text(users[index]['username']),
+                      )
+                    ],
+                  );
+                },
+              ),
+      ),
+    );
+  }
+}
+
+class FollowersListModal extends StatefulWidget {
+  const FollowersListModal({super.key});
+
+  @override
+  State<FollowersListModal> createState() => _FollowersListModalState();
+}
+
+class _FollowersListModalState extends State<FollowersListModal> {
+  List<dynamic> users = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getUsers();
+  }
+
+  getUsers() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+    List<String> listId = snapshot['followers'].cast<String>();
+    listId.forEach((id) async {
+      DocumentSnapshot userSnapshot =
+          await firestore.collection('users').doc(id).get();
+      setState(() {
+        users.add({
+          'id': userSnapshot.id,
+          'username': userSnapshot['username'],
+          'profilePicture': userSnapshot['profilePicture'],
+        });
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    users.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+          padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+          height: 500,
+          child: users.length == 0
+              ? Center(child: Text('No users found'))
+              : Column(
+                  children: [
+                    Text("Followers : ${users.length}"),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: users.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UserProfilePage(
+                                      userId: users[index]['id'])),
+                            );
+                          },
+                          leading: CircleAvatar(
+                            backgroundImage:
+                                NetworkImage(users[index]['profilePicture']),
+                          ),
+                          title: Text(users[index]['username']),
+                        );
+                      },
+                    ),
+                  ],
+                )),
+    );
+  }
+}
+
+class FollowingsListModal extends StatefulWidget {
+  const FollowingsListModal({super.key});
+
+  @override
+  State<FollowingsListModal> createState() => _FollowingsListModallState();
+}
+
+class _FollowingsListModallState extends State<FollowingsListModal> {
+  List<dynamic> users = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getUsers();
+  }
+
+  getUsers() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+    List<String> listId = snapshot['followings'].cast<String>();
+    listId.forEach((id) async {
+      DocumentSnapshot userSnapshot =
+          await firestore.collection('users').doc(id).get();
+      setState(() {
+        users.add({
+          'id': userSnapshot.id,
+          'username': userSnapshot['username'],
+          'profilePicture': userSnapshot['profilePicture'],
+        });
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    users.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+          padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+          height: 500,
+          child: users.length == 0
+              ? Center(child: Text('No users found'))
+              : Column(
+                  children: [
+                    Text("Followings : ${users.length}"),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: users.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UserProfilePage(
+                                      userId: users[index]['id'])),
+                            );
+                          },
+                          leading: CircleAvatar(
+                            backgroundImage:
+                                NetworkImage(users[index]['profilePicture']),
+                          ),
+                          title: Text(users[index]['username']),
+                        );
+                      },
+                    ),
+                  ],
+                )),
+    );
+  }
+}
+
+class ReportModal extends StatefulWidget {
+  final bool isPost;
+  final String reportId;
+  final String username;
+  final String userId;
+  final String title;
+  final String content;
+  const ReportModal(
+      {super.key,
+      required this.isPost,
+      required this.username,
+      required this.userId,
+      required this.content,
+      required this.reportId,
+      required this.title});
+
+  @override
+  State<ReportModal> createState() => _ReportModalState();
+}
+
+class _ReportModalState extends State<ReportModal> {
+  TextEditingController reportController = TextEditingController();
+
+  reportComment() async {
+    try {
+      final smtpServer =
+          gmail('moderation.ilili@gmail.com', 'gpubnhzldelidwcq');
+
+      // Create a message
+      final message = Message()
+        ..from = Address('moderation.ilili@gmail.com', 'Moderation')
+        ..recipients.add('moderation.ilili@gmail.com')
+        ..subject = 'Report of the comment ${widget.reportId}'
+        ..html = '''
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 20px;
+  }
+  h2 {
+    color: #333;
+    margin-bottom: 10px;
+  }
+  h3 {
+    color: #666;
+    margin-bottom: 5px;
+  }
+  p {
+    color: #555;
+    margin-bottom: 5px;
+  }
+</style>
+</head>
+<body>
+  <h2>The user ${auth.currentUser!.uid}, email address ${auth.currentUser?.email}, reported the following comment:</h2>
+  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px;">
+    <h3>User: ${widget.username} (User ID: ${widget.userId})</h3>
+    <p>Comment ID: ${widget.reportId}</p>
+    <p>Comment content:</p>
+    <div style="background-color: #f9f9f9; border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+      ${widget.content}
+    </div>
+  </div>
+  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
+    <h3>The reason for this report is:</h3>
+    <p>${reportController.text}</p>
+    <p>Reported at: ${DateTime.now().toString()}</p>
+  </div>
+</body>
+</html>
+''';
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ${sendReport.toString()}');
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error sending email: $e');
+    }
+  }
+
+  reportPost() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var smtpkey = await prefs.getString('smtp_key') ?? '';
+      final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
+
+      // Create a message
+      final message = Message()
+        ..from = Address('moderation.ilili@gmail.com', 'Moderation')
+        ..recipients.add('moderation.ilili@gmail.com')
+        ..subject = 'Report of the post ${widget.reportId}'
+        ..html = '''
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 20px;
+  }
+  h2 {
+    color: #333;
+    margin-bottom: 10px;
+  }
+  h3 {
+    color: #666;
+    margin-bottom: 5px;
+  }
+  p {
+    color: #555;
+    margin-bottom: 5px;
+  }
+</style>
+</head>
+<body>
+  <h2>The user ${auth.currentUser!.uid}, email address ${auth.currentUser?.email}, reported the following post:</h2>
+  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px;">
+    <h3>User: ${widget.username} (User ID: ${widget.userId})</h3>
+    <p>Post ID: ${widget.reportId}</p>
+    <p>Post title: ${widget.title}</p>
+    <p>Post content:</p>
+    <div style="background-color: #f9f9f9; border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+      ${widget.content}
+    </div>
+  </div>
+  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
+    <h3>The reason for this report is:</h3>
+    <p>${reportController.text}</p>
+    <p>Reported at: ${DateTime.now().toString()}</p>
+  </div>
+</body>
+</html>
+''';
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ${sendReport.toString()}');
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error sending email: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+        height: 500,
+        child: Column(
+          children: [
+            Text(
+              "Report of ${widget.isPost ? 'post' : 'comment'}",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Why do you want to report this ${widget.isPost ? 'post' : 'comment'}",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            Container(
+              height: 200,
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: TextField(
+                maxLines: null,
+                controller: reportController,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Write the report reason ...',
                 ),
               ),
-            SizedBox(width: 20),
+            ),
+            SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                pickAudioFile();
+                widget.isPost ? reportPost() : reportComment();
               },
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.audiotrack),
-                    SizedBox(width: 5),
-                    Text('Pick Audio')
-                  ]),
+              child:
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(Icons.report),
+                SizedBox(width: 10),
+                widget.isPost ? Text('Report post') : Text('Report comment')
+              ]),
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
                 fixedSize:
-                    Size(170, 35), // Set the width and height of the button
+                    Size(180, 35), // Set the width and height of the button
                 backgroundColor:
                     Color(0xFF6A1B9A), // Set the background color of the button
               ),
-            ),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-              onPressed: () {
-                playPause();
-              },
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(formatPosition(position.inMilliseconds)),
-                Slider(
-                  activeColor: Color(0xFF6A1B9A),
-                  inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
-                  min: 0.0,
-                  max: audioDuration.inSeconds.toDouble(),
-                  value: position.inSeconds.toDouble(),
-                  onChanged: (double value) {
-                    setState(() {
-                      _seekToSecond(value.toInt());
-                      value = value;
-                    });
-                  },
-                ),
-                Text(formatPosition(audioDuration.inMilliseconds)),
-              ],
             )
           ],
         ),
-        ElevatedButton(
-          onPressed: () {
-            postComment();
-          },
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(Icons.send),
-            SizedBox(width: 10),
-            Text('Post Comment')
-          ]),
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            fixedSize: Size(170, 35), // Set the width and height of the button
-            backgroundColor:
-                Color(0xFF6A1B9A), // Set the background color of the button
-          ),
-        ),
-      ],
-    ));
+      ),
+    );
   }
 }
 
@@ -993,7 +1378,7 @@ void showErrorMessage(String message, BuildContext context) {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Oh snap!",
+                        Text("There is a problem",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -1036,7 +1421,8 @@ void showErrorMessage(String message, BuildContext context) {
   );
 }
 
-void showInfoMessage(String message, BuildContext context) {
+void showInfoMessage(
+    String message, BuildContext context, VoidCallback hideCallback) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Stack(
@@ -1082,7 +1468,7 @@ void showInfoMessage(String message, BuildContext context) {
                     icon: Icon(Icons.close),
                     color: Colors.white,
                     onPressed: () {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      hideCallback;
                     },
                   ),
                 ],

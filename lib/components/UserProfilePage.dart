@@ -1,9 +1,13 @@
+import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ilili/components/changeProfile.dart';
-import 'package:ilili/components/floattingButton.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:Ilili/components/changeProfile.dart';
+import 'package:Ilili/components/chat.dart';
+import 'package:Ilili/components/floattingButton.dart';
+import 'package:Ilili/components/notification.dart';
+import 'package:Ilili/components/widget.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -16,15 +20,38 @@ class UserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFECEFF1),
-      floatingActionButton: FloatingActionButtonUser(ownerId: userId),
+      backgroundColor: Color(0xFFFAFAFA),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text(
+          "Profile",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        backgroundColor: Color(0xFFFAFAFA),
+        shadowColor: Colors.transparent,
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
-              SizedBox(height: 30),
-              TopSection(userId: userId),
-              PostSection(userId: userId),
+              DelayedDisplay(
+                child: TopSection(userId: userId),
+                delay: Duration(microseconds: 500),
+              ),
+              DelayedDisplay(
+                child: PostSection(userId: userId),
+                delay: Duration(microseconds: 800),
+              ),
             ],
           ),
         ),
@@ -48,11 +75,44 @@ class _TopSectionState extends State<TopSection> {
   String description = "";
   List<dynamic> followers = [];
   List<dynamic> followings = [];
+  String myUsername = "";
+  bool isPictureLoad = false;
 
   @override
   void initState() {
     super.initState();
     getUserData();
+  }
+
+  void follow() async {
+    if (followers.contains(auth.currentUser!.uid)) {
+      firestore.collection('users').doc(widget.userId).update({
+        'followers': FieldValue.arrayRemove([auth.currentUser!.uid])
+      });
+      firestore.collection('users').doc(auth.currentUser!.uid).update({
+        'following': FieldValue.arrayRemove([widget.userId])
+      });
+      setState(() {
+        followers.remove(auth.currentUser!.uid);
+      });
+    } else {
+      firestore.collection('users').doc(widget.userId).update({
+        'followers': FieldValue.arrayUnion([auth.currentUser!.uid])
+      });
+      firestore.collection('users').doc(auth.currentUser!.uid).update({
+        'followings': FieldValue.arrayUnion([widget.userId])
+      });
+      setState(() {
+        followers.add(auth.currentUser!.uid);
+      });
+      sendNotificationToTopic(
+          "follow", "New followers", "$myUsername started to following you", {
+        "sender": auth.currentUser!.uid,
+        "receiver": widget.userId,
+        "type": "follow",
+        "click_action": "FLUTTER_FOLLOW_CLICK",
+      });
+    }
   }
 
   @override
@@ -63,13 +123,23 @@ class _TopSectionState extends State<TopSection> {
   void getUserData() async {
     DocumentSnapshot ds =
         await firestore.collection('users').doc(widget.userId).get();
-        
+
     setState(() {
       username = ds.get('username');
       profilPicture = ds.get('profilePicture');
       description = ds.get('description');
       followers = ds.get('followers');
-      followings = ds.get('following');
+      followings = ds.get('followings');
+      isPictureLoad = true;
+    });
+  }
+
+  void getMyUsername() async {
+    DocumentSnapshot ds =
+        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+
+    setState(() {
+      myUsername = ds.get('username');
     });
   }
 
@@ -77,14 +147,10 @@ class _TopSectionState extends State<TopSection> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: Offset(0, 3), // changes the position of the shadow
-            ),
-          ],
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(50),
+            topRight: Radius.circular(50),
+          ),
           gradient: LinearGradient(
             colors: [
               Color(0xFF6A1B9A),
@@ -92,41 +158,103 @@ class _TopSectionState extends State<TopSection> {
             ],
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
-          )),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey,
+              offset: const Offset(
+                        0.0,
+                        5.0,
+                      ),
+                      blurRadius: 5.0,
+            )
+          ]),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            height: 150,
-            width: 150,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(75),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.4),
-                  spreadRadius: 1,
-                  blurRadius: 2,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(200),
-              child: Image.network(
-                "$profilPicture",
-                fit: BoxFit.cover,
+          SizedBox(height: 25),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    "${followers.length}",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    "followers",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
-            ),
+              Container(
+                padding: const EdgeInsets.all(4),
+                height: 120,
+                width: 120,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(75),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.4),
+                      spreadRadius: 1,
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: isPictureLoad
+                    ? SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(profilPicture),
+                        ),
+                      )
+                    : Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.grey,
+                        ),
+                      ),
+              ),
+              Column(
+                children: [
+                  Text(
+                    "${followings.length}",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    "followings",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
           SizedBox(height: 10),
           Text(
             "$username",
             style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white),
           ),
           SizedBox(height: 20),
           Container(
@@ -134,31 +262,73 @@ class _TopSectionState extends State<TopSection> {
             child: Text(
               "$description",
               style: TextStyle(
-                fontSize: 15,
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
                 color: Colors.white,
               ),
             ),
           ),
           SizedBox(height: 20),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(
-              "${followers.length} followers",
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.white,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  follow();
+                },
+                style: followers.contains(auth.currentUser!.uid)
+                    ? ElevatedButton.styleFrom(
+                        side: BorderSide(color: Colors.white),
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        minimumSize: Size(75, 40),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      )
+                    : ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        minimumSize: Size(75, 40),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                child: Text(
+                  followers.contains(auth.currentUser!.uid)
+                      ? "Unfollow"
+                      : "Follow",
+                ),
               ),
-            ),
-            SizedBox(width: 10),
-            Text(
-              "${followings.length} following",
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(width: 20)
-          ]),
-          SizedBox(height: 25),
+              SizedBox(width: 15),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ChatPage(
+                              userId: widget.userId,
+                              username: username,
+                              profilePicture: profilePicture,
+                            )),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  side: BorderSide(color: Colors.white),
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  minimumSize: Size(75, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+                child: Text(
+                  "Message",
+                ),
+              )
+            ],
+          ),
+          SizedBox(height: 20),
         ],
       ),
     );
@@ -200,17 +370,31 @@ class _PostSectionState extends State<PostSection> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      shrinkWrap: true,
-      physics: ClampingScrollPhysics(),
-      children: [
-        for (var post in posts)
-          AudioPlayerWidget(
-              postId: post,
-              userId: widget.userId,
-              isOwner: false,
-              isComment: false),
-      ],
-    );
+    return posts.length == 0
+        ? Container(
+            height: 200,
+            child: Center(
+              child: Text(
+                "No posts yet",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          )
+        : ListView(
+            shrinkWrap: true,
+            physics: ClampingScrollPhysics(),
+            children: [
+              for (var post in posts)
+                AudioPlayerWidget(
+                  postId: post,
+                  userId: widget.userId,
+                  isOwner: true,
+                  inPostPage: false,
+                ),
+            ],
+          );
   }
 }

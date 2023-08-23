@@ -1,57 +1,157 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:Ilili/components/google_ads.dart';
+import 'package:Ilili/components/widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:ilili/components/appRouter.dart';
+import 'package:Ilili/components/appRouter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart' as path;
 import 'dart:async';
 import 'dart:io';
+import 'package:carousel_slider/carousel_slider.dart';
 
 List<String> tagsList = [];
 AudioPlayer audioPlayer = AudioPlayer();
 String audioPath = '';
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseStorage storage = FirebaseStorage.instance;
+TextEditingController titleController = TextEditingController();
+bool subscription = false;
 
-class AddPostPage extends StatelessWidget {
+class AddPostPage extends StatefulWidget {
   const AddPostPage({super.key});
 
   @override
+  State<AddPostPage> createState() => _AddPostPageState();
+}
+
+class _AddPostPageState extends State<AddPostPage> {
+  @override
   void dispose() {
+    audioPath = '';
+    tagsList = [];
     audioPlayer.release();
     audioPlayer.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFECEFF1),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-              child: Text(
-                  "To add a post, please record an audio file or upload one, and add some tags to it, and then click on the 'Add Post' button."),
-            ),
-            SizedBox(height: 10),
-            ButtonSection(),
-            SizedBox(height: 20),
-            AudioPlayerSection(),
-            Divider(
-              height: 50,
-              thickness: 2,
-            ),
-            TagsSection(),
-            SizedBox(height: 20),
-            SendButtonSection(),
-          ],
+      body: SingleChildScrollView(
+        child: Center(
+            child: Container(
+          height: MediaQuery.of(context).size.height,
+          width: double.maxFinite,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              DelayedDisplay(
+                delay: Duration(milliseconds: 500),
+                child: HeaderSection(),
+              ),
+              SizedBox(height: 20),
+              DelayedDisplay(
+                delay: Duration(milliseconds: 700),
+                child: TitleSection(),
+              ),
+              SizedBox(height: 20),
+              DelayedDisplay(
+                delay: Duration(milliseconds: 900),
+                child: ButtonSection(),
+              ),
+              SizedBox(height: 30),
+              DelayedDisplay(
+                delay: Duration(milliseconds: 1100),
+                child: AudioPlayerSection(),
+              ),
+              SizedBox(height: 30),
+              Divider(
+                height: 30,
+                thickness: 2,
+              ),
+              DelayedDisplay(
+                delay: Duration(milliseconds: 1300),
+                child: TagsSection(),
+              ),
+              SizedBox(height: 20),
+              DelayedDisplay(
+                delay: Duration(milliseconds: 1500),
+                child: SendButtonSection(),
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
+        )),
+      ),
+    );
+  }
+}
+
+class HeaderSection extends StatelessWidget {
+  const HeaderSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(left: 20),
+      width: double.maxFinite,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(
+          "What's new ?",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          "Record or upload an audio file, and add some tags to it, and then click on the 'Add Post' button.",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 18,
+            fontWeight: FontWeight.w400,
+          ),
+        )
+      ]),
+    );
+  }
+}
+
+class TitleSection extends StatefulWidget {
+  const TitleSection({super.key});
+
+  @override
+  State<TitleSection> createState() => _TitleSectionState();
+}
+
+class _TitleSectionState extends State<TitleSection> {
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 300,
+      child: TextField(
+        controller: titleController,
+        decoration: InputDecoration(
+          filled: true,
+          prefixIcon: Icon(Icons.title),
+          fillColor: Colors.white,
+          labelText: 'title',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
         ),
       ),
     );
@@ -96,14 +196,10 @@ class _ButtonSectionState extends State<ButtonSection> {
         print('Existing file deleted');
       }
       await checkPermission();
-      print('--------------->Here1');
       audioRecorder = FlutterSoundRecorder();
-      print('--------------->Here2');
       // Start recording audio
       await audioRecorder?.openRecorder();
-      print('--------------->Here3');
       await audioRecorder!.startRecorder(toFile: 'audio.aac');
-      print('--------------->Here4');
       setState(() {
         isRecording = true;
       });
@@ -120,16 +216,13 @@ class _ButtonSectionState extends State<ButtonSection> {
         await audioRecorder!.stopRecorder();
         await audioRecorder!.closeRecorder();
         audioRecorder = null;
-        print("Recording stopped");
-        setState(() {
-          audioPath = 'audio.aac';
-          isRecording = false;
-        });
-
         String filePath = '/data/user/0/com.example.ilili/cache/audio.aac';
-        audioPath = filePath;
+        setState(() {
+          audioPath = filePath;
+          isRecording = false;
+          audioPlayer.setSourceUrl(audioPath);
+        });
       }
-      ;
     } catch (e) {
       showErrorMessage(e.toString(), context);
       print('Error stopping recording or playing audio: $e');
@@ -144,7 +237,6 @@ class _ButtonSectionState extends State<ButtonSection> {
 
       if (result != null) {
         PlatformFile file = result.files.first;
-        print("File path: ${file.path}");
         setState(() {
           audioPath = file.path!;
           audioPlayer.setSourceUrl(file.path!);
@@ -178,8 +270,7 @@ class _ButtonSectionState extends State<ButtonSection> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              fixedSize:
-                  Size(170, 35), // Set the width and height of the button
+              fixedSize: Size(175, 40),
               backgroundColor:
                   Color(0xFF6A1B9A), // Set the background color of the button
             ),
@@ -198,13 +289,21 @@ class _ButtonSectionState extends State<ButtonSection> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              fixedSize:
-                  Size(170, 35), // Set the width and height of the button
+              fixedSize: Size(175, 40),
               backgroundColor:
                   Color(0xFF6A1B9A), // Set the background color of the button
             ),
           ),
-        SizedBox(width: 20),
+        SizedBox(width: 5),
+        Text(
+          "Or",
+          style: TextStyle(
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        SizedBox(width: 5),
         ElevatedButton(
           onPressed: () {
             pickAudioFile();
@@ -218,7 +317,7 @@ class _ButtonSectionState extends State<ButtonSection> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            fixedSize: Size(170, 35), // Set the width and height of the button
+            fixedSize: Size(175, 40), // Set the width and height of the button
             backgroundColor:
                 Color(0xFF6A1B9A), // Set the background color of the button
           ),
@@ -261,11 +360,8 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
         await audioPlayer.pause();
         setState(() => isPlaying = false);
       } else {
-        if (audioPath != null) {
-          print(audioPath);
-          await audioPlayer.play(UrlSource(audioPath));
-          setState(() => isPlaying = true);
-        }
+        await audioPlayer.play(UrlSource(audioPath));
+        setState(() => isPlaying = true);
       }
     } catch (e) {
       showErrorMessage(e.toString(), context);
@@ -289,37 +385,38 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-              onPressed: () {
-                playPause();
-              },
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(formatPosition(position.inMilliseconds)),
-                Slider(
-                  activeColor: Color(0xFF6A1B9A),
-                  inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
-                  min: 0.0,
-                  max: audioDuration.inSeconds.toDouble(),
-                  value: position.inSeconds.toDouble(),
-                  onChanged: (double value) {
-                    setState(() {
-                      _seekToSecond(value.toInt());
-                      value = value;
-                    });
-                  },
-                ),
-                Text(formatPosition(audioDuration.inMilliseconds)),
-              ],
-            )
-          ],
-        )
+        if (audioPath != '')
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                onPressed: () {
+                  playPause();
+                },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(formatPosition(position.inMilliseconds)),
+                  Slider(
+                    activeColor: Color(0xFF6A1B9A),
+                    inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
+                    min: 0.0,
+                    max: audioDuration.inSeconds.toDouble(),
+                    value: position.inSeconds.toDouble(),
+                    onChanged: (double value) {
+                      setState(() {
+                        _seekToSecond(value.toInt());
+                        value = value;
+                      });
+                    },
+                  ),
+                  Text(formatPosition(audioDuration.inMilliseconds)),
+                ],
+              )
+            ],
+          )
       ],
     );
   }
@@ -353,6 +450,7 @@ class _TagsSectionState extends State<TagsSection> {
       setState(() {
         tagsList.add(tagController.text);
       });
+      tagController.clear();
     } catch (e) {
       showErrorMessage(e.toString(), context);
     }
@@ -423,6 +521,37 @@ class SendButtonSection extends StatefulWidget {
 class _SendButtonSectionState extends State<SendButtonSection> {
   Reference storageRef = storage.ref("posts");
   String audioLink = "";
+  InterstitialAd? interstitialAd;
+
+  void initState() {
+    super.initState();
+    loadInterstitialAd();
+  }
+
+  void loadInterstitialAd() {
+    try {
+      InterstitialAd.load(
+        adUnitId: AdHelper.interstitialAdUnitId,
+        request: AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            ad.fullScreenContentCallback = FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (ad) {},
+            );
+
+            setState(() {
+              interstitialAd = ad;
+            });
+          },
+          onAdFailedToLoad: (err) {
+            print('Failed to load an interstitial ad: ${err.message}');
+          },
+        ),
+      );
+    } catch (e) {
+      print("error interstitial ad : ${e.toString()}");
+    }
+  }
 
   String generateUniqueFileName() {
     String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
@@ -462,15 +591,19 @@ class _SendButtonSectionState extends State<SendButtonSection> {
     try {
       String name = generateUniqueFileName();
       List<dynamic> posts = await getPosts();
+
+      posts.add(name);
+      String title = titleController.text;
+
       Reference postRef = storageRef.child(name);
       UploadTask uploadTask = postRef.putFile(File(audioPath));
-      posts.add(name);
 
       await uploadTask.whenComplete(() async {
         String downloadURL = await postRef.getDownloadURL();
 
         FirebaseFirestore.instance.collection('posts').doc(name).set({
           'userId': auth.currentUser!.uid,
+          "title": title,
           'audio': downloadURL,
           'tags': tagsList,
           'likes': [],
@@ -486,10 +619,13 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           'posts': posts,
         });
       });
+      showInfoMessage("Your post is posted !", context, () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      });
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => AppRouter(),
+          builder: (context) => AppRouter(index: 1),
         ),
       );
     } catch (e) {
@@ -497,11 +633,59 @@ class _SendButtonSectionState extends State<SendButtonSection> {
     }
   }
 
+  void showConfirmAlert(BuildContext context) {
+    if (titleController.text == "" || tagsList.isEmpty || audioPath == "") {
+      showErrorMessage("please add an audio and fill title and tags", context);
+      return;
+    }
+
+    // Create a AlertDialog
+    AlertDialog alertDialog = AlertDialog(
+      title: Text("Do you want to post this audio?"),
+      actions: [
+        // OK button
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+          ),
+          child: Text('No', style: TextStyle(color: Colors.black)),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF6A1B9A),
+          ),
+          child: Text('Yes', style: TextStyle(color: Colors.white)),
+          onPressed: () {
+            print("post audio");
+            if (interstitialAd != null) {
+              interstitialAd!.show();
+            } else {
+              print("interstitialAd is null");
+            }
+            postAudio();
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+
+    // Show the alert dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alertDialog;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        postAudio();
+        showConfirmAlert(context);
       },
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         Icon(Icons.send),
@@ -512,7 +696,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        fixedSize: Size(170, 35), // Set the width and height of the button
+        fixedSize: Size(250, 50), // Set the width and height of the button
         backgroundColor:
             Color(0xFF6A1B9A), // Set the background color of the button
       ),

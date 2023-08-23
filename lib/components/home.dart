@@ -1,10 +1,14 @@
+import 'package:Ilili/components/addPost.dart';
+import 'package:Ilili/components/appRouter.dart';
+import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ilili/components/UserProfilePage.dart';
-import 'package:ilili/components/changeProfile.dart';
-import 'package:ilili/components/setUsername.dart';
+import 'package:Ilili/components/UserProfilePage.dart';
+import 'package:Ilili/components/changeProfile.dart';
+import 'package:Ilili/components/messageList.dart';
+import 'package:Ilili/components/setUsername.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:Ilili/components/widget.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -21,6 +25,7 @@ class _HomePageState extends State<HomePage> {
     "username": "",
     "profilPicture": "",
   };
+  int unreadMessages = 0;
   TextEditingController textEditingController = TextEditingController();
   late CollectionReference<Map<String, dynamic>> usersCollectionRef;
   List<dynamic> posts = [];
@@ -31,6 +36,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     checkUsername();
     getFeedPosts();
+    getNumbersLastMessage();
     setState(() {
       usersCollectionRef = firestore.collection('users');
     });
@@ -46,53 +52,106 @@ class _HomePageState extends State<HomePage> {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => SetUsernamePage()));
     } else {
-      setState(() {
-        userInfo['username'] = ds.get('username');
-        userInfo['profilPicture'] = ds.get('profilePicture');
-      });
+      if (mounted) {
+        setState(() {
+          userInfo['username'] = ds.get('username');
+          userInfo['profilPicture'] = ds.get('profilePicture');
+        });
+      }
+    }
+  }
+
+  void getNumbersLastMessage() async {
+    DocumentSnapshot userDoc =
+        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+    int _unreadMessages = 0;
+
+    List<String> chats = List<String>.from(userDoc['chats']);
+    List<dynamic> result = [];
+    String lastMessage = '';
+    for (String chatId in chats) {
+      QuerySnapshot<Map<String, dynamic>> chatSnapshot = await firestore
+          .collection('chats')
+          .doc(auth.currentUser!.uid)
+          .collection(chatId)
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .get();
+      if (chatSnapshot.docs.isNotEmpty) {
+        if (!chatSnapshot.docs.first['read']) {
+          _unreadMessages++;
+        }
+      }
+      if (mounted) {
+        setState(() {
+          unreadMessages = _unreadMessages;
+        });
+      }
     }
   }
 
   Future<void> getFeedPosts() async {
-    // Retrieve the Firestore posts collection
-    CollectionReference<Map<String, dynamic>> postsCollectionRef =
-        firestore.collection('posts');
+    try {
+      // Retrieve the Firestore posts collection
+      CollectionReference<Map<String, dynamic>> postsCollectionRef =
+          firestore.collection('posts');
 
-    // Query the posts collection and order by weighted score
-    QuerySnapshot<Map<String, dynamic>> querySnapshot =
-        await postsCollectionRef.get();
+      // Query the posts collection and order by weighted score
+      QuerySnapshot<Map<String, dynamic>> querySnapshot =
+          await postsCollectionRef.get();
 
-    // Extract the post documents and convert them to Post objects with weighted score
-    List<Post> postslist = querySnapshot.docs.map((doc) {
-      String user = doc.get('userId');
-      int score = doc.get('score');
-      Timestamp timestamp = doc.get('timestamp');
-      double weightedScore =
-          score.toDouble() * 0.7 + timestamp.seconds.toDouble() * 0.3;
+      // Extract the post documents and convert them to Post objects with weighted score
+      List<Post> postslist = querySnapshot.docs.map((doc) {
+        String user = doc.get('userId');
+        int score = doc.get('score');
+        Timestamp timestamp = doc.get('timestamp');
+        double weightedScore =
+            score.toDouble() * 0.7 + timestamp.seconds.toDouble() * 0.3;
 
-      return Post(
-        userId: user,
-        postId: doc.id,
-        weightedScore: weightedScore,
-        // Add other properties as per your Post class definition
-      );
-    }).toList();
+        return Post(
+          userId: user,
+          postId: doc.id,
+          weightedScore: weightedScore,
+          // Add other properties as per your Post class definition
+        );
+      }).toList();
 
-    // Sort the posts based on weighted score
-    postslist.sort((a, b) => b.weightedScore.compareTo(a.weightedScore));
+      // Sort the posts based on weighted score
+      postslist.sort((a, b) => b.weightedScore.compareTo(a.weightedScore));
 
-    setState(() {
-      posts = postslist;
-    });
-    return;
+      setState(() {
+        posts = postslist;
+      });
+      return;
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  void redirectToAddPost(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => AppRouter(index : 1)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Search"),
+        backgroundColor: Colors.purple.withOpacity(0.1),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            redirectToAddPost(context);
+          },
+          child: Icon(Icons.add),
           backgroundColor: Color(0xFF6A1B9A),
+        ),
+        appBar: AppBar(
+          title: Text(
+            "Search",
+            style: TextStyle(color: Colors.grey),
+          ),
+          backgroundColor: Color(0xFFFAFAFA),
           actions: [
             IconButton(
               onPressed: () {
@@ -100,35 +159,90 @@ class _HomePageState extends State<HomePage> {
                     context: context,
                     delegate: SearchDelegateWidget(usersCollectionRef));
               },
-              icon: Icon(Icons.search),
+              icon: Icon(
+                Icons.search,
+                color: Colors.black,
+              ),
             ),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  posts = [];
-                });
-                getFeedPosts();
-              },
-              icon: Icon(Icons.refresh),
-            ),
+            unreadMessages == 0
+                ? IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MessageListPage()));
+                    },
+                    icon: Icon(
+                      Icons.message,
+                      color: Colors.black,
+                    ),
+                  )
+                : Stack(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MessageListPage()));
+                        },
+                        icon: Icon(Icons.message, color: Colors.black),
+                      ),
+                      if (unreadMessages > 0)
+                        Positioned(
+                          top: 5,
+                          right: 5,
+                          child: Container(
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.red,
+                            ),
+                            child: Text(
+                              unreadMessages.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  )
           ],
         ),
         body: SingleChildScrollView(
+            child: DelayedDisplay(
+          delay: Duration(milliseconds: 300),
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (Post post in posts)
-                  AudioPlayerWidget(
-                    postId: post.postId,
-                    userId: post.userId,
-                    isOwner: false,
-                    isComment: false,
+            child: posts.length == 0
+                ? Container(
+                    height: 200,
+                    child: Center(
+                      child: Text(
+                        "No posts yet, please follow users to see their posts.",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (Post post in posts)
+                        AudioPlayerWidget(
+                          postId: post.postId,
+                          userId: post.userId,
+                          isOwner: post.userId == auth.currentUser!.uid,
+                          inPostPage: false,
+                        ),
+                    ],
                   ),
-              ],
-            ),
           ),
-        ));
+        )));
   }
 }
 

@@ -1,6 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:ilili/components/changeProfile.dart';
+import 'package:Ilili/components/changeProfile.dart';
+import 'package:Ilili/components/chat.dart';
+import 'package:Ilili/components/settings.dart';
+import 'package:Ilili/components/widget.dart';
+
+import 'notification.dart';
+
+FirebaseFirestore firestore = FirebaseFirestore.instance;
+FirebaseAuth auth = FirebaseAuth.instance;
 
 class FloatingActionButtonOwner extends StatefulWidget {
   FloatingActionButtonOwner({Key? key}) : super(key: key);
@@ -64,13 +73,15 @@ class _FloatingActionButtonOwnerState extends State<FloatingActionButtonOwner> {
       elevation: 8,
     ).then((selectedValue) {
       if (selectedValue == "User Account") {
-        print('Selected value: $selectedValue');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ChangeProfilePage()),
         );
       } else if (selectedValue == "Settings") {
-        print("Settings");
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => SettingsPage()),
+        );
       } else if (selectedValue == "Logout") {
         logout();
       }
@@ -114,11 +125,14 @@ class FloatingActionButtonUser extends StatefulWidget {
 class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
   bool isOpen = false;
   List<dynamic> followingList = [];
+  String username = "";
+  String profilePicture = "";
+  String myusername = "";
 
   @override
   void initState() {
+    getUsersInformations();
     super.initState();
-    getFollowers();
   }
 
   void toggleMenu() {
@@ -127,7 +141,7 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
     });
   }
 
-  void getFollowers() async {
+  void getUsersInformations() async {
     firestore
         .collection('users')
         .doc(widget.ownerId)
@@ -136,6 +150,19 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
       if (documentSnapshot.exists) {
         setState(() {
           followingList = documentSnapshot['followers'];
+          username = documentSnapshot['username'];
+          profilePicture = documentSnapshot['profilePicture'];
+        });
+      }
+    });
+    firestore
+        .collection('users')
+        .doc(auth.currentUser!.uid)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        setState(() {
+          myusername = documentSnapshot['username'];
         });
       }
     });
@@ -161,6 +188,13 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
       });
       setState(() {
         followingList.add(auth.currentUser!.uid);
+      });
+      sendNotificationToTopic(
+          "follow", "New followers", "$myusername started to following you", {
+        "sender": auth.currentUser!.uid,
+        "receiver": widget.ownerId,
+        "type": "follow",
+        "click_action": "FLUTTER_FOLLOW_CLICK",
       });
     }
   }
@@ -204,6 +238,17 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
         print('Selected value: $selectedValue');
         follow();
       }
+      if (selectedValue == "Message") {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ChatPage(
+                    userId: widget.ownerId,
+                    username: username,
+                    profilePicture: profilePicture,
+                  )),
+        );
+      }
       toggleMenu();
     }).whenComplete(() {
       setState(() {
@@ -227,6 +272,33 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
       },
       backgroundColor: Color(0xFF6A1B9A),
       child: isOpen ? Icon(Icons.close) : Icon(Icons.menu),
+    );
+  }
+}
+
+class FloatingActionButtonUserMessage extends StatefulWidget {
+  const FloatingActionButtonUserMessage({super.key});
+
+  @override
+  State<FloatingActionButtonUserMessage> createState() =>
+      _FloatingActionButtonUserMessageState();
+}
+
+class _FloatingActionButtonUserMessageState
+    extends State<FloatingActionButtonUserMessage> {
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      backgroundColor: Color(0xFF6A1B9A),
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return UsersListModal();
+          },
+        );
+      },
+      child: Icon(Icons.add),
     );
   }
 }

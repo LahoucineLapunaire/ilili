@@ -9,18 +9,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 
-class ResetPassword extends StatefulWidget {
-  const ResetPassword({Key? key}) : super(key: key);
+class ResetEmail extends StatefulWidget {
+  const ResetEmail({Key? key}) : super(key: key);
 
   @override
-  _ResetPasswordState createState() => _ResetPasswordState();
+  _ResetEmailState createState() => _ResetEmailState();
 }
 
-class _ResetPasswordState extends State<ResetPassword> {
+class _ResetEmailState extends State<ResetEmail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFAFAFA),
+      backgroundColor: Color(0xFFECEFF1),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -49,7 +49,7 @@ class TextTop extends StatelessWidget {
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(
-              "Reset Password",
+              "Change Email",
               style: TextStyle(
                 fontFamily: GoogleFonts.poppins().fontFamily,
                 fontSize: 24,
@@ -57,7 +57,7 @@ class TextTop extends StatelessWidget {
               ),
             ),
             Text(
-              "Enter your email to reset your password",
+              "Enter your new email",
               style: TextStyle(
                 fontFamily: GoogleFonts.poppins().fontFamily,
                 fontSize: 18,
@@ -80,28 +80,20 @@ class EmailSection extends StatefulWidget {
 
 class _EmailSectionState extends State<EmailSection> {
   TextEditingController emailController = TextEditingController();
-  bool confirmation = false;
 
-  Future<void> sendPasswordResetEmail() async {
+  Future<void> sendEmailResetEmail() async {
     showErrorMessage("All fields must be filled", context);
     if (emailController.text == '') {
       return;
     }
     try {
-      await auth
-          .sendPasswordResetEmail(email: emailController.text)
-          .then((value) {
-        setState(() {
-          confirmation = true;
-        });
-      });
-      showInfoMessage('Password reset email sent successfully', context, () {
+      await auth.currentUser?.updateEmail(emailController.text);
+      showInfoMessage('Email changed successfully', context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
-      print('Password reset email sent successfully');
     } catch (e) {
       showErrorMessage(e.toString().split('] ')[1], context);
-      print('Error sending password reset email: $e');
+      print('Error sending Email reset email : \n $e');
     }
   }
 
@@ -111,24 +103,6 @@ class _EmailSectionState extends State<EmailSection> {
         width: 300,
         child: Column(
           children: [
-            if (confirmation)
-              Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Row(
-                  children: [
-                    Icon(Icons.check, color: Colors.green),
-                    SizedBox(width: 5),
-                    Container(
-                      width: 250,
-                      child: Text(
-                        "Password reset email sent successfully, please check your email",
-                        style: TextStyle(
-                            color: Colors.green, fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  ],
-                ),
-              ),
             TextField(
               controller: emailController,
               decoration: InputDecoration(
@@ -144,10 +118,10 @@ class _EmailSectionState extends State<EmailSection> {
             SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                sendPasswordResetEmail();
+                sendEmailResetEmail();
               },
               child: Text(
-                "Reset Password",
+                "Change Email",
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF6A1B9A),

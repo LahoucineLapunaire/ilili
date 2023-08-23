@@ -1,9 +1,11 @@
+import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ilili/components/changeProfile.dart';
-import 'package:ilili/components/floattingButton.dart';
-import 'package:ilili/components/widget.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:Ilili/components/floattingButton.dart';
+import 'package:Ilili/components/settings.dart';
+import 'package:Ilili/components/widget.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -14,15 +16,20 @@ class OwnerProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xFFECEFF1),
-        floatingActionButton: FloatingActionButtonOwner(),
+        backgroundColor: Color(0xFFFAFAFA),
         body: SingleChildScrollView(
           child: Center(
               child: Column(
             children: [
-              SizedBox(height: 30),
-              TopSection(),
-              PostSection(),
+              SizedBox(height: 30,),
+              DelayedDisplay(
+                child: TopSection(),
+                delay: Duration(microseconds: 500),
+              ),
+              DelayedDisplay(
+                child: PostSection(),
+                delay: Duration(microseconds: 800),
+              ),
             ],
           )),
         ));
@@ -43,6 +50,7 @@ class _TopSectionState extends State<TopSection> {
   String description = "";
   List<dynamic> followers = [];
   List<dynamic> followings = [];
+  bool isPictureLoad = false;
 
   @override
   void initState() {
@@ -62,6 +70,7 @@ class _TopSectionState extends State<TopSection> {
     setState(() {
       username = ds.get('username');
       profilPicture = ds.get('profilePicture');
+      isPictureLoad = true;
       description = ds.get('description');
       followers = ds.get('followers');
       followings = ds.get('followings');
@@ -72,14 +81,10 @@ class _TopSectionState extends State<TopSection> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: Offset(0, 3), // changes the position of the shadow
-            ),
-          ],
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(50),
+            topRight: Radius.circular(50),
+          ),
           gradient: LinearGradient(
             colors: [
               Color(0xFF6A1B9A),
@@ -87,41 +92,137 @@ class _TopSectionState extends State<TopSection> {
             ],
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
-          )),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey,
+              offset: const Offset(
+                        0.0,
+                        5.0,
+                      ),
+                      blurRadius: 5.0,
+            )
+          ]),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            height: 150,
-            width: 150,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(75),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.4),
-                  spreadRadius: 1,
-                  blurRadius: 2,
-                  offset: const Offset(0, 1),
+          SizedBox(height: 20,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+             IconButton(
+              icon: Icon(Icons.settings, color: Colors.black),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsPage()),
+                );
+              },
+            ),
+            SizedBox(width: 10,)
+          ],),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return FollowersListModal();
+                    },
+                  );
+                },
+                child: Column(
+                  children: [
+                    Text(
+                      "${followers.length}",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      "followers",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(200),
-              child: Image.network(
-                "$profilPicture",
-                fit: BoxFit.cover,
               ),
-            ),
+              Container(
+                padding: const EdgeInsets.all(4),
+                height: 120,
+                width: 120,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(75),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.4),
+                      spreadRadius: 1,
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: isPictureLoad
+                    ? SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(profilPicture),
+                        ),
+                      )
+                    : Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.grey,
+                        ),
+                      ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return FollowingsListModal();
+                    },
+                  );
+                },
+                child: Column(
+                  children: [
+                    Text(
+                      "${followings.length}",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      "followings",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 10),
           Text(
             "$username",
             style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white),
           ),
           SizedBox(height: 20),
           Container(
@@ -129,31 +230,14 @@ class _TopSectionState extends State<TopSection> {
             child: Text(
               "$description",
               style: TextStyle(
-                fontSize: 15,
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
                 color: Colors.white,
               ),
             ),
           ),
           SizedBox(height: 20),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(
-              "${followers.length} followers",
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(width: 10),
-            Text(
-              "${followings.length} following",
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(width: 20)
-          ]),
-          SizedBox(height: 25),
         ],
       ),
     );
@@ -187,25 +271,51 @@ class _PostSectionState extends State<PostSection> {
         .where("userId", isEqualTo: auth.currentUser!.uid)
         .get();
 
+    List<Map<dynamic, dynamic>> postslist = qs.docs.map((doc) {
+      Timestamp timestamp = doc.get('timestamp');
+      double newTimestamp = timestamp.seconds.toDouble();
+
+      return {
+        "id": doc.id,
+        "timestamp": newTimestamp,
+      };
+    }).toList();
+
+    // Sort the posts based on weighted score
+    postslist.sort((a, b) => b["timestamp"].compareTo(a["timestamp"]));
+
     setState(() {
-      posts = qs.docs.map((e) => e.id).toList();
+      posts = postslist.map((e) => e["id"]).toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      shrinkWrap: true,
-      physics: ClampingScrollPhysics(),
-      children: [
-        for (var post in posts)
-          AudioPlayerWidget(
-            postId: post,
-            userId: auth.currentUser!.uid,
-            isOwner: true,
-            isComment: false,
-          ),
-      ],
-    );
+    return posts.length == 0
+        ? Container(
+            height: 200,
+            child: Center(
+              child: Text(
+                "No posts yet, to add a post, please go to the add Post page",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          )
+        : ListView(
+            shrinkWrap: true,
+            physics: ClampingScrollPhysics(),
+            children: [
+              for (var post in posts)
+                AudioPlayerWidget(
+                  postId: post,
+                  userId: auth.currentUser!.uid,
+                  isOwner: true,
+                  inPostPage: false,
+                ),
+            ],
+          );
   }
 }
