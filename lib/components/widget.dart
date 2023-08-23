@@ -1361,7 +1361,7 @@ void showErrorMessage(String message, BuildContext context) {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Oh snap!",
+                        Text("There is a problem",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,

@@ -142,7 +142,7 @@ class _FormSectionState extends State<FormSection> {
       showErrorMessage("Passwords must be the same", context);
       return;
     }
-    if (passwordStrength != "Strong") {
+    if (passwordStrength != "") {
       showErrorMessage("Password must be strong", context);
       return;
     }
@@ -204,6 +204,9 @@ class _FormSectionState extends State<FormSection> {
     setState(() {
       passwordStrength = message;
     });
+    print(passwordStrength);
+    print(passwordController.text);
+    print(message);
   }
 
   @override

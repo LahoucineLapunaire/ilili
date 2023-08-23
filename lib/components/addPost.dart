@@ -212,14 +212,10 @@ class _ButtonSectionState extends State<ButtonSection> {
         print('Existing file deleted');
       }
       await checkPermission();
-      print('--------------->Here1');
       audioRecorder = FlutterSoundRecorder();
-      print('--------------->Here2');
       // Start recording audio
       await audioRecorder?.openRecorder();
-      print('--------------->Here3');
       await audioRecorder!.startRecorder(toFile: 'audio.aac');
-      print('--------------->Here4');
       setState(() {
         isRecording = true;
       });
@@ -236,16 +232,13 @@ class _ButtonSectionState extends State<ButtonSection> {
         await audioRecorder!.stopRecorder();
         await audioRecorder!.closeRecorder();
         audioRecorder = null;
-        print("Recording stopped");
-        setState(() {
-          audioPath = 'audio.aac';
-          isRecording = false;
-        });
-
         String filePath = '/data/user/0/com.example.ilili/cache/audio.aac';
-        audioPath = filePath;
+        setState(() {
+          audioPath = filePath;
+          isRecording = false;
+          audioPlayer.setSourceUrl(audioPath);
+        });
       }
-      ;
     } catch (e) {
       showErrorMessage(e.toString(), context);
       print('Error stopping recording or playing audio: $e');
@@ -383,7 +376,6 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
         await audioPlayer.pause();
         setState(() => isPlaying = false);
       } else {
-        print(audioPath);
         await audioPlayer.play(UrlSource(audioPath));
         setState(() => isPlaying = true);
       }
@@ -409,37 +401,38 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-              onPressed: () {
-                playPause();
-              },
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(formatPosition(position.inMilliseconds)),
-                Slider(
-                  activeColor: Color(0xFF6A1B9A),
-                  inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
-                  min: 0.0,
-                  max: audioDuration.inSeconds.toDouble(),
-                  value: position.inSeconds.toDouble(),
-                  onChanged: (double value) {
-                    setState(() {
-                      _seekToSecond(value.toInt());
-                      value = value;
-                    });
-                  },
-                ),
-                Text(formatPosition(audioDuration.inMilliseconds)),
-              ],
-            )
-          ],
-        )
+        if (audioPath != '')
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                onPressed: () {
+                  playPause();
+                },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(formatPosition(position.inMilliseconds)),
+                  Slider(
+                    activeColor: Color(0xFF6A1B9A),
+                    inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
+                    min: 0.0,
+                    max: audioDuration.inSeconds.toDouble(),
+                    value: position.inSeconds.toDouble(),
+                    onChanged: (double value) {
+                      setState(() {
+                        _seekToSecond(value.toInt());
+                        value = value;
+                      });
+                    },
+                  ),
+                  Text(formatPosition(audioDuration.inMilliseconds)),
+                ],
+              )
+            ],
+          )
       ],
     );
   }
@@ -618,12 +611,6 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       posts.add(name);
       String title = titleController.text;
 
-      if (title == "" || tagsList.isEmpty || audioPath == "") {
-        showErrorMessage(
-            "please add an audio and fill title and tags", context);
-        return;
-      }
-
       Reference postRef = storageRef.child(name);
       UploadTask uploadTask = postRef.putFile(File(audioPath));
 
@@ -663,6 +650,11 @@ class _SendButtonSectionState extends State<SendButtonSection> {
   }
 
   void showConfirmAlert(BuildContext context) {
+    if (titleController.text == "" || tagsList.isEmpty || audioPath == "") {
+      showErrorMessage("please add an audio and fill title and tags", context);
+      return;
+    }
+
     // Create a AlertDialog
     AlertDialog alertDialog = AlertDialog(
       title: Text("Do you want to post this audio?"),
