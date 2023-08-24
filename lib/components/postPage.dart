@@ -11,8 +11,8 @@ import 'appRouter.dart';
 
 String sortType = "newest";
 List<dynamic> commentList = [];
-
 FirebaseAuth auth = FirebaseAuth.instance;
+
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 class PostPage extends StatefulWidget {
@@ -79,11 +79,7 @@ class _PostPageState extends State<PostPage> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () {
-              Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AppRouter(index: 0),
-        ));
+              Navigator.pop(context);
             },
           ),
           title: Text(
@@ -142,7 +138,7 @@ class _PostPageState extends State<PostPage> {
                       } else {
                         return CommentSection();
                       }
-                    })
+                    }),
               ],
             ),
           ),)
