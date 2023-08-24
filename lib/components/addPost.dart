@@ -627,7 +627,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => AppRouter(index: 1),
+          builder: (context) => AppRouter(index: 0),
         ),
       );
     } catch (e) {

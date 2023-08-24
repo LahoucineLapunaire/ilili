@@ -222,25 +222,47 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
         ),
         SizedBox(height: 15),
         Container(
-          width: 300,
-          child: Container(
-            height: 200,
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: TextField(
-              controller: descriptionController,
-              maxLength: 250,
-              maxLines: null,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Write your comment ...',
-              ),
-            ),
-          ),
-        )
+                  height: 200,
+                  width: 300,
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Stack(
+                    children: [
+                      TextField(
+                        maxLines: null,
+                        controller: descriptionController,
+                        maxLength: 250,
+                        decoration: InputDecoration(
+                          hintMaxLines: null,
+                          border: InputBorder.none,
+                          counterText: "",
+                          hintText: 'Write your description ...',
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8),
+                              bottomRight: Radius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            '${descriptionController.text.length}/250',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
       ],
     );
   }

@@ -7,9 +7,12 @@ import 'package:intl/intl.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:mailer/mailer.dart';
 
+import 'appRouter.dart';
+
 String sortType = "newest";
 List<dynamic> commentList = [];
 
+FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 class PostPage extends StatefulWidget {
@@ -76,7 +79,11 @@ class _PostPageState extends State<PostPage> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AppRouter(index: 0),
+        ));
             },
           ),
           title: Text(
@@ -100,22 +107,16 @@ class _PostPageState extends State<PostPage> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Color(0xFF6A1B9A),
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (BuildContext context) {
-                return CommentModal(
-                  postId: widget.postId,
-                );
-              },
-            );
-          },
-          child: Icon(Icons.comment),
-        ),
         body: SingleChildScrollView(
-          child: Center(
+          child: WillPopScope(onWillPop: (){
+            Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AppRouter(index: 0),
+        ));
+        return Future.value(false);
+          },
+          child : Center(
             child: Column(
               children: [
                 AudioPlayerWidget(
@@ -144,7 +145,7 @@ class _PostPageState extends State<PostPage> {
                     })
               ],
             ),
-          ),
+          ),)
         ));
   }
 }

@@ -475,11 +475,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                           : null,
                     ),
                     onPressed: () {
-                      if (widget.isOwner) {
-                        print("likes: $likes");
-                      } else {
-                        likePost();
-                      }
+                      likePost();
                     },
                   ),
                   SizedBox(width: 5),
@@ -819,9 +815,14 @@ class _CommentModalState extends State<CommentModal> {
         "click_action": "FLUTTER_COMMENT_CLICK",
       });
       Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PostPage(postId: widget.postId, userId: ownerId, isOwner: ownerId == auth.currentUser!.uid,)),
-                );
+        context,
+        MaterialPageRoute(
+            builder: (context) => PostPage(
+                  postId: widget.postId,
+                  userId: ownerId,
+                  isOwner: ownerId == auth.currentUser!.uid,
+                )),
+      );
     } catch (e) {
       print("Error posting comment : ${e.toString()}");
     }
@@ -866,14 +867,38 @@ class _CommentModalState extends State<CommentModal> {
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: TextField(
-                    maxLines: null,
-                    controller: commentController,
-                    maxLength: 250,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Write your comment ...',
-                    ),
+                  child: Stack(
+                    children: [
+                      TextField(
+                        maxLines: null,
+                        controller: commentController,
+                        maxLength: 250,
+                        decoration: InputDecoration(
+                          hintMaxLines: null,
+                          border: InputBorder.none,
+                          counterText: "",
+                          hintText: 'Write your comment ...',
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8),
+                              bottomRight: Radius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            '${commentController.text.length}/250',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(height: 20),
@@ -1546,4 +1571,3 @@ void showInfoMessage(
     ),
   );
 }
-

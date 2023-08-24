@@ -64,6 +64,7 @@ class _TopSectionState extends State<TopSection> {
   void initState() {
     super.initState();
     getUserData();
+    getMyUsername();
   }
 
   void follow() async {

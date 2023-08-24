@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/chat.dart';
 import 'package:Ilili/components/floattingButton.dart';
 
+import 'appRouter.dart';
+
 final FirebaseFirestore firestore = FirebaseFirestore.instance;
 final FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -24,7 +26,8 @@ class _MessageListPageState extends State<MessageListPage> {
   }
 
   getConversation() async {
-    DocumentSnapshot userDoc =
+    try {
+      DocumentSnapshot userDoc =
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
 
     List<String> chats = List<String>.from(userDoc['chats']);
@@ -51,6 +54,9 @@ class _MessageListPageState extends State<MessageListPage> {
     setState(() {
       chatList = result;
     });
+    } catch (e) {
+      print("Error getting conversations : $e");
+    }
   }
 
   @override
@@ -62,7 +68,11 @@ class _MessageListPageState extends State<MessageListPage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AppRouter(index: 0),
+        ));
           },
         ),
         title: Text(
@@ -75,13 +85,21 @@ class _MessageListPageState extends State<MessageListPage> {
           ),
         ),
       ),
-      body: Center(
+      body: WillPopScope(onWillPop:(){
+        Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AppRouter(index: 0),
+        ));
+        return Future.value(false);
+      }, child:Center(
         child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
           stream: firestore
               .collection('users')
               .doc(auth.currentUser!.uid)
               .snapshots(),
           builder: (context, userSnapshot) {
+            print(userSnapshot.connectionState);
             if (userSnapshot.connectionState == ConnectionState.waiting) {
               return CircularProgressIndicator();
             }
@@ -137,7 +155,7 @@ class _MessageListPageState extends State<MessageListPage> {
             );
           },
         ),
-      ),
+      ),)
     );
   }
 }
