@@ -39,11 +39,5 @@
             <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-5863565056037942~7198521751"/>
-            <meta-data
-        android:name="com.google.firebase.messaging.default_notification_icon"
-        android:resource="@drawable/ic_stat_logo" />
-    <meta-data
-        android:name="com.google.firebase.messaging.default_notification_color"
-        android:resource="@color/colorAccent" />
     </application>
 </manifest>
