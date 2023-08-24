@@ -168,36 +168,6 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
     });
   }
 
-  void follow() async {
-    if (followingList.contains(auth.currentUser!.uid)) {
-      firestore.collection('users').doc(widget.ownerId).update({
-        'followers': FieldValue.arrayRemove([auth.currentUser!.uid])
-      });
-      firestore.collection('users').doc(auth.currentUser!.uid).update({
-        'following': FieldValue.arrayRemove([widget.ownerId])
-      });
-      setState(() {
-        followingList.remove(auth.currentUser!.uid);
-      });
-    } else {
-      firestore.collection('users').doc(widget.ownerId).update({
-        'followers': FieldValue.arrayUnion([auth.currentUser!.uid])
-      });
-      firestore.collection('users').doc(auth.currentUser!.uid).update({
-        'followings': FieldValue.arrayUnion([widget.ownerId])
-      });
-      setState(() {
-        followingList.add(auth.currentUser!.uid);
-      });
-      sendNotificationToTopic(
-          "follow", "New followers", "$myusername started to following you", {
-        "sender": auth.currentUser!.uid,
-        "receiver": widget.ownerId,
-        "type": "follow",
-        "click_action": "FLUTTER_FOLLOW_CLICK",
-      });
-    }
-  }
 
   void showPopupMenu(BuildContext context) {
     final RenderBox button = context.findRenderObject() as RenderBox;
@@ -236,7 +206,6 @@ class _FloatingActionButtonUserState extends State<FloatingActionButtonUser> {
     ).then((selectedValue) {
       if (selectedValue == "Follow") {
         print('Selected value: $selectedValue');
-        follow();
       }
       if (selectedValue == "Message") {
         Navigator.push(

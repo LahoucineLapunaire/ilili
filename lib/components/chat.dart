@@ -11,6 +11,8 @@ FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 CollectionReference chatRef = firestore.collection('chats');
 List<DocumentSnapshot> messageList = [];
+String myUsername = "";
+String myProfilePicture = "";
 
 class ChatPage extends StatefulWidget {
   final String userId;
@@ -29,9 +31,11 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final ScrollController scrollController = ScrollController();
+  
 
   void initState() {
     super.initState();
+    getMyInfo();
     // Use addPostFrameCallback to perform actions after widget is built
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       Future.delayed(Duration(milliseconds: 500), () {
@@ -43,6 +47,18 @@ class _ChatPageState extends State<ChatPage> {
   void scrollToBottom() {
     try {
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  getMyInfo() async{
+    try {
+      DocumentSnapshot documentSnapshot = await firestore.collection("users").doc(auth.currentUser?.uid).get();
+      setState(() {
+        myProfilePicture = documentSnapshot.get("profilePicture");
+        myUsername = documentSnapshot.get("username");
+      });
     } catch (e) {
       print(e.toString());
     }
@@ -87,7 +103,8 @@ class _ChatPageState extends State<ChatPage> {
             controller: scrollController,
             child: Center(
               child: Column(
-                children: [ListSection(widget.userId)],
+                children: [ListSection(widget.userId),
+                SizedBox(width: 50,)],
               ),
             )));
   }
@@ -190,7 +207,7 @@ class MessageField extends StatelessWidget {
           textField.clear();
         });
       });
-      sendNotificationToTopic("chat", "$username", "${textField.text}", {
+      sendNotificationToTopic("chat", "$myUsername", "${textField.text}", myProfilePicture,{
         "sender": auth.currentUser!.uid,
         "receiver": otherUserID,
         "type": "chat",

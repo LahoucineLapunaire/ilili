@@ -58,13 +58,14 @@ class _TopSectionState extends State<TopSection> {
   List<dynamic> followers = [];
   List<dynamic> followings = [];
   String myUsername = "";
+  String myProfilePicture = "";
   bool isPictureLoad = false;
 
   @override
   void initState() {
     super.initState();
     getUserData();
-    getMyUsername();
+    getMyInfo();
   }
 
   void follow() async {
@@ -89,7 +90,7 @@ class _TopSectionState extends State<TopSection> {
         followers.add(auth.currentUser!.uid);
       });
       sendNotificationToTopic(
-          "follow", "New followers", "$myUsername started to following you", {
+          "follow", "New followers", "$myUsername started to following you",myProfilePicture ,{
         "sender": auth.currentUser!.uid,
         "receiver": widget.userId,
         "type": "follow",
@@ -117,12 +118,14 @@ class _TopSectionState extends State<TopSection> {
     });
   }
 
-  void getMyUsername() async {
+  void getMyInfo() async {
     DocumentSnapshot ds =
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
 
     setState(() {
+      myProfilePicture = ds.get('profilePicture');
       myUsername = ds.get('username');
+
     });
   }
 

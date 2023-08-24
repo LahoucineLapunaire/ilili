@@ -808,7 +808,7 @@ class _CommentModalState extends State<CommentModal> {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
       sendNotificationToTopic(
-          "comment", "New comment !", "$username commented on your post !", {
+          "comment", "New comment !", "$username commented on your post !",myProfilePicture ,{
         "sender": auth.currentUser!.uid,
         "receiver": ownerId,
         "type": "comment",
