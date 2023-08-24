@@ -296,9 +296,10 @@ class GoogleLoginForm extends StatefulWidget {
 class _GoogleLoginFormState extends State<GoogleLoginForm> {
   Future<void> signupWithGoogle() async {
     try {
-      print("Signing up with Google");
       // Trigger the Google sign-in flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      print(googleUser);
 
       if (googleUser != null) {
         // Obtain the authentication details from the Google sign-in
@@ -338,7 +339,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
             'username': '',
             'posts': [],
             'followers': [],
-            'following': [],
+            'followings': [],
             'description': '',
           });
 

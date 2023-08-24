@@ -144,6 +144,7 @@ class _TitleSectionState extends State<TitleSection> {
       width: 300,
       child: TextField(
         controller: titleController,
+        maxLength: 30,
         decoration: InputDecoration(
           filled: true,
           prefixIcon: Icon(Icons.title),
@@ -464,6 +465,7 @@ class _TagsSectionState extends State<TagsSection> {
         children: [
           TextField(
             controller: tagController,
+            maxLength: 30,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,

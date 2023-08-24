@@ -42,7 +42,6 @@ class _SettingsPageState extends State<SettingsPage> {
           .get()
           .then((value) {
         setState(() {
-          subscription = value.data()?['subscription'];
           username = value.data()?['username'];
         });
       });
@@ -174,13 +173,20 @@ class _NotificationSectionState extends State<NotificationSection> {
   bool chat = true;
   bool comments = true;
 
+  @override
+  void initState(){
+    super.initState();
+    getNotificationState();
+  }
+
   void getNotificationState() async {
     try {
+      
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
-        followers = prefs.getBool("followerNotificaiton") ?? true;
-        chat = prefs.getBool("chatNotificaiton") ?? true;
-        comments = prefs.getBool("commentNotificaiton") ?? true;
+        followers = prefs.getBool("followerNotification") ?? true;
+        chat = prefs.getBool("chatNotification") ?? true;
+        comments = prefs.getBool("commentNotification") ?? true;
       });
     } catch (e) {
       print("Error: $e");
@@ -188,8 +194,13 @@ class _NotificationSectionState extends State<NotificationSection> {
   }
 
   void setValues(String pref, bool value) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool(pref, value);
+    try {
+     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool(pref, value); 
+    } catch (e) {
+      print("Error: ${e.toString()}");
+    }
+    
   }
 
   @override
@@ -226,7 +237,7 @@ class _NotificationSectionState extends State<NotificationSection> {
                 setState(() {
                   followers = value;
                 });
-                setValues("followerNotificaiton", value);
+                setValues("followerNotification", value);
               },
             ),
           ),
@@ -246,7 +257,7 @@ class _NotificationSectionState extends State<NotificationSection> {
                 setState(() {
                   chat = value;
                 });
-                setValues("chatNotificaiton", value);
+                setValues("chatNotification", value);
               },
             ),
           ),
@@ -266,7 +277,7 @@ class _NotificationSectionState extends State<NotificationSection> {
                 setState(() {
                   comments = value;
                 });
-                setValues("commentNotificaiton", value);
+                setValues("commentNotification", value);
               },
             ),
           ),

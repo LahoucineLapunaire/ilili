@@ -112,10 +112,15 @@ class _TopSectionState extends State<TopSection> {
              IconButton(
               icon: Icon(Icons.settings, color: Colors.black),
               onPressed: () {
-                Navigator.push(
+                try {
+                  Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => SettingsPage()),
                 );
+                } catch (e) {
+                  print("Error: ${e.toString()}");
+                }
+                
               },
             ),
             SizedBox(width: 10,)

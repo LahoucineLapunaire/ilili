@@ -21,29 +21,11 @@ class UserProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFFAFAFA),
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          "Profile",
-          style: TextStyle(
-            fontFamily: GoogleFonts.poppins().fontFamily,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        backgroundColor: Color(0xFFFAFAFA),
-        shadowColor: Colors.transparent,
-      ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
+              SizedBox(height: 30,),
               DelayedDisplay(
                 child: TopSection(userId: userId),
                 delay: Duration(microseconds: 500),

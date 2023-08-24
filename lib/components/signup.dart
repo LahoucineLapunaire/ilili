@@ -1,15 +1,10 @@
 import 'package:delayed_display/delayed_display.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart';
-import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:Ilili/components/PrivacyPolicy.dart';
 import 'package:Ilili/components/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:Ilili/components/termsOfService.dart';
 import 'package:Ilili/components/widget.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -482,53 +477,46 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
 
   Future<void> signupWithGoogle() async {
     try {
-      // Trigger the Google sign-in flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+     if (googleUser != null) {
+    // Obtain the authentication details from the Google sign-in
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
 
-      print(googleUser?.email.toString());
+    // Create a new credential using the Google ID token and access token
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
 
-      if (googleUser != null) {
-        // Obtain the authentication details from the Google sign-in
-        final GoogleSignInAuthentication googleAuth =
-            await googleUser.authentication;
+    // Sign in to Firebase with the Google credential
+    final UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithCredential(credential);
 
-        // Create a new credential using the Google ID token and access token
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
+    final String uid = userCredential.user!.uid;
 
-        // Sign in to Firebase with the Google credential
-        final UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithCredential(credential);
+    // Check if the user already exists
+    final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
-        final String uid = userCredential.user!.uid;
-
-        // Check if the user already exists
-        final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-            await FirebaseFirestore.instance.collection('users').doc(uid).get();
-
-        if (userSnapshot.exists) {
-        } else {
-          // User does not exist, create a new document in Firestore
-          await firestore.collection('users').doc(uid).set({
-            'profilePicture':
-                'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
-            'username': '',
-            'posts': [],
-            'followers': [],
-            'followings': [],
-            'chats': [],
-            'description': 'mydescription',
-            'subscription': false,
-          });
-        }
-      }
+    if (userSnapshot.exists) {
+    } else {
+      // User does not exist, create a new document in Firestore
+      await firestore.collection('users').doc(uid).set({
+        'profilePicture':
+            'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
+        'username': '',
+        'posts': [],
+        'followers': [],
+        'followings': [],
+        'chats': [],
+        'description': 'mydescription',
+        'subscription': false,
+      });
+    }
+  }
     } catch (e) {
-      print("error google signup");
-      if (mounted) {
-        showErrorMessage(e.toString().split('] ')[1], context);
-      }
+      print("error signing up with google: ${e}");
     }
   }
 

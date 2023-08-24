@@ -208,6 +208,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
           width: 300,
           child: TextField(
             controller: usernameController,
+            maxLength: 20,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
@@ -231,6 +232,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
             ),
             child: TextField(
               controller: descriptionController,
+              maxLength: 250,
               maxLines: null,
               decoration: InputDecoration(
                 border: InputBorder.none,

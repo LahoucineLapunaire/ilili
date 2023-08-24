@@ -869,6 +869,7 @@ class _CommentModalState extends State<CommentModal> {
                   child: TextField(
                     maxLines: null,
                     controller: commentController,
+                    maxLength: 250,
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: 'Write your comment ...',
@@ -1361,60 +1362,90 @@ class _ReportModalState extends State<ReportModal> {
 }
 
 void showErrorMessage(String message, BuildContext context) {
+  final int maxLength = 30;
+  final List<String> words = message.split(' ');
+
+  List<String> lines = [];
+  String currentLine = '';
+
+  for (String word in words) {
+    if (currentLine.isEmpty) {
+      currentLine = word;
+    } else if ((currentLine + ' ' + word).length <= maxLength) {
+      currentLine += ' ' + word;
+    } else {
+      lines.add(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine.isNotEmpty) {
+    lines.add(currentLine);
+  }
+
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Stack(
         children: [
           Container(
-              padding: EdgeInsets.all(16),
-              height: 90,
-              decoration: BoxDecoration(
-                  color: Color(0xFFC72C41),
-                  borderRadius: BorderRadius.all(Radius.circular(20))),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(width: 20),
-                  Icon(Icons.error_outline, color: Colors.white),
-                  SizedBox(width: 10),
-                  Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("There is a problem",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                            )),
-                        Flexible(
-                          child: Text(
-                            message,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.visible,
+            padding: EdgeInsets.all(16),
+            height: 90 + (lines.length - 1) * 20.0,
+            decoration: BoxDecoration(
+              color: Color(0xFFC72C41),
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(width: 20),
+                Icon(Icons.error_outline, color: Colors.white),
+                SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "There is a problem",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Column(
+                      children: lines.map((line) {
+                        return Text(
+                          line,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
                           ),
-                        ),
-                      ]),
-                ],
-              )),
+                          maxLines: 2,
+                          overflow: TextOverflow.visible,
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           Positioned(
-              top: -6,
-              left: 0,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.close),
-                    color: Colors.white,
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    },
-                  ),
-                ],
-              ))
+            top: -6,
+            left: 0,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.close),
+                  color: Colors.white,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  },
+                ),
+              ],
+            ),
+          ),
         ],
       ),
       behavior: SnackBarBehavior.floating,
@@ -1426,56 +1457,87 @@ void showErrorMessage(String message, BuildContext context) {
 
 void showInfoMessage(
     String message, BuildContext context, VoidCallback hideCallback) {
+  final int maxLength = 30;
+  final List<String> words = message.split(' ');
+
+  List<String> lines = [];
+  String currentLine = '';
+
+  for (String word in words) {
+    if (currentLine.isEmpty) {
+      currentLine = word;
+    } else if ((currentLine + ' ' + word).length <= maxLength) {
+      currentLine += ' ' + word;
+    } else {
+      lines.add(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine.isNotEmpty) {
+    lines.add(currentLine);
+  }
+
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Stack(
         children: [
           Container(
-              padding: EdgeInsets.all(16),
-              height: 90,
-              decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 44, 199, 57),
-                  borderRadius: BorderRadius.all(Radius.circular(20))),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(width: 60),
-                  Icon(Icons.verified, color: Colors.white),
-                  SizedBox(width: 10),
-                  Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("Good!",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                            )),
-                        Text(message,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis),
-                      ]),
-                ],
-              )),
+            padding: EdgeInsets.all(16),
+            height: 90 + (lines.length - 1) * 20.0,
+            decoration: BoxDecoration(
+              color: Color.fromARGB(255, 44, 199, 57),
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(width: 60),
+                Icon(Icons.verified, color: Colors.white),
+                SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Good!",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Column(
+                      children: lines.map((line) {
+                        return Text(
+                          line,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           Positioned(
-              top: -6,
-              left: 0,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.close),
-                    color: Colors.white,
-                    onPressed: () {
-                      hideCallback;
-                    },
-                  ),
-                ],
-              ))
+            top: -6,
+            left: 0,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.close),
+                  color: Colors.white,
+                  onPressed: hideCallback,
+                ),
+              ],
+            ),
+          ),
         ],
       ),
       behavior: SnackBarBehavior.floating,
@@ -1484,3 +1546,4 @@ void showInfoMessage(
     ),
   );
 }
+
