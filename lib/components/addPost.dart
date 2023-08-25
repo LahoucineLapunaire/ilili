@@ -661,10 +661,10 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           ),
           child: Text('Yes', style: TextStyle(color: Colors.white)),
           onPressed: () {
-            print("post audio");
             if (interstitialAd != null) {
               interstitialAd!.show();
             } else {
+              postAudio();
               print("interstitialAd is null");
             }
             postAudio();

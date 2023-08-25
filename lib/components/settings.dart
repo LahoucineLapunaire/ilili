@@ -174,14 +174,13 @@ class _NotificationSectionState extends State<NotificationSection> {
   bool comments = true;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     getNotificationState();
   }
 
   void getNotificationState() async {
     try {
-      
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
         followers = prefs.getBool("followerNotification") ?? true;
@@ -195,12 +194,11 @@ class _NotificationSectionState extends State<NotificationSection> {
 
   void setValues(String pref, bool value) async {
     try {
-     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool(pref, value); 
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool(pref, value);
     } catch (e) {
       print("Error: ${e.toString()}");
     }
-    
   }
 
   @override

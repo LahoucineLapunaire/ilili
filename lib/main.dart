@@ -59,12 +59,15 @@ Future<bool> checkPermission() async {
   var status = await Permission.storage.request();
   if (status != PermissionStatus.granted) {
     print('Permission not granted');
+    checkPermission();
+    return false;
   }
   if (await Permission.microphone.request().isGranted) {
     print('Permission granted');
     return true;
   } else {
     print('Permission denied');
+    checkPermission();
     return false;
   }
 }
@@ -159,7 +162,9 @@ class Logged extends StatelessWidget {
         primaryColor: Color(0xFF6A1B9A), // Change this to your desired color
       ),
       title: 'ilili',
-      home: AppRouter(index: 0,),
+      home: AppRouter(
+        index: 0,
+      ),
     );
   }
 }

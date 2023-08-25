@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<void> sendNotificationToTopic(String topic, String title, String body,String image,
-    Map<dynamic, dynamic> jsonData) async {
+Future<void> sendNotificationToTopic(String topic, String title, String body,
+    String image, Map<dynamic, dynamic> jsonData) async {
   var credential = await obtainCredentials().then((value) {
     return value.accessToken.data as String;
   });
@@ -22,11 +22,7 @@ Future<void> sendNotificationToTopic(String topic, String title, String body,Str
   final data = {
     "message": {
       "topic": topic,
-      "notification": {
-        "title": title,
-        "body": body,
-        "image": image
-      },
+      "notification": {"title": title, "body": body, "image": image},
       "data": jsonData
     }
   };

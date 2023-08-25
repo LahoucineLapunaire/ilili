@@ -82,8 +82,8 @@ class _EmailSectionState extends State<EmailSection> {
   TextEditingController emailController = TextEditingController();
 
   Future<void> sendEmailResetEmail() async {
-    showErrorMessage("All fields must be filled", context);
     if (emailController.text == '') {
+      showErrorMessage("All fields must be filled", context);
       return;
     }
     try {
