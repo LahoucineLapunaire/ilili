@@ -27,39 +27,40 @@ class ChangeProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFFFAFAFA),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          "Profile",
-          style: TextStyle(
-            fontFamily: GoogleFonts.poppins().fontFamily,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Color(0xFFFAFAFA),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          title: Text(
+            "Profile",
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
         ),
-      ),
-      backgroundColor: Color(0xFFFAFAFA),
-      body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          HeaderSection(),
-          SizedBox(height: 25),
-          ProfilPictureSection(),
-          SizedBox(height: 25),
-          UserInfoWidget(),
-          SizedBox(height: 25),
-          ChangeInfoButton(),
-        ],
-      )),
-    );
+        backgroundColor: Color(0xFFFAFAFA),
+        body: SingleChildScrollView(
+          child: Center(
+              child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              HeaderSection(),
+              SizedBox(height: 25),
+              ProfilPictureSection(),
+              SizedBox(height: 25),
+              UserInfoWidget(),
+              SizedBox(height: 25),
+              ChangeInfoButton(),
+            ],
+          )),
+        ));
   }
 }
 
@@ -172,10 +173,14 @@ class UserInfoWidget extends StatefulWidget {
 }
 
 class _UserInfoWidgetState extends State<UserInfoWidget> {
+  List<String> usernameList = [];
+  String error = "";
+
   @override
   void initState() {
     super.initState();
     getUserInfo();
+    getAllUsername();
   }
 
   Future<void> getUserInfo() async {
@@ -187,10 +192,65 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
 
     if (snapshot.exists) {
       setState(() {
+        username = snapshot.data()!['username'] ?? '';
         usernameController.text = snapshot.data()!['username'] ?? '';
         descriptionController.text = snapshot.data()!['description'] ?? '';
       });
     }
+  }
+
+  Future<void> getAllUsername() async {
+    QuerySnapshot querySnapshot =
+        await FirebaseFirestore.instance.collection("users").get();
+
+    for (int i = 0; i < querySnapshot.docs.length; i++) {
+      usernameList.add(querySnapshot.docs[i].get('username'));
+    }
+  }
+
+  bool containsSpacesOrSpecialCharacters(String input) {
+    RegExp regex = RegExp(r'[^\w,]');
+    return regex.hasMatch(input);
+  }
+
+  bool checkUsername() {
+    if (username == usernameController.text) {
+      print("here");
+      setState(() {
+        error = "";
+      });
+      return true;
+    }
+    if (usernameList.contains(usernameController.text)) {
+      setState(
+        () {
+          error = "Username already exists";
+        },
+      );
+      return false;
+    }
+    if (containsSpacesOrSpecialCharacters(usernameController.text)) {
+      setState(
+        () {
+          error = "Username cannot contain spaces or special characters";
+        },
+      );
+      return false;
+    }
+    if (usernameController.text.length > 20) {
+      setState(
+        () {
+          error = "Username cannot be more than 20 characters";
+        },
+      );
+      return false;
+    }
+    setState(
+      () {
+        error = "";
+      },
+    );
+    return true;
   }
 
   @override
@@ -209,6 +269,9 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
           child: TextField(
             controller: usernameController,
             maxLength: 20,
+            onChanged: (value) {
+              checkUsername();
+            },
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
@@ -220,49 +283,69 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
             ),
           ),
         ),
+        SizedBox(height: 5),
+        if (error != "")
+          Padding(
+            padding: EdgeInsets.only(bottom: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error, color: Colors.red),
+                SizedBox(width: 5),
+                Text(
+                  error,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontFamily: GoogleFonts.poppins().fontFamily,
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
         SizedBox(height: 15),
         Container(
-                  height: 200,
-                  width: 300,
-                  padding: EdgeInsets.all(10),
+          height: 200,
+          width: 300,
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Stack(
+            children: [
+              TextField(
+                maxLines: null,
+                controller: descriptionController,
+                maxLength: 250,
+                decoration: InputDecoration(
+                  hintMaxLines: null,
+                  border: InputBorder.none,
+                  counterText: "",
+                  hintText: 'Write your description ...',
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      bottomRight: Radius.circular(8),
+                    ),
                   ),
-                  child: Stack(
-                    children: [
-                      TextField(
-                        maxLines: null,
-                        controller: descriptionController,
-                        maxLength: 250,
-                        decoration: InputDecoration(
-                          hintMaxLines: null,
-                          border: InputBorder.none,
-                          counterText: "",
-                          hintText: 'Write your description ...',
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(8),
-                              bottomRight: Radius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            '${descriptionController.text.length}/250',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    '${descriptionController.text.length}/250',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -321,9 +404,6 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
 
   void changeUserInfo() async {
     try {
-      print("username: ${usernameController.text}");
-      print("description: ${descriptionController.text}");
-      print("profilePicture: $profilePicture");
       if (usernameController.text == "" || descriptionController.text == null) {
         showErrorMessage("Please fill in all fields", context);
         return;
@@ -331,7 +411,11 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
       if (checkUsername() == false) {
         return;
       }
-
+      if (usernameList.contains(usernameController.text) &&
+          username != usernameController.text) {
+        showErrorMessage("Username already exists", context);
+        return;
+      }
       if (profilePicture.isEmpty) {
         showErrorMessage("Please select a profile picture", context);
         return;

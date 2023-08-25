@@ -157,8 +157,8 @@ class _FormSectionState extends State<FormSection> {
         'posts': [],
         'followers': [],
         'followings': [],
-        'description': '',
         'chats': [],
+        'description': '',
       });
 
       print('User signed up and document created successfully!');
@@ -478,43 +478,45 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
   Future<void> signupWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-     if (googleUser != null) {
-    // Obtain the authentication details from the Google sign-in
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+      if (googleUser != null) {
+        // Obtain the authentication details from the Google sign-in
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
 
-    // Create a new credential using the Google ID token and access token
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+        // Create a new credential using the Google ID token and access token
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
 
-    // Sign in to Firebase with the Google credential
-    final UserCredential userCredential =
-        await FirebaseAuth.instance.signInWithCredential(credential);
+        // Sign in to Firebase with the Google credential
+        final UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithCredential(credential);
 
-    final String uid = userCredential.user!.uid;
+        final String uid = userCredential.user!.uid;
 
-    // Check if the user already exists
-    final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        // Check if the user already exists
+        final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+            await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
-    if (userSnapshot.exists) {
-    } else {
-      // User does not exist, create a new document in Firestore
-      await firestore.collection('users').doc(uid).set({
-        'profilePicture':
-            'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
-        'username': '',
-        'posts': [],
-        'followers': [],
-        'followings': [],
-        'chats': [],
-        'description': 'mydescription',
-        'subscription': false,
-      });
-    }
-  }
+        if (userSnapshot.exists) {
+        } else {
+          // User does not exist, create a new document in Firestore
+          await firestore.collection('users').doc(uid).set({
+            'profilePicture':
+                'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
+            'username': '',
+            'posts': [],
+            'followers': [],
+            'followings': [],
+            'chats': [],
+            'description': 'mydescription',
+            'subscription': false,
+          }).then((value) {
+            print("User added");
+          });
+        }
+      }
     } catch (e) {
       print("error signing up with google: ${e}");
     }

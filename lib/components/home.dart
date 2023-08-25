@@ -65,7 +65,6 @@ class _HomePageState extends State<HomePage> {
     DocumentSnapshot userDoc =
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
     int _unreadMessages = 0;
-
     List<String> chats = List<String>.from(userDoc['chats']);
     List<dynamic> result = [];
     String lastMessage = '';
@@ -131,7 +130,7 @@ class _HomePageState extends State<HomePage> {
   void redirectToAddPost(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AppRouter(index : 1)),
+      MaterialPageRoute(builder: (context) => AppRouter(index: 1)),
     );
   }
 
@@ -148,13 +147,13 @@ class _HomePageState extends State<HomePage> {
         ),
         appBar: AppBar(
           backgroundColor: Color(0xFFFAFAFA),
-          title : SizedBox(
-                        height: 40,
-                        width: 40,
-                        child: CircleAvatar(
-                          backgroundImage: AssetImage('assets/images/ic_launcher.png'),
-                        ),
-                      ),
+          title: SizedBox(
+            height: 40,
+            width: 40,
+            child: CircleAvatar(
+              backgroundImage: AssetImage('assets/images/ic_launcher.png'),
+            ),
+          ),
           centerTitle: true,
           actions: [
             unreadMessages == 0

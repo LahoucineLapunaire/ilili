@@ -215,7 +215,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       // Delete the post document in Firestore
       await firestore.collection('posts').doc(widget.postId).delete();
       Navigator.push(context,
-          MaterialPageRoute(builder: (context) => AppRouter(index: 0)));
+          MaterialPageRoute(builder: (context) => AppRouter(index: 2)));
       dispose();
     } catch (e) {
       print("Error: $e");
@@ -807,8 +807,8 @@ class _CommentModalState extends State<CommentModal> {
       showInfoMessage("Comment is posted !", context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
-      sendNotificationToTopic(
-          "comment", "New comment !", "$username commented on your post !",myProfilePicture ,{
+      sendNotificationToTopic("comment", "New comment !",
+          "$username commented on your post !", myProfilePicture, {
         "sender": auth.currentUser!.uid,
         "receiver": ownerId,
         "type": "comment",

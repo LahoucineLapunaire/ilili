@@ -17,6 +17,7 @@ class SetUsernamePage extends StatefulWidget {
 class _SetUsernamePageState extends State<SetUsernamePage> {
   TextEditingController usernameController = TextEditingController();
   List<String> usernameList = [];
+  String error = "";
 
   @override
   void initState() {
@@ -40,18 +41,34 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
 
   bool checkUsername() {
     if (usernameList.contains(usernameController.text)) {
-      showErrorMessage("Username already exists", context);
+      setState(
+        () {
+          error = "Username already exists";
+        },
+      );
       return false;
     }
     if (containsSpacesOrSpecialCharacters(usernameController.text)) {
-      showErrorMessage(
-          "Username cannot contain spaces or special characters", context);
+      setState(
+        () {
+          error = "Username cannot contain spaces or special characters";
+        },
+      );
       return false;
     }
     if (usernameController.text.length > 20) {
-      showErrorMessage("Username cannot be longer than 20 characters", context);
+      setState(
+        () {
+          error = "Username cannot be more than 20 characters";
+        },
+      );
       return false;
     }
+    setState(
+      () {
+        error = "";
+      },
+    );
     return true;
   }
 
@@ -102,6 +119,26 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
                 ),
               ),
             ),
+            SizedBox(height: 5),
+            if (error != "")
+              Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error, color: Colors.red),
+                    SizedBox(width: 5),
+                    Text(
+                      error,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: GoogleFonts.poppins().fontFamily,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
             SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {

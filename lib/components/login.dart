@@ -340,6 +340,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
             'posts': [],
             'followers': [],
             'followings': [],
+            'chats': [],
             'description': '',
           });
 
