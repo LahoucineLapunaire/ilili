@@ -37,7 +37,7 @@ class _AddPostPageState extends State<AddPostPage> {
   void dispose() {
     audioPath = '';
     tagsList = [];
-    audioPlayer.release();
+    titleController.clear();
     audioPlayer.dispose();
     super.dispose();
   }
@@ -247,6 +247,12 @@ class _ButtonSectionState extends State<ButtonSection> {
       showErrorMessage(e.toString(), context);
       print("Error while picking the file: ${e.toString()}");
     }
+  }
+
+  @override
+  void dispose() {
+    audioRecorder?.closeRecorder();
+    super.dispose();
   }
 
   @override

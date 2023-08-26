@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> sendNotificationToTopic(String topic, String title, String body,
@@ -22,7 +21,11 @@ Future<void> sendNotificationToTopic(String topic, String title, String body,
   final data = {
     "message": {
       "topic": topic,
-      "notification": {"title": title, "body": body, "image": image},
+      "notification": {
+        "title": title,
+        "body": body,
+        "image": image,
+      },
       "data": jsonData
     }
   };

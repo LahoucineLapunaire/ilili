@@ -31,7 +31,6 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final ScrollController scrollController = ScrollController();
-  
 
   void initState() {
     super.initState();
@@ -52,9 +51,10 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  getMyInfo() async{
+  getMyInfo() async {
     try {
-      DocumentSnapshot documentSnapshot = await firestore.collection("users").doc(auth.currentUser?.uid).get();
+      DocumentSnapshot documentSnapshot =
+          await firestore.collection("users").doc(auth.currentUser?.uid).get();
       setState(() {
         myProfilePicture = documentSnapshot.get("profilePicture");
         myUsername = documentSnapshot.get("username");
@@ -103,8 +103,9 @@ class _ChatPageState extends State<ChatPage> {
             controller: scrollController,
             child: Center(
               child: Column(
-                children: [ListSection(widget.userId),
-                SizedBox(width: 50,)],
+                children: [
+                  ListSection(widget.userId),
+                ],
               ),
             )));
   }
@@ -168,36 +169,64 @@ class _ListSectionState extends State<ListSection> {
             ),
           );
         }
-        return Column(
-          children: messageList.map((document) {
-            return document['userId'] == auth.currentUser?.uid
-                ? CurrentUserMessage(document['message'], document['timestamp'],
-                    document["read"])
-                : OtherUserMessage(document['message'], document['timestamp']);
-          }).toList(),
+        return Container(
+          margin: EdgeInsets.only(bottom: 50),
+          child: Column(
+            children: messageList.map((document) {
+              return document['userId'] == auth.currentUser?.uid
+                  ? CurrentUserMessage(document['message'],
+                      document['timestamp'], document["read"])
+                  : OtherUserMessage(
+                      document['message'], document['timestamp']);
+            }).toList(),
+          ),
         );
       },
     );
   }
 }
 
-class MessageField extends StatelessWidget {
+class MessageField extends StatefulWidget {
   final String otherUserID;
   final String username;
-  final textField = TextEditingController();
+
   MessageField(this.otherUserID, this.username, {Key? key}) : super(key: key);
 
+  @override
+  _MessageFieldState createState() => _MessageFieldState();
+}
+
+class _MessageFieldState extends State<MessageField> {
+  final textField = TextEditingController();
+  EdgeInsets margin = EdgeInsets.zero;
+
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    textField.dispose();
+    super.dispose();
+  }
+
   Future<void> sendMessage() async {
+    if (textField.text.isEmpty) {
+      return;
+    }
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd – kk:mm:ss').format(now);
     try {
-      chatRef.doc(auth.currentUser?.uid).collection(otherUserID).add({
+      chatRef.doc(auth.currentUser?.uid).collection(widget.otherUserID).add({
         'message': textField.text,
         'userId': auth.currentUser?.uid,
         'timestamp': formattedDate,
         'read': true,
       }).then((value) {
-        chatRef.doc(otherUserID).collection(auth.currentUser?.uid ?? "").add({
+        chatRef
+            .doc(widget.otherUserID)
+            .collection(auth.currentUser?.uid ?? "")
+            .add({
           'message': textField.text,
           'userId': auth.currentUser?.uid,
           'timestamp': formattedDate,
@@ -207,9 +236,10 @@ class MessageField extends StatelessWidget {
           textField.clear();
         });
       });
-      sendNotificationToTopic("chat", "$myUsername", "${textField.text}", myProfilePicture,{
+      sendNotificationToTopic(
+          "chat", "$myUsername", "${textField.text}", myProfilePicture, {
         "sender": auth.currentUser!.uid,
-        "receiver": otherUserID,
+        "receiver": widget.otherUserID,
         "type": "chat",
         "click_action": "FLUTTER_CHAT_CLICK",
       });
@@ -218,28 +248,42 @@ class MessageField extends StatelessWidget {
     }
   }
 
-  addConversation() async {
+  void addConversation() async {
     try {
       DocumentSnapshot documentSnapshot =
           await firestore.collection("users").doc(auth.currentUser?.uid).get();
       List<dynamic> chats = documentSnapshot.get("chats");
-      if (!chats.contains(otherUserID)) {
-        chats.add(otherUserID);
+      if (!chats.contains(widget.otherUserID)) {
+        chats.add(widget.otherUserID);
         firestore.collection("users").doc(auth.currentUser?.uid).update({
           "chats": chats,
         });
       }
       documentSnapshot =
-          await firestore.collection("users").doc(otherUserID).get();
+          await firestore.collection("users").doc(widget.otherUserID).get();
       chats = documentSnapshot.get("chats");
       if (!chats.contains(auth.currentUser?.uid)) {
         chats.add(auth.currentUser?.uid);
-        firestore.collection("users").doc(otherUserID).update({
+        firestore.collection("users").doc(widget.otherUserID).update({
           "chats": chats,
         });
       }
     } catch (e) {
       print(e.toString());
+    }
+  }
+
+  void changeMargin(bool isFocused) {
+    if (isFocused) {
+      print("focused");
+      setState(() {
+        margin = EdgeInsets.only(bottom: 50);
+      });
+    } else {
+      print("not focused");
+      setState(() {
+        margin = EdgeInsets.only(bottom: 0);
+      });
     }
   }
 

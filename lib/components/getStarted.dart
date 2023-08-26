@@ -46,8 +46,21 @@ class GetStartedPage extends StatelessWidget {
                 style: TextStyle(
                     fontFamily: GoogleFonts.poppins().fontFamily,
                     fontSize: 18,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w600,
                     color: Colors.white),
+              )),
+          SizedBox(height: 20),
+          DelayedDisplay(
+              delay: Duration(milliseconds: 1200),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  "Ilili is in a beta version, we are working hard to make it better. Please report any bug you find.",
+                  style: TextStyle(
+                      fontFamily: GoogleFonts.poppins().fontFamily,
+                      fontSize: 16,
+                      color: Colors.white),
+                ),
               )),
           SizedBox(height: 50),
           DelayedDisplay(

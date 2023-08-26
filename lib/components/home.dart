@@ -142,7 +142,7 @@ class _HomePageState extends State<HomePage> {
           onPressed: () {
             redirectToAddPost(context);
           },
-          child: Icon(Icons.add),
+          child: Icon(Icons.add, color: Colors.white),
           backgroundColor: Color(0xFF6A1B9A),
         ),
         appBar: AppBar(
@@ -201,7 +201,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                     ],
-                  )
+                  ),
           ],
         ),
         body: SingleChildScrollView(
@@ -231,6 +231,7 @@ class _HomePageState extends State<HomePage> {
                           isOwner: post.userId == auth.currentUser!.uid,
                           inPostPage: false,
                         ),
+                      SizedBox(height: 100),
                     ],
                   ),
           ),

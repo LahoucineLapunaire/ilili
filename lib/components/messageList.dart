@@ -28,32 +28,32 @@ class _MessageListPageState extends State<MessageListPage> {
   getConversation() async {
     try {
       DocumentSnapshot userDoc =
-        await firestore.collection('users').doc(auth.currentUser!.uid).get();
+          await firestore.collection('users').doc(auth.currentUser!.uid).get();
 
-    List<String> chats = List<String>.from(userDoc['chats']);
-    List<dynamic> result = [];
-    String lastMessage = '';
-    for (String chatId in chats) {
-      QuerySnapshot<Map<String, dynamic>> chatSnapshot = await firestore
-          .collection('chats')
-          .doc(auth.currentUser!.uid)
-          .collection(chatId)
-          .orderBy('timestamp', descending: true)
-          .limit(1)
-          .get();
-      if (chatSnapshot.docs.isNotEmpty) {
-        lastMessage = chatSnapshot.docs.first['message'];
-      } else {
-        lastMessage = '';
+      List<String> chats = List<String>.from(userDoc['chats']);
+      List<dynamic> result = [];
+      String lastMessage = '';
+      for (String chatId in chats) {
+        QuerySnapshot<Map<String, dynamic>> chatSnapshot = await firestore
+            .collection('chats')
+            .doc(auth.currentUser!.uid)
+            .collection(chatId)
+            .orderBy('timestamp', descending: true)
+            .limit(1)
+            .get();
+        if (chatSnapshot.docs.isNotEmpty) {
+          lastMessage = chatSnapshot.docs.first['message'];
+        } else {
+          lastMessage = '';
+        }
+        result.add({
+          'userId': chatId,
+          'lastMessage': lastMessage,
+        });
       }
-      result.add({
-        'userId': chatId,
-        'lastMessage': lastMessage,
+      setState(() {
+        chatList = result;
       });
-    }
-    setState(() {
-      chatList = result;
-    });
     } catch (e) {
       print("Error getting conversations : $e");
     }
@@ -62,101 +62,103 @@ class _MessageListPageState extends State<MessageListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButtonUserMessage(),
-      appBar: AppBar(
-        backgroundColor: Color(0xFFFAFAFA),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AppRouter(index: 0),
-        ));
-          },
-        ),
-        title: Text(
-          "Message",
-          style: TextStyle(
-            fontFamily: GoogleFonts.poppins().fontFamily,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+        floatingActionButton: FloatingActionButtonUserMessage(),
+        appBar: AppBar(
+          backgroundColor: Color(0xFFFAFAFA),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AppRouter(index: 0),
+                  ));
+            },
+          ),
+          title: Text(
+            "Message",
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
         ),
-      ),
-      body: WillPopScope(onWillPop:(){
-        Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AppRouter(index: 0),
-        ));
-        return Future.value(false);
-      }, child:Center(
-        child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          stream: firestore
-              .collection('users')
-              .doc(auth.currentUser!.uid)
-              .snapshots(),
-          builder: (context, userSnapshot) {
-            print(userSnapshot.connectionState);
-            if (userSnapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            }
+        body: WillPopScope(
+          onWillPop: () {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AppRouter(index: 0),
+                ));
+            return Future.value(false);
+          },
+          child: Center(
+            child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: firestore
+                  .collection('users')
+                  .doc(auth.currentUser!.uid)
+                  .snapshots(),
+              builder: (context, userSnapshot) {
+                print(userSnapshot.connectionState);
+                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                }
 
-            List<String> chatIds = userSnapshot.data!['chats'] != null
-                ? List<String>.from(userSnapshot.data!['chats'])
-                : [];
+                List<String> chatIds = userSnapshot.data!['chats'] != null
+                    ? List<String>.from(userSnapshot.data!['chats'])
+                    : [];
 
-            if (chatIds.isEmpty) {
-              return Container(
-                height: 200,
-                child: Center(
-                  child: Text(
-                    "No message yet, to start a chat, please press the + button.",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
+                if (chatIds.isEmpty) {
+                  return Container(
+                    height: 200,
+                    child: Center(
+                      child: Text(
+                        "No message yet, to start a chat, please press the + button.",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            }
+                  );
+                }
 
-            return ListView.builder(
-              itemCount: chatIds.length,
-              itemBuilder: (context, index) {
-                return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: firestore
-                      .collection('chats')
-                      .doc(auth.currentUser!.uid)
-                      .collection(chatIds[index])
-                      .orderBy('timestamp', descending: true)
-                      .limit(1)
-                      .snapshots(),
-                  builder: (context, chatSnapshot) {
-                    String lastMessage = chatSnapshot.hasData
-                        ? chatSnapshot.data!.docs.isNotEmpty
-                            ? chatSnapshot.data!.docs.first['message']
-                            : ''
-                        : '';
-                    return UserCardSection(
-                      userId: chatIds[index],
-                      lastMessage: lastMessage,
-                      isRead: chatSnapshot.hasData
-                          ? chatSnapshot.data!.docs.isNotEmpty
-                              ? chatSnapshot.data!.docs.first['read']
-                              : false
-                          : false,
+                return ListView.builder(
+                  itemCount: chatIds.length,
+                  itemBuilder: (context, index) {
+                    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      stream: firestore
+                          .collection('chats')
+                          .doc(auth.currentUser!.uid)
+                          .collection(chatIds[index])
+                          .orderBy('timestamp', descending: true)
+                          .limit(1)
+                          .snapshots(),
+                      builder: (context, chatSnapshot) {
+                        String lastMessage = chatSnapshot.hasData
+                            ? chatSnapshot.data!.docs.isNotEmpty
+                                ? chatSnapshot.data!.docs.first['message']
+                                : ''
+                            : '';
+                        return UserCardSection(
+                          userId: chatIds[index],
+                          lastMessage: lastMessage,
+                          isRead: chatSnapshot.hasData
+                              ? chatSnapshot.data!.docs.isNotEmpty
+                                  ? chatSnapshot.data!.docs.first['read']
+                                  : false
+                              : false,
+                        );
+                      },
                     );
                   },
                 );
               },
-            );
-          },
-        ),
-      ),)
-    );
+            ),
+          ),
+        ));
   }
 }
 
@@ -188,15 +190,22 @@ class _UserCardSectionState extends State<UserCardSection> {
 
   getUserInfo() {
     firestore.collection('users').doc(widget.userId).get().then((value) {
-      setState(() {
-        username = value['username'];
-        profilePicture = value['profilePicture'];
-        isPictureLoaded = true;
-        if (widget.lastMessage.length > 20) {
-          message = widget.lastMessage.substring(0, 20) + '...';
-        }
-      });
+      if (mounted) {
+        setState(() {
+          username = value['username'];
+          profilePicture = value['profilePicture'];
+          isPictureLoaded = true;
+          if (widget.lastMessage.length > 20) {
+            message = widget.lastMessage.substring(0, 20) + '...';
+          }
+        });
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override

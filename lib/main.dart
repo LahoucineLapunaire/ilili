@@ -15,11 +15,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  initNotification();
   await checkPermission();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   initSharedPreferences();
   GetKeysFromRemoteConfig();
+  initNotification();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   auth.authStateChanges().listen((User? user) {
     if (user == null) {
       runApp(const UnLogged());
@@ -57,6 +57,7 @@ Future<void> GetKeysFromRemoteConfig() async {
 
 Future<bool> checkPermission() async {
   var status = await Permission.storage.request();
+  Permission.notification.request();
   if (status != PermissionStatus.granted) {
     print('Permission not granted');
     checkPermission();
@@ -74,13 +75,13 @@ Future<bool> checkPermission() async {
 
 void initSharedPreferences() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  if (prefs.getBool("followerNotificaiton") == null) {
+  if (prefs.getBool("followerNotification") == null) {
     prefs.setBool("followerNotificaiton", true);
   }
-  if (prefs.getBool("chatNotificaiton") == null) {
+  if (prefs.getBool("chatNotification") == null) {
     prefs.setBool("chatNotificaiton", true);
   }
-  if (prefs.getBool("commentNotificaiton") == null) {
+  if (prefs.getBool("commentNotification") == null) {
     prefs.setBool("commentNotificaiton", true);
   }
   if (prefs.getString("language") == null) {
@@ -106,32 +107,33 @@ void initNotification() async {
   print('User granted permission: ${settings.authorizationStatus}');
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    bool followerNotificaiton = prefs.getBool("followerNotificaiton")!;
-    bool chatNotificaiton = prefs.getBool("chatNotificaiton")!;
-    bool commentNotificaiton = prefs.getBool("commentNotificaiton")!;
-    if (message.data["receiver"] == auth.currentUser!.uid &&
-        ((message.data["type"] == "follow" && followerNotificaiton) ||
-            (message.data["type"] == "chat" && chatNotificaiton) ||
-            (message.data["type"] == "comment" && commentNotificaiton))) {
-      print("You received a message");
-      print("onMessage: ${message.notification?.body}");
-      print("onMessage: ${message.data}");
+    bool followerNotificaiton = prefs.getBool("followerNotification") ??
+        true && (message.data["type"] == "follow");
+    bool chatNotificaiton = prefs.getBool("chatNotification") ??
+        true && (message.data["type"] == "chat");
+    bool commentNotificaiton = prefs.getBool("commentNotification") ??
+        true && (message.data["type"] == "comment");
+    print("followerNotificaiton : $followerNotificaiton");
+    print("chatNotificaiton : $chatNotificaiton");
+    print("commentNotificaiton : $commentNotificaiton");
+    try {
+      if (message.data["receiver"] == auth.currentUser!.uid &&
+          (followerNotificaiton || chatNotificaiton || commentNotificaiton)) {
+        print("You received a message");
+        print("onMessage: ${message.notification?.body}");
+        print("onMessage: ${message.data}");
+      } else {
+        print("You received a message but you are not allowed to receive it");
+        return;
+      }
+    } catch (e) {
+      print("error in onMessage: ${e.toString()}");
     }
   });
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool followerNotificaiton = prefs.getBool("followerNotificaiton")!;
-  bool chatNotificaiton = prefs.getBool("chatNotificaiton")!;
-  bool commentNotificaiton = prefs.getBool("commentNotificaiton")!;
-  if (message.data["receiver"] == auth.currentUser!.uid &&
-      ((message.data["type"] == "follow" && followerNotificaiton) ||
-          (message.data["type"] == "chat" && chatNotificaiton) ||
-          (message.data["type"] == "comment" && commentNotificaiton))) {
-    print("Handling a background message: ${message.messageId}");
-    print("onMessage: ${message.notification?.body}");
-  }
+  return;
 }
 
 class UnLogged extends StatelessWidget {

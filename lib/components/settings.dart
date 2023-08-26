@@ -13,6 +13,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
@@ -195,6 +196,7 @@ class _NotificationSectionState extends State<NotificationSection> {
   void setValues(String pref, bool value) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await Permission.notification.request();
       prefs.setBool(pref, value);
     } catch (e) {
       print("Error: ${e.toString()}");

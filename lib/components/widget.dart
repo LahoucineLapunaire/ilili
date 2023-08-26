@@ -72,13 +72,6 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     getPostInfo();
   }
 
-  void reloadPage() {
-    setState(() {
-      // Set the flag to trigger a rebuild of the widget
-      shouldReload = true;
-    });
-  }
-
   void getUserInfo() async {
     DocumentSnapshot<Map<String, dynamic>> ds =
         await firestore.collection('users').doc(widget.userId).get();
@@ -519,6 +512,20 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         ],
       ),
     );
+  }
+}
+
+class AudioPlayerProvider extends ChangeNotifier {
+  AudioPlayer ActiveAudioPlayer = AudioPlayer();
+
+  bool isActive(AudioPlayer audioplayer) {
+    return ActiveAudioPlayer == audioplayer;
+  }
+
+  void setActiveAudioPlayer(AudioPlayer audioplayer) {
+    ActiveAudioPlayer.stop();
+    ActiveAudioPlayer = audioplayer;
+    notifyListeners();
   }
 }
 
@@ -1482,6 +1489,7 @@ void showErrorMessage(String message, BuildContext context) {
 
 void showInfoMessage(
     String message, BuildContext context, VoidCallback hideCallback) {
+  print(message);
   final int maxLength = 30;
   final List<String> words = message.split(' ');
 
