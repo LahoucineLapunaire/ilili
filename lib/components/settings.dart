@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/PrivacyPolicy.dart';
@@ -170,10 +171,7 @@ class NotificationSection extends StatefulWidget {
 }
 
 class _NotificationSectionState extends State<NotificationSection> {
-  bool followers = true;
-  bool chat = true;
-  bool comments = true;
-
+  bool notification = false;
   @override
   void initState() {
     super.initState();
@@ -184,9 +182,7 @@ class _NotificationSectionState extends State<NotificationSection> {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
-        followers = prefs.getBool("followerNotification") ?? true;
-        chat = prefs.getBool("chatNotification") ?? true;
-        comments = prefs.getBool("commentNotification") ?? true;
+        notification = prefs.getBool("notification") ?? true;
       });
     } catch (e) {
       print("Error: $e");
@@ -195,9 +191,21 @@ class _NotificationSectionState extends State<NotificationSection> {
 
   void setValues(String pref, bool value) async {
     try {
+      var messaging = FirebaseMessaging.instance;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await Permission.notification.request();
       prefs.setBool(pref, value);
+      setState(() {
+        notification = value;
+      });
+      if (value) {
+        messaging.subscribeToTopic(auth.currentUser!.uid);
+        messaging.subscribeToTopic("general");
+        print("subscribed to topic ${auth.currentUser!.uid}");
+      } else {
+        messaging.unsubscribeFromTopic(auth.currentUser!.uid);
+        messaging.unsubscribeFromTopic("general");
+        print("unsubscribed from topic ${auth.currentUser!.uid}");
+      }
     } catch (e) {
       print("Error: ${e.toString()}");
     }
@@ -221,63 +229,21 @@ class _NotificationSectionState extends State<NotificationSection> {
           ),
           ListTile(
             title: Text(
-              "Followers",
+              "Turn on/off notifications",
               style: TextStyle(
                 fontFamily: GoogleFonts.poppins().fontFamily,
               ),
             ),
-            subtitle: Text("Turn on/off notifications about followers",
+            subtitle: Text(
+                "Turn on/off notifications about followers, chat and comments",
                 style: TextStyle(
                   fontFamily: GoogleFonts.poppins().fontFamily,
                 )),
             trailing: Switch(
               activeColor: Color(0xFF6A1B9A),
-              value: followers,
+              value: notification,
               onChanged: (value) {
-                setState(() {
-                  followers = value;
-                });
-                setValues("followerNotification", value);
-              },
-            ),
-          ),
-          ListTile(
-            title: Text("Chat messages",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-            subtitle: Text("Turn on/off notifications about messages",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-            trailing: Switch(
-              activeColor: Color(0xFF6A1B9A),
-              value: chat,
-              onChanged: (value) {
-                setState(() {
-                  chat = value;
-                });
-                setValues("chatNotification", value);
-              },
-            ),
-          ),
-          ListTile(
-            title: Text("Comments",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-            subtitle: Text("Turn on/off notifications about comments",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-            trailing: Switch(
-              activeColor: Color(0xFF6A1B9A),
-              value: comments,
-              onChanged: (value) {
-                setState(() {
-                  comments = value;
-                });
-                setValues("commentNotification", value);
+                setValues("notification", value);
               },
             ),
           ),

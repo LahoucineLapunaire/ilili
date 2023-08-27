@@ -25,7 +25,9 @@ class UserProfilePage extends StatelessWidget {
         child: Center(
           child: Column(
             children: [
-              SizedBox(height: 30,),
+              SizedBox(
+                height: 30,
+              ),
               DelayedDisplay(
                 child: TopSection(userId: userId),
                 delay: Duration(microseconds: 500),
@@ -89,8 +91,8 @@ class _TopSectionState extends State<TopSection> {
       setState(() {
         followers.add(auth.currentUser!.uid);
       });
-      sendNotificationToTopic(
-          "follow", "New followers", "$myUsername started to following you",myProfilePicture ,{
+      sendNotificationToTopic("${widget.userId}", "New followers",
+          "$myUsername started to following you", myProfilePicture, {
         "sender": auth.currentUser!.uid,
         "receiver": widget.userId,
         "type": "follow",
@@ -125,7 +127,6 @@ class _TopSectionState extends State<TopSection> {
     setState(() {
       myProfilePicture = ds.get('profilePicture');
       myUsername = ds.get('username');
-
     });
   }
 
@@ -149,10 +150,10 @@ class _TopSectionState extends State<TopSection> {
             BoxShadow(
               color: Colors.grey,
               offset: const Offset(
-                        0.0,
-                        5.0,
-                      ),
-                      blurRadius: 5.0,
+                0.0,
+                5.0,
+              ),
+              blurRadius: 5.0,
             )
           ]),
       child: Column(

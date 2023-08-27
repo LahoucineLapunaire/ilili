@@ -236,8 +236,8 @@ class _MessageFieldState extends State<MessageField> {
           textField.clear();
         });
       });
-      sendNotificationToTopic(
-          "chat", "$myUsername", "${textField.text}", myProfilePicture, {
+      sendNotificationToTopic("${widget.otherUserID}", "$myUsername",
+          "${textField.text}", myProfilePicture, {
         "sender": auth.currentUser!.uid,
         "receiver": widget.otherUserID,
         "type": "chat",

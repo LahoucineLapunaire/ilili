@@ -40,7 +40,7 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
   }
 
   bool checkUsername() {
-    if (usernameList.contains(usernameController.text)) {
+    if (usernameList.contains(usernameController.text.toLowerCase())) {
       setState(
         () {
           error = "Username already exists";

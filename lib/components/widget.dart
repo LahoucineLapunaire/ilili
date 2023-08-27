@@ -814,7 +814,7 @@ class _CommentModalState extends State<CommentModal> {
       showInfoMessage("Comment is posted !", context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
-      sendNotificationToTopic("comment", "New comment !",
+      sendNotificationToTopic("$ownerId", "New comment !",
           "$username commented on your post !", myProfilePicture, {
         "sender": auth.currentUser!.uid,
         "receiver": ownerId,

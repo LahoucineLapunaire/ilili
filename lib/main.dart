@@ -1,3 +1,4 @@
+import 'package:Ilili/components/widget.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
@@ -56,33 +57,42 @@ Future<void> GetKeysFromRemoteConfig() async {
 }
 
 Future<bool> checkPermission() async {
-  var status = await Permission.storage.request();
-  Permission.notification.request();
-  if (status != PermissionStatus.granted) {
-    print('Permission not granted');
+  var storageStatus = await Permission.storage.request();
+  if (storageStatus != PermissionStatus.granted) {
+    print('Storage Permission not granted');
     checkPermission();
     return false;
-  }
-  if (await Permission.microphone.request().isGranted) {
-    print('Permission granted');
-    return true;
   } else {
-    print('Permission denied');
+    print('Notification Permission granted');
+  }
+  var notificationStatus = await Permission.notification.request();
+  if (notificationStatus != PermissionStatus.granted) {
+    print('Notification Permission not granted');
     checkPermission();
     return false;
+  } else {
+    print('Storage Permission granted');
   }
+  var microphoneStatus = await Permission.microphone.request();
+  if (microphoneStatus != PermissionStatus.granted) {
+    print('Microphone Permission not granted');
+    checkPermission();
+    return false;
+  } else {
+    print('Microphone Permission granted');
+  }
+  return true;
 }
 
 void initSharedPreferences() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  if (prefs.getBool("followerNotification") == null) {
-    prefs.setBool("followerNotificaiton", true);
-  }
-  if (prefs.getBool("chatNotification") == null) {
-    prefs.setBool("chatNotificaiton", true);
-  }
-  if (prefs.getBool("commentNotification") == null) {
-    prefs.setBool("commentNotificaiton", true);
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  if (prefs.getBool("notification") == null) {
+    prefs.setBool("notification", true);
+
+    if (auth.currentUser != null) {
+      messaging.subscribeToTopic(auth.currentUser!.uid);
+    }
   }
   if (prefs.getString("language") == null) {
     prefs.setString("language", "English");
@@ -91,9 +101,7 @@ void initSharedPreferences() async {
 
 void initNotification() async {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-  await messaging.subscribeToTopic('comment');
-  await messaging.subscribeToTopic('follow');
-  await messaging.subscribeToTopic('chat');
+  messaging.subscribeToTopic("general");
   NotificationSettings settings = await messaging.requestPermission(
     alert: true,
     announcement: false,
@@ -105,34 +113,18 @@ void initNotification() async {
   );
   SharedPreferences prefs = await SharedPreferences.getInstance();
   print('User granted permission: ${settings.authorizationStatus}');
-
+  print("notification init");
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    bool followerNotificaiton = prefs.getBool("followerNotification") ??
-        true && (message.data["type"] == "follow");
-    bool chatNotificaiton = prefs.getBool("chatNotification") ??
-        true && (message.data["type"] == "chat");
-    bool commentNotificaiton = prefs.getBool("commentNotification") ??
-        true && (message.data["type"] == "comment");
-    print("followerNotificaiton : $followerNotificaiton");
-    print("chatNotificaiton : $chatNotificaiton");
-    print("commentNotificaiton : $commentNotificaiton");
-    try {
-      if (message.data["receiver"] == auth.currentUser!.uid &&
-          (followerNotificaiton || chatNotificaiton || commentNotificaiton)) {
-        print("You received a message");
-        print("onMessage: ${message.notification?.body}");
-        print("onMessage: ${message.data}");
-      } else {
-        print("You received a message but you are not allowed to receive it");
-        return;
-      }
-    } catch (e) {
-      print("error in onMessage: ${e.toString()}");
-    }
+    print("You received a message");
+    print("onMessage: ${message.notification?.body}");
+    print("onMessage: ${message.data}");
   });
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("You received a Background message");
+  print("onMessage: ${message.notification?.body}");
+  print("onMessage: ${message.data}");
   return;
 }
 
