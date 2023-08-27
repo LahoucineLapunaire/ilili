@@ -378,7 +378,7 @@ class _PostSectionState extends State<PostSection> {
                 AudioPlayerWidget(
                   postId: post,
                   userId: widget.userId,
-                  isOwner: true,
+                  isOwner: widget.userId == auth.currentUser!.uid,
                   inPostPage: false,
                 ),
             ],
