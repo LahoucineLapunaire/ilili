@@ -6,6 +6,7 @@ class LegalNoticePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Legal Notice'),
+        backgroundColor: Color(0xFF6A1B9A),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),

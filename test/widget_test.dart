@@ -12,7 +12,7 @@ import 'package:Ilili/main.dart';
 import 'package:Ilili/components/getStarted.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('Mock test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const GetStartedPage());
 

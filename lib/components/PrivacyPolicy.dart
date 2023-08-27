@@ -5,6 +5,7 @@ class PrivacyPolicyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xFF6A1B9A),
         title: Text('Legal Notice'),
       ),
       body: SingleChildScrollView(

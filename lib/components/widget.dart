@@ -89,7 +89,6 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     for (var tag in ds.data()!['tags']) {
       _tagsText += ", $tag";
     }
-    _tagsText = _tagsText.substring(2);
     setState(() {
       audioPath = ds.data()!['audio'];
       tags = ds.data()!['tags'];

@@ -138,7 +138,7 @@ class UnLogged extends StatelessWidget {
         theme: ThemeData(
           primaryColor: Color(0xFF6A1B9A), // Change this to your desired color
         ),
-        title: 'ilili',
+        title: 'Ilili',
         home: Scaffold(
           body: GetStartedPage(),
         ));
@@ -155,7 +155,7 @@ class Logged extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Color(0xFF6A1B9A), // Change this to your desired color
       ),
-      title: 'ilili',
+      title: 'Ilili',
       home: AppRouter(
         index: 0,
       ),
