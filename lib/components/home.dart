@@ -9,6 +9,7 @@ import 'package:Ilili/components/messageList.dart';
 import 'package:Ilili/components/setUsername.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:Ilili/components/widget.dart';
+import 'package:provider/provider.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
