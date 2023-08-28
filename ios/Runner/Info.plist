@@ -77,7 +77,6 @@
 
 <key>NSMicrophoneUsageDescription</key>
 <string>Allow access to microphone to record audio</string>
-<string>Network access required</string>
 <key>NSBonjourServices</key>
 <array>
 	<dict>
@@ -85,8 +84,6 @@
 		<string>Editor</string>
 		<key>CFBundleURLSchemes</key>
 		<array>
-			<!-- TODO Replace this value: -->
-			<!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
 			<string>com.googleusercontent.apps.593268336010-8m9pfikeamerfjpoothd9aa83bqa4u84</string>
 		</array>
 	</dict>
