@@ -7,17 +7,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:Ilili/main.dart';
 import 'package:Ilili/components/getStarted.dart';
 
 void main() {
-  testWidgets('Mock test', (WidgetTester tester) async {
+  testWidgets('GetStartedPage test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const GetStartedPage());
+    await tester.pumpWidget(MaterialApp(
+        home: GetStartedPage())); // Wrap the GetStartedPage with MaterialApp
 
-    // Verify that our counter starts at 0.
-    expect(find.text('Ilili: Where your voice matters.'), findsOneWidget);
+    expect(find.text("Ilili: Where your voice matters."), findsOneWidget);
+    expect(find.text('Let\'s Get Started'), findsOneWidget);
     expect(find.text('1'), findsNothing);
   });
 }

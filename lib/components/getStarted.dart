@@ -27,7 +27,7 @@ class GetStartedPage extends StatelessWidget {
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           DelayedDisplay(
               delay: Duration(milliseconds: 500), child: LogoSection()),
-          SizedBox(height: 50),
+          SizedBox(height: 30),
           DelayedDisplay(
               delay: Duration(milliseconds: 800),
               child: Text(
@@ -62,7 +62,7 @@ class GetStartedPage extends StatelessWidget {
                       color: Colors.white),
                 ),
               )),
-          SizedBox(height: 50),
+          SizedBox(height: 20),
           DelayedDisplay(
               delay: Duration(milliseconds: 1500), child: ButtonSetion()),
         ]),
