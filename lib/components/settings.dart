@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/PrivacyPolicy.dart';
@@ -83,11 +84,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   height: 1,
                   thickness: 1,
                 ),
-                NotificationSection(),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                ),
+                if (!kIsWeb) NotificationSection(),
+                if (!kIsWeb)
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                  ),
                 AppSection(),
                 Divider(
                   height: 1,

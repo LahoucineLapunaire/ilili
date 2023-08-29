@@ -8,8 +8,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:Ilili/components/widget.dart';
 
-GoogleSignIn googleSignIn = GoogleSignIn();
-
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -297,7 +295,10 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
   Future<void> signupWithGoogle() async {
     try {
       // Trigger the Google sign-in flow
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn(
+              clientId:
+                  "593268336010-9o5us0954qr95sqrbmcl6j57dm4keib1.apps.googleusercontent.com")
+          .signIn();
 
       print(googleUser);
 

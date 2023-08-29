@@ -1,6 +1,6 @@
-import 'package:Ilili/components/widget.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,18 +10,26 @@ import 'package:Ilili/components/getStarted.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-FirebaseAuth auth = FirebaseAuth.instance;
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  await checkPermission();
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+        options: FirebaseOptions(
+            apiKey: "AIzaSyDWjIzP1Fn3dHcbWCOs1WVf6lFBlcQIYgE",
+            appId: "1:593268336010:web:5ceffd538c530070c71473",
+            messagingSenderId: "593268336010",
+            projectId: "ilili-7ebc6"));
+  } else {
+    await Firebase.initializeApp();
+    await checkPermission();
+    initNotification();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
   initSharedPreferences();
   GetKeysFromRemoteConfig();
-  initNotification();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  auth.authStateChanges().listen((User? user) {
+  FirebaseAuth.instance.authStateChanges().listen((User? user) {
     if (user == null) {
       runApp(const UnLogged());
     } else if (user.emailVerified == false) {
@@ -34,7 +42,7 @@ Future<void> main() async {
 
 Future<void> GetKeysFromRemoteConfig() async {
   try {
-    if (auth.currentUser != null) {
+    if (FirebaseAuth.instance.currentUser != null) {
       // Initialize Firebase Remote Config.
       final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
       await remoteConfig.fetchAndActivate();
@@ -90,8 +98,8 @@ void initSharedPreferences() async {
   if (prefs.getBool("notification") == null) {
     prefs.setBool("notification", true);
 
-    if (auth.currentUser != null) {
-      messaging.subscribeToTopic(auth.currentUser!.uid);
+    if (FirebaseAuth.instance.currentUser != null) {
+      messaging.subscribeToTopic(FirebaseAuth.instance.currentUser!.uid);
     }
   }
   if (prefs.getString("language") == null) {

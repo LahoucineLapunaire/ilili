@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Ilili/components/addPost.dart';
 import 'package:Ilili/components/home.dart';
@@ -23,7 +24,7 @@ class AppRouter extends StatefulWidget {
 class _AppRouterState extends State<AppRouter> {
   int _currentIndex = 0;
   BannerAd? bannerAd;
-   late CollectionReference<Map<String, dynamic>> usersCollectionRef;
+  late CollectionReference<Map<String, dynamic>> usersCollectionRef;
 
   final List<Widget> _pages = [
     HomePage(),
@@ -32,15 +33,17 @@ class _AppRouterState extends State<AppRouter> {
   ];
 
   void initState() {
-    if(widget.index != null){
+    if (widget.index != null) {
       setState(() {
         _currentIndex = widget.index;
-      usersCollectionRef = firestore.collection('users');
+        usersCollectionRef = firestore.collection('users');
       });
     }
     super.initState();
-    initGoogleMobileAds();
-    createBannerAd();
+    if (!kIsWeb) {
+      initGoogleMobileAds();
+      createBannerAd();
+    }
   }
 
   Future<InitializationStatus> initGoogleMobileAds() {
@@ -72,12 +75,11 @@ class _AppRouterState extends State<AppRouter> {
   }
 
   void _onTabTapped(int index) {
-   if(index == 1){
-     showSearch(
-                    context: context,
-                    delegate: SearchDelegateWidget(usersCollectionRef));
-                    return;
-   }
+    if (index == 1) {
+      showSearch(
+          context: context, delegate: SearchDelegateWidget(usersCollectionRef));
+      return;
+    }
 
     setState(() {
       _currentIndex = index;

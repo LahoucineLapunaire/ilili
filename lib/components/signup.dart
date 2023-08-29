@@ -199,9 +199,6 @@ class _FormSectionState extends State<FormSection> {
     setState(() {
       passwordStrength = message;
     });
-    print(passwordStrength);
-    print(passwordController.text);
-    print(message);
   }
 
   @override
@@ -477,7 +474,10 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
 
   Future<void> signupWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn(
+              clientId:
+                  "593268336010-9o5us0954qr95sqrbmcl6j57dm4keib1.apps.googleusercontent.com")
+          .signIn();
       if (googleUser != null) {
         // Obtain the authentication details from the Google sign-in
         final GoogleSignInAuthentication googleAuth =
