@@ -739,7 +739,9 @@ class _CommentModalState extends State<CommentModal> {
     super.initState();
     getUser();
     getPostOwner();
-    loadInterstitialAd();
+    if (!kIsWeb) {
+      loadInterstitialAd();
+    }
   }
 
   void getPostOwner() async {
