@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:Ilili/components/widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -123,7 +126,7 @@ class _ProfilPictureSectionState extends State<ProfilPictureSection> {
   void pickImage() async {
     final XFile? pickedFile =
         await picker.pickImage(source: ImageSource.gallery);
-
+    print(pickedFile?.path);
     setState(() {
       if (pickedFile != null) {
         image = File(pickedFile.path);
@@ -155,10 +158,17 @@ class _ProfilPictureSectionState extends State<ProfilPictureSection> {
                   profilePicture,
                   fit: BoxFit.cover,
                 )
-              : Image.file(
-                  image!,
-                  fit: BoxFit.cover,
-                ),
+              : kIsWeb
+                  ? Image.network(
+                      image!.path, // Replace with your asset path
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.file(
+                      image!,
+                      fit: BoxFit.cover,
+                    ),
         ),
       ),
     );
@@ -215,7 +225,6 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
 
   bool checkUsername() {
     if (username == usernameController.text) {
-      print("here");
       setState(() {
         error = "";
       });
@@ -374,8 +383,6 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
 
     for (int i = 0; i < querySnapshot.docs.length; i++) {
       usernameList.add(querySnapshot.docs[i].get('username'));
-      print("Username: ${querySnapshot.docs[i].get('username')}");
-      ;
     }
   }
 
@@ -428,7 +435,9 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
       if (isPhotoChanged) {
         Reference imageRef = storageRef.child(auth.currentUser!.uid + ".jpg");
         UploadTask uploadTask = imageRef.putFile(File(profilePicture));
+        ;
         await uploadTask.whenComplete(() async {
+          print("Image uploaded !");
           String downloadURL = await imageRef.getDownloadURL();
           firestore.collection('users').doc(auth.currentUser!.uid).update({
             'username': usernameController.text,
@@ -452,8 +461,11 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
         ),
       );
     } catch (e) {
-      showErrorMessage(e.toString().split('] ')[1], context);
-      print("---------------------> ${e.toString().split('] ')[1]}");
+      if (kIsWeb) {
+        print("---------------------> ${e.toString()}");
+      } else {
+        showErrorMessage(e.toString().split('] ')[1], context);
+      }
     }
   }
 

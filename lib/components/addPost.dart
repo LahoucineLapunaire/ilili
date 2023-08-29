@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delayed_display/delayed_display.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -15,7 +16,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart' as path;
 import 'dart:async';
 import 'dart:io';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:audioplayers_web/audioplayers_web.dart';
 
 List<String> tagsList = [];
 AudioPlayer audioPlayer = AudioPlayer();
@@ -235,13 +236,21 @@ class _ButtonSectionState extends State<ButtonSection> {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.audio,
       );
-
       if (result != null) {
         PlatformFile file = result.files.first;
-        setState(() {
-          audioPath = file.path!;
-          audioPlayer.setSourceUrl(file.path!);
-        });
+        print(file);
+        if (kIsWeb) {
+          setState(() {
+            audioPath = file.name; // Use the file name instead of path
+            audioPlayer
+                .setSourceBytes(file.bytes!); // Use bytes property for source
+          });
+        } else {
+          setState(() {
+            audioPath = file.path!;
+            audioPlayer.setSourceUrl(file.path!);
+          });
+        }
       }
     } catch (e) {
       showErrorMessage(e.toString(), context);
@@ -533,7 +542,9 @@ class _SendButtonSectionState extends State<SendButtonSection> {
 
   void initState() {
     super.initState();
-    loadInterstitialAd();
+    if (!kIsWeb) {
+      loadInterstitialAd();
+    }
   }
 
   void loadInterstitialAd() {
@@ -667,14 +678,18 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           ),
           child: Text('Yes', style: TextStyle(color: Colors.white)),
           onPressed: () {
-            if (interstitialAd != null) {
-              interstitialAd!.show();
-            } else {
+            if (kIsWeb) {
               postAudio();
-              print("interstitialAd is null");
+            } else {
+              if (interstitialAd != null) {
+                interstitialAd!.show();
+              } else {
+                postAudio();
+                print("interstitialAd is null");
+              }
+              postAudio();
+              Navigator.of(context).pop();
             }
-            postAudio();
-            Navigator.of(context).pop();
           },
         ),
       ],

@@ -16,11 +16,14 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
     await Firebase.initializeApp(
-        options: FirebaseOptions(
-            apiKey: "AIzaSyDWjIzP1Fn3dHcbWCOs1WVf6lFBlcQIYgE",
-            appId: "1:593268336010:web:5ceffd538c530070c71473",
-            messagingSenderId: "593268336010",
-            projectId: "ilili-7ebc6"));
+      options: FirebaseOptions(
+        apiKey: "AIzaSyDWjIzP1Fn3dHcbWCOs1WVf6lFBlcQIYgE",
+        appId: "1:593268336010:web:5ceffd538c530070c71473",
+        messagingSenderId: "593268336010",
+        projectId: "ilili-7ebc6",
+        storageBucket: "ilili-7ebc6.appspot.com/",
+      ),
+    );
   } else {
     await Firebase.initializeApp();
     await checkPermission();

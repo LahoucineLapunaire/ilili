@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -474,6 +475,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                         IconButton(
                           icon: Icon(Icons.comment),
                           onPressed: () {
+                            print("In post page");
+                            print("${widget.inPostPage}");
                             if (widget.inPostPage) {
                               showModalBottomSheet(
                                 context: context,
@@ -906,12 +909,16 @@ class _CommentModalState extends State<CommentModal> {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    if (interstitialAd != null) {
-                      interstitialAd?.show();
+                    if (kIsWeb) {
+                      postComment();
                     } else {
-                      print("Interstitial ad is null !");
+                      if (interstitialAd != null) {
+                        interstitialAd?.show();
+                      } else {
+                        print("Interstitial ad is null !");
+                      }
+                      postComment();
                     }
-                    postComment();
                   },
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
