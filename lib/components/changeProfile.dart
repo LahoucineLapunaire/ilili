@@ -364,6 +364,8 @@ class ChangeInfoButton extends StatefulWidget {
 
 class _ChangeInfoButtonState extends State<ChangeInfoButton> {
   Reference storageRef = storage.ref("users");
+  Reference webStorageRef =
+      storage.refFromURL("gs://ilili-7ebc6.appspot.com/users");
   List<String> usernameList = [];
 
   @override
@@ -428,7 +430,13 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
         return;
       }
       if (isPhotoChanged) {
-        Reference imageRef = storageRef.child(auth.currentUser!.uid + ".jpg");
+        Reference imageRef;
+        if (kIsWeb) {
+          imageRef = webStorageRef.child(auth.currentUser!.uid + ".jpg");
+        } else {
+          imageRef = storageRef.child(auth.currentUser!.uid + ".jpg");
+        }
+        print("Image ref : $imageRef");
         UploadTask uploadTask;
         if (kIsWeb) {
           Uint8List imageData = await XFile(profilePicture).readAsBytes();

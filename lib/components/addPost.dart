@@ -551,6 +551,8 @@ class SendButtonSection extends StatefulWidget {
 
 class _SendButtonSectionState extends State<SendButtonSection> {
   Reference storageRef = storage.ref("posts");
+  Reference webStorageRef =
+      storage.refFromURL("gs://ilili-7ebc6.appspot.com/posts");
   String audioLink = "";
   InterstitialAd? interstitialAd;
 
@@ -628,19 +630,20 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       posts.add(name);
       String title = titleController.text;
 
-      Reference postRef = storageRef.child(name);
-      UploadTask uploadTask;
-      print("______Here_____");
+      Reference postRef;
       if (kIsWeb) {
-        print("______Here1_____");
+        postRef = webStorageRef.child(name);
+      } else {
+        postRef = storageRef.child(name);
+      }
+      UploadTask uploadTask;
+      if (kIsWeb) {
         uploadTask = postRef.putData(urlBytes);
-        print("______Here2_____");
       } else {
         uploadTask = postRef.putFile(File(audioPath));
       }
 
       await uploadTask.whenComplete(() async {
-        print("______Here3_____");
         String downloadURL = await postRef.getDownloadURL();
 
         FirebaseFirestore.instance.collection('posts').doc(name).set({
