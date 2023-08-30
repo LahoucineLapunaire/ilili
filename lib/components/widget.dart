@@ -16,7 +16,7 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:mailto/mailto.dart';
 import 'notification.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -1318,11 +1318,8 @@ class _ReportModalState extends State<ReportModal> {
 </body>
 </html>
 ''';
-      print("________HERE1_________");
       final sendReport = await send(message, smtpServer);
-      print("________HERE2_________");
       print('Message sent: ${sendReport.toString()}');
-      print("________HERE3_________");
       Navigator.pop(context);
     } catch (e) {
       print('Error sending email: $e');
@@ -1337,6 +1334,16 @@ class _ReportModalState extends State<ReportModal> {
         height: 500,
         child: Column(
           children: [
+            if (kIsWeb)
+              Text(
+                "If you are using the web version of Ilili, please contact us at moderation.ilili@gmail.com",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            if (kIsWeb) SizedBox(height: 10),
             Text(
               "Report of ${widget.isPost ? 'post' : 'comment'}",
               style: TextStyle(

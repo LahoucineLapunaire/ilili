@@ -278,7 +278,7 @@ class _ButtonSectionState extends State<ButtonSection> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (isRecording)
+        if (isRecording && !kIsWeb)
           ElevatedButton(
             onPressed: () {
               stopRecording();
@@ -300,7 +300,7 @@ class _ButtonSectionState extends State<ButtonSection> {
                   Color(0xFF6A1B9A), // Set the background color of the button
             ),
           ),
-        if (!isRecording)
+        if (!isRecording && !kIsWeb)
           ElevatedButton(
             onPressed: () {
               startRecording();
@@ -320,14 +320,15 @@ class _ButtonSectionState extends State<ButtonSection> {
             ),
           ),
         SizedBox(width: 5),
-        Text(
-          "Or",
-          style: TextStyle(
-            fontFamily: GoogleFonts.poppins().fontFamily,
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
+        if (!kIsWeb)
+          Text(
+            "Or",
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+            ),
           ),
-        ),
         SizedBox(width: 5),
         ElevatedButton(
           onPressed: () {

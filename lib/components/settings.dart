@@ -642,6 +642,16 @@ class _ContactSupportModalState extends State<ContactSupportModal> {
         height: 500,
         child: Column(
           children: [
+            if (kIsWeb)
+              Text(
+                "If you are using the web version of Ilili, please contact us at moderation.ilili@gmail.com",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            if (kIsWeb) SizedBox(height: 10),
             Text(
               "Contact support, please tell us your questions",
               style: TextStyle(
@@ -779,6 +789,16 @@ class _ReportProblemModalState extends State<ReportProblemModal> {
         height: 500,
         child: Column(
           children: [
+            if (kIsWeb)
+              Text(
+                "If you are using the web version of Ilili, please contact us at moderation.ilili@gmail.com",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            if (kIsWeb) SizedBox(height: 10),
             Text(
               "Please describe your problem or the bug you have encountered",
               style: TextStyle(
