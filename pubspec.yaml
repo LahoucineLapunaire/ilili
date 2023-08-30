@@ -54,7 +54,6 @@ dependencies:
   googleapis_auth: ^1.4.1
   flutter_local_notifications: ^15.1.0+1
   google_mobile_ads: ^3.0.0
-  flutter_stripe: ^9.3.0
   flutter_dotenv: ^5.1.0
   shared_preferences: ^2.2.0
   firebase_remote_config: ^4.2.5
@@ -62,8 +61,8 @@ dependencies:
   google_fonts: ^5.1.0
   carousel_slider: ^4.2.1
   provider: ^6.0.5
-  audioplayers_web: ^4.0.0
   
+
 
 dev_dependencies:
   flutter_test:

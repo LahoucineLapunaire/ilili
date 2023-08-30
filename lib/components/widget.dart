@@ -475,8 +475,6 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                         IconButton(
                           icon: Icon(Icons.comment),
                           onPressed: () {
-                            print("In post page");
-                            print("${widget.inPostPage}");
                             if (widget.inPostPage) {
                               showModalBottomSheet(
                                 context: context,
@@ -1207,9 +1205,9 @@ class _ReportModalState extends State<ReportModal> {
 
   reportComment() async {
     try {
-      final smtpServer =
-          gmail('moderation.ilili@gmail.com', 'gpubnhzldelidwcq');
-
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var smtpkey = await prefs.getString('smtp_key') ?? '';
+      final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
       // Create a message
       final message = Message()
         ..from = Address('moderation.ilili@gmail.com', 'Moderation')
@@ -1271,7 +1269,6 @@ class _ReportModalState extends State<ReportModal> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       var smtpkey = await prefs.getString('smtp_key') ?? '';
       final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
-
       // Create a message
       final message = Message()
         ..from = Address('moderation.ilili@gmail.com', 'Moderation')
@@ -1321,8 +1318,11 @@ class _ReportModalState extends State<ReportModal> {
 </body>
 </html>
 ''';
+      print("________HERE1_________");
       final sendReport = await send(message, smtpServer);
+      print("________HERE2_________");
       print('Message sent: ${sendReport.toString()}');
+      print("________HERE3_________");
       Navigator.pop(context);
     } catch (e) {
       print('Error sending email: $e');

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:Ilili/components/widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/appRouter.dart';
-import 'package:Ilili/components/widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -264,8 +261,6 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
 
   @override
   void dispose() {
-    usernameController.dispose();
-    descriptionController.dispose();
     super.dispose();
   }
 
@@ -411,7 +406,7 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
 
   void changeUserInfo() async {
     try {
-      if (usernameController.text == "" || descriptionController.text == null) {
+      if (usernameController.text == "" || descriptionController.text == "") {
         showErrorMessage("Please fill in all fields", context);
         return;
       }
@@ -434,8 +429,14 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
       }
       if (isPhotoChanged) {
         Reference imageRef = storageRef.child(auth.currentUser!.uid + ".jpg");
-        UploadTask uploadTask = imageRef.putFile(File(profilePicture));
-        ;
+        UploadTask uploadTask;
+        if (kIsWeb) {
+          Uint8List imageData = await XFile(profilePicture).readAsBytes();
+          uploadTask = imageRef.putData(imageData);
+        } else {
+          uploadTask = imageRef.putFile(File(profilePicture));
+        }
+
         await uploadTask.whenComplete(() async {
           print("Image uploaded !");
           String downloadURL = await imageRef.getDownloadURL();
@@ -451,6 +452,8 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
           'description': descriptionController.text,
         });
       }
+      usernameController.clear();
+      descriptionController.clear();
       showInfoMessage("User info changed !", context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });

@@ -16,7 +16,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart' as path;
 import 'dart:async';
 import 'dart:io';
-import 'package:audioplayers_web/audioplayers_web.dart';
 
 List<String> tagsList = [];
 AudioPlayer audioPlayer = AudioPlayer();
@@ -192,6 +191,7 @@ class _ButtonSectionState extends State<ButtonSection> {
         // Stop any ongoing recording before starting a new one
         await audioRecorder!.stopRecorder();
       }
+      await audioPlayer.stop();
       File existingFile = File('audio.aac');
       if (existingFile.existsSync()) {
         await existingFile.delete();
@@ -203,6 +203,7 @@ class _ButtonSectionState extends State<ButtonSection> {
       await audioRecorder?.openRecorder();
       await audioRecorder!.startRecorder(toFile: 'audio.aac');
       setState(() {
+        audioPath = '';
         isRecording = true;
       });
     } catch (e) {
@@ -224,6 +225,7 @@ class _ButtonSectionState extends State<ButtonSection> {
           isRecording = false;
           audioPlayer.setSourceUrl(audioPath);
         });
+        audioPlayer.play(UrlSource(audioPath));
       }
     } catch (e) {
       showErrorMessage(e.toString(), context);
@@ -238,12 +240,9 @@ class _ButtonSectionState extends State<ButtonSection> {
       );
       if (result != null) {
         PlatformFile file = result.files.first;
-        print(file);
         if (kIsWeb) {
           setState(() {
-            audioPath = file.name; // Use the file name instead of path
-            audioPlayer
-                .setSourceBytes(file.bytes!); // Use bytes property for source
+            audioPath = file.name;
           });
         } else {
           setState(() {
