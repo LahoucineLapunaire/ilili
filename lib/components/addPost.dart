@@ -20,6 +20,8 @@ import 'dart:io';
 List<String> tagsList = [];
 AudioPlayer audioPlayer = AudioPlayer();
 String audioPath = '';
+UrlSource urlSource = UrlSource('');
+Uint8List urlBytes = Uint8List(0);
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseStorage storage = FirebaseStorage.instance;
 TextEditingController titleController = TextEditingController();
@@ -233,6 +235,11 @@ class _ButtonSectionState extends State<ButtonSection> {
     }
   }
 
+  UrlSource urlSourceFromBytes(Uint8List bytes,
+      {String mimeType = "audio/mpeg"}) {
+    return UrlSource(Uri.dataFromBytes(bytes, mimeType: mimeType).toString());
+  }
+
   Future<void> pickAudioFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -241,8 +248,11 @@ class _ButtonSectionState extends State<ButtonSection> {
       if (result != null) {
         PlatformFile file = result.files.first;
         if (kIsWeb) {
+          Uint8List bytes = file.bytes!;
           setState(() {
-            audioPath = file.name;
+            audioPlayer.setSource(urlSourceFromBytes(bytes));
+            urlBytes = bytes;
+            urlSource = urlSourceFromBytes(bytes);
           });
         } else {
           setState(() {
@@ -375,7 +385,12 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
         await audioPlayer.pause();
         setState(() => isPlaying = false);
       } else {
-        await audioPlayer.play(UrlSource(audioPath));
+        if (kIsWeb) {
+          await audioPlayer.play(urlSource);
+        } else {
+          await audioPlayer.play(UrlSource(audioPath));
+        }
+
         setState(() => isPlaying = true);
       }
     } catch (e) {
@@ -400,7 +415,7 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (audioPath != '')
+        if (audioPath != '' || urlSource.url != '')
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -614,9 +629,18 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       String title = titleController.text;
 
       Reference postRef = storageRef.child(name);
-      UploadTask uploadTask = postRef.putFile(File(audioPath));
+      UploadTask uploadTask;
+      print("______Here_____");
+      if (kIsWeb) {
+        print("______Here1_____");
+        uploadTask = postRef.putData(urlBytes);
+        print("______Here2_____");
+      } else {
+        uploadTask = postRef.putFile(File(audioPath));
+      }
 
       await uploadTask.whenComplete(() async {
+        print("______Here3_____");
         String downloadURL = await postRef.getDownloadURL();
 
         FirebaseFirestore.instance.collection('posts').doc(name).set({
@@ -652,11 +676,18 @@ class _SendButtonSectionState extends State<SendButtonSection> {
   }
 
   void showConfirmAlert(BuildContext context) {
-    if (titleController.text == "" || tagsList.isEmpty || audioPath == "") {
+    if (titleController.text == "" || tagsList.isEmpty) {
       showErrorMessage("please add an audio and fill title and tags", context);
       return;
     }
-
+    if (kIsWeb && urlSource.url == "") {
+      showErrorMessage("please add an audio and fill title and tags", context);
+      return;
+    }
+    if (!kIsWeb && audioPath == "") {
+      showErrorMessage("please add an audio and fill title and tags", context);
+      return;
+    }
     // Create a AlertDialog
     AlertDialog alertDialog = AlertDialog(
       title: Text("Do you want to post this audio?"),
