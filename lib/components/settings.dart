@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/PrivacyPolicy.dart';
 import 'package:Ilili/components/changeProfile.dart';
-import 'package:Ilili/components/legalnotice.dart';
+import 'package:Ilili/components/legalNotice.dart';
 import 'package:Ilili/components/resetEmail.dart';
 import 'package:Ilili/components/resetPassword.dart';
 import 'package:Ilili/components/termsOfService.dart';
@@ -15,7 +15,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;

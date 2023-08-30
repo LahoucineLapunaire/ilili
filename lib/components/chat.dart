@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:Ilili/components/changeProfile.dart';
 import 'package:intl/intl.dart';
 import 'notification.dart';
 
@@ -36,7 +34,7 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     getMyInfo();
     // Use addPostFrameCallback to perform actions after widget is built
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(Duration(milliseconds: 500), () {
         scrollToBottom();
       });
