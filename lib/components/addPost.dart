@@ -666,7 +666,9 @@ class _SendButtonSectionState extends State<SendButtonSection> {
         });
       });
       showInfoMessage("Your post is posted !", context, () {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        }
       });
       Navigator.pushReplacement(
         context,
@@ -718,9 +720,9 @@ class _SendButtonSectionState extends State<SendButtonSection> {
               if (interstitialAd != null) {
                 interstitialAd!.show();
               } else {
-                postAudio();
                 print("interstitialAd is null");
               }
+              postAudio();
               Navigator.of(context).pop();
             }
           },
