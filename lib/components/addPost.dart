@@ -721,7 +721,6 @@ class _SendButtonSectionState extends State<SendButtonSection> {
                 postAudio();
                 print("interstitialAd is null");
               }
-              postAudio();
               Navigator.of(context).pop();
             }
           },
