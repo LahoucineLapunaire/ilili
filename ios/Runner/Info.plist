@@ -56,12 +56,23 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Allow access to camera to capture photos</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	<array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app uses your location to send you push notifications</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow access to microphone to record audio</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow access to photo library</string>
+	<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsLocalNetworking</key>
+    <true/>
+</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

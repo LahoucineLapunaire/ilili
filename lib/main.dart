@@ -13,7 +13,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
-  print("OKOKs");
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
     await Firebase.initializeApp(
@@ -68,32 +67,25 @@ Future<void> GetKeysFromRemoteConfig() async {
   }
 }
 
-Future<bool> checkPermission() async {
+Future<void> checkPermission() async {
   var storageStatus = await Permission.storage.request();
   if (storageStatus != PermissionStatus.granted) {
     print('Storage Permission not granted');
-    checkPermission();
-    return false;
   } else {
-    print('Notification Permission granted');
+    print('Storage Permission granted');
   }
   var notificationStatus = await Permission.notification.request();
   if (notificationStatus != PermissionStatus.granted) {
     print('Notification Permission not granted');
-    checkPermission();
-    return false;
   } else {
-    print('Storage Permission granted');
+    print('Notification Permission granted');
   }
   var microphoneStatus = await Permission.microphone.request();
   if (microphoneStatus != PermissionStatus.granted) {
     print('Microphone Permission not granted');
-    checkPermission();
-    return false;
   } else {
     print('Microphone Permission granted');
   }
-  return true;
 }
 
 void initSharedPreferences() async {
