@@ -61,7 +61,8 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
-	<array>
+		<string>audio</string>
+	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app uses your location to send you push notifications</string>
 	<key>NSMicrophoneUsageDescription</key>
@@ -71,6 +72,8 @@
 	<key>NSAppTransportSecurity</key>
 <dict>
     <key>NSAllowsLocalNetworking</key>
+    <true/>
+	<key>NSAllowsArbitraryLoads</key>
     <true/>
 </dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

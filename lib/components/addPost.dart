@@ -172,20 +172,7 @@ class _ButtonSectionState extends State<ButtonSection> {
   FlutterSoundRecorder? audioRecorder;
   FlutterSoundPlayer? player;
   bool isRecording = false;
-
-  Future<bool> checkPermission() async {
-    var status = await Permission.microphone.request();
-    if (status != PermissionStatus.granted) {
-      throw RecordingPermissionException('Microphone permission not granted');
-    }
-    if (await Permission.microphone.request().isGranted) {
-      print('Permission granted');
-      return true;
-    } else {
-      print('Permission denied');
-      return false;
-    }
-  }
+  String pathToAudio = "";
 
   void startRecording() async {
     try {
@@ -193,14 +180,18 @@ class _ButtonSectionState extends State<ButtonSection> {
         // Stop any ongoing recording before starting a new one
         await audioRecorder!.stopRecorder();
       }
+
       await audioPlayer.stop();
       File existingFile = File('audio.aac');
       if (existingFile.existsSync()) {
         await existingFile.delete();
         print('Existing file deleted');
       }
-      await checkPermission();
+      if(!(await askPermission())){
+        return;
+      }
       audioRecorder = FlutterSoundRecorder();
+
       // Start recording audio
       await audioRecorder?.openRecorder();
       await audioRecorder!.startRecorder(toFile: 'audio.aac');
@@ -217,17 +208,26 @@ class _ButtonSectionState extends State<ButtonSection> {
   void stopRecording() async {
     try {
       if (audioRecorder != null) {
+        String filePath = '/data/user/0/com.example.ilili/cache/audio.aac';
         // Stop the ongoing recording
-        await audioRecorder!.stopRecorder();
+        await audioRecorder!.stopRecorder().then((value){
+          if(value != null){
+            filePath = value;
+          }
+        });
         await audioRecorder!.closeRecorder();
         audioRecorder = null;
-        String filePath = '/data/user/0/com.example.ilili/cache/audio.aac';
+        
         setState(() {
           audioPath = filePath;
           isRecording = false;
-          audioPlayer.setSourceUrl(audioPath);
         });
-        audioPlayer.play(UrlSource(audioPath));
+        if(Platform.isIOS){
+          audioPlayer.play(DeviceFileSource(audioPath));
+        }
+        else{
+          audioPlayer.play(UrlSource(audioPath));
+        }
       }
     } catch (e) {
       showErrorMessage(e.toString(), context);
@@ -266,6 +266,17 @@ class _ButtonSectionState extends State<ButtonSection> {
       print("Error while picking the file: ${e.toString()}");
     }
   }
+
+  Future<bool> askPermission() async {
+  var microphoneStatus = await Permission.microphone.request();
+  if (microphoneStatus != PermissionStatus.granted) {
+    print('Microphone Permission not granted');
+    return false;
+  } else {
+    print('Microphone Permission granted');
+    return true;
+  }
+}
 
   @override
   void dispose() {

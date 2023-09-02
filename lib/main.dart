@@ -115,7 +115,6 @@ void initNotification() async {
     provisional: false,
     sound: true,
   );
-  SharedPreferences prefs = await SharedPreferences.getInstance();
   print('User granted permission: ${settings.authorizationStatus}');
   print("notification init");
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
