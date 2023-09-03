@@ -48,40 +48,49 @@ class _AppRouterState extends State<AppRouter> {
 
   Future<InitializationStatus> initGoogleMobileAds() {
     // TODO: Initialize Google Mobile Ads SDK
+    // This function initializes the Google Mobile Ads SDK and returns an InitializationStatus.
     return MobileAds.instance.initialize();
   }
 
   void createBannerAd() {
     try {
+      // Create a BannerAd with specified ad unit ID, request, and size.
       BannerAd(
         adUnitId: AdHelper.bannerAdUnitId,
         request: AdRequest(),
         size: AdSize.banner,
         listener: BannerAdListener(
           onAdLoaded: (ad) {
+            // Banner ad loaded successfully, update the bannerAd state.
             setState(() {
               bannerAd = ad as BannerAd;
             });
           },
           onAdFailedToLoad: (ad, err) {
+            // Banner ad failed to load, print an error message and dispose of the ad.
             print('Failed to load a banner ad: ${err.message}');
             ad.dispose();
           },
         ),
       ).load();
     } catch (e) {
+      // Handle any exceptions that may occur during banner ad creation.
       print("error banner ad: ${e.toString()}");
     }
   }
 
   void _onTabTapped(int index) {
     if (index == 1) {
+      // If the second tab is tapped (index 1), show the search delegate.
       showSearch(
-          context: context, delegate: SearchDelegateWidget(usersCollectionRef));
+        context: context,
+        delegate: SearchDelegateWidget(usersCollectionRef),
+      );
       return;
     }
 
     setState(() {
+      // Update the current index when a tab is tapped.
       _currentIndex = index;
     });
   }

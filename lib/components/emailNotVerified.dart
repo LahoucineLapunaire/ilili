@@ -8,11 +8,16 @@ FirebaseAuth auth = FirebaseAuth.instance;
 class EmailNotVerified extends StatelessWidget {
   const EmailNotVerified({super.key});
 
-  goToLogin() {
+  // Function to sign out the currently authenticated user.
+  void goToLogin() {
+    // Using Firebase Authentication, sign out the current user.
     auth.signOut();
   }
 
-  sendEmailVerification() {
+// Function to send an email verification link to the current user.
+  void sendEmailVerification() {
+    // Retrieve the currently authenticated user and send an email verification link.
+    // This will allow the user to verify their email address.
     auth.currentUser!.sendEmailVerification();
   }
 

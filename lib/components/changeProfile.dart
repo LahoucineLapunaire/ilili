@@ -111,24 +111,34 @@ class _ProfilPictureSectionState extends State<ProfilPictureSection> {
     getProfilePhoto();
   }
 
+  // This function retrieves the profile photo URL from Firestore.
   void getProfilePhoto() async {
+    // Fetch the document containing user data from Firestore.
     DocumentSnapshot ds =
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
 
+    // Update the state to display the retrieved profile photo URL.
     setState(() {
       profilePicture = ds.get('profilePicture');
     });
   }
 
+// This function allows the user to pick an image from their device's gallery.
   void pickImage() async {
+    // Show the gallery and allow the user to select an image.
     final XFile? pickedFile =
         await picker.pickImage(source: ImageSource.gallery);
+
+    // Update the state with the selected image and set the 'isPhotoChanged' flag.
     setState(() {
       if (pickedFile != null) {
+        // If an image was picked, assign it to the 'image' variable.
         image = File(pickedFile.path);
         isPhotoChanged = true;
+        // Update the 'profilePicture' with the path to the picked image.
         profilePicture = pickedFile.path;
       } else {
+        // If no image was selected, log a message.
         print('No image selected.');
       }
     });
@@ -189,14 +199,18 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
     getAllUsername();
   }
 
+  // This function retrieves the user's information from Firestore and updates the UI.
   Future<void> getUserInfo() async {
+    // Get the document snapshot of the current user from the 'users' collection in Firestore.
     DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
         .instance
         .collection('users')
         .doc(auth.currentUser!.uid)
         .get();
 
+    // Check if the document exists.
     if (snapshot.exists) {
+      // Update the state variables with the user's information.
       setState(() {
         username = snapshot.data()!['username'] ?? '';
         usernameController.text = snapshot.data()!['username'] ?? '';
@@ -205,27 +219,36 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
     }
   }
 
+// This function retrieves all usernames from Firestore and populates the 'usernameList' variable.
   Future<void> getAllUsername() async {
+    // Query Firestore to get all documents in the 'users' collection.
     QuerySnapshot querySnapshot =
         await FirebaseFirestore.instance.collection("users").get();
 
+    // Iterate through the documents and add usernames to the 'usernameList'.
     for (int i = 0; i < querySnapshot.docs.length; i++) {
       usernameList.add(querySnapshot.docs[i].get('username'));
     }
   }
 
+// This function checks if a string contains spaces or special characters.
   bool containsSpacesOrSpecialCharacters(String input) {
+    // Define a regular expression to match non-word characters (special characters).
     RegExp regex = RegExp(r'[^\w,]');
     return regex.hasMatch(input);
   }
 
+// This function checks the validity of a username.
   bool checkUsername() {
+    // Check if the entered username matches the current username.
     if (username == usernameController.text) {
       setState(() {
         error = "";
       });
       return true;
     }
+
+    // Check if the entered username already exists in 'usernameList'.
     if (usernameList.contains(usernameController.text)) {
       setState(
         () {
@@ -234,6 +257,8 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
       );
       return false;
     }
+
+    // Check if the entered username contains spaces or special characters.
     if (containsSpacesOrSpecialCharacters(usernameController.text)) {
       setState(
         () {
@@ -242,6 +267,8 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
       );
       return false;
     }
+
+    // Check if the entered username is too long (more than 20 characters).
     if (usernameController.text.length > 20) {
       setState(
         () {
@@ -250,6 +277,8 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
       );
       return false;
     }
+
+    // If all checks pass, clear the error message and return true.
     setState(
       () {
         error = "";
@@ -373,31 +402,38 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
     getAllUsername();
   }
 
+  // Function to retrieve all usernames from Firestore
   Future<void> getAllUsername() async {
     QuerySnapshot querySnapshot =
         await FirebaseFirestore.instance.collection("users").get();
 
     for (int i = 0; i < querySnapshot.docs.length; i++) {
+      // Add each username to the usernameList
       usernameList.add(querySnapshot.docs[i].get('username'));
     }
   }
 
+// Function to check if a string contains spaces or special characters
   bool containsSpacesOrSpecialCharacters(String input) {
     RegExp regex = RegExp(r'[^\w,]');
     return regex.hasMatch(input);
   }
 
+// Function to check if a username is valid
   bool checkUsername() {
     if (containsSpacesOrSpecialCharacters(usernameController.text)) {
+      // Display an error message if the username contains invalid characters
       showErrorMessage(
           "Username cannot contain spaces or special characters", context);
       return false;
     }
     if (usernameController.text.length > 20) {
+      // Display an error message if the username is too long
       showErrorMessage("Username cannot be longer than 20 characters", context);
       return false;
     }
     if (usernameController.text == "") {
+      // Display an error message if the username is empty
       showErrorMessage("Username cannot be empty", context);
       return false;
     } else {
@@ -405,9 +441,11 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
     }
   }
 
+// Function to change user information
   void changeUserInfo() async {
     try {
       if (usernameController.text == "" || descriptionController.text == "") {
+        // Display an error message if any field is empty
         showErrorMessage("Please fill in all fields", context);
         return;
       }
@@ -416,14 +454,17 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
       }
       if (usernameList.contains(usernameController.text) &&
           username != usernameController.text) {
+        // Display an error message if the username already exists
         showErrorMessage("Username already exists", context);
         return;
       }
       if (profilePicture.isEmpty) {
+        // Display an error message if no profile picture is selected
         showErrorMessage("Please select a profile picture", context);
         return;
       }
       if (descriptionController.text.length > 170) {
+        // Display an error message if the description is too long
         showErrorMessage(
             "Description cannot be longer than 170 characters", context);
         return;
@@ -431,15 +472,19 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
       if (isPhotoChanged) {
         Reference imageRef;
         if (kIsWeb) {
+          // Set the image reference for web
           imageRef = webStorageRef.child(auth.currentUser!.uid + ".jpg");
         } else {
+          // Set the image reference for mobile
           imageRef = storageRef.child(auth.currentUser!.uid + ".jpg");
         }
         UploadTask uploadTask;
         if (kIsWeb) {
+          // Upload image data for web
           Uint8List imageData = await XFile(profilePicture).readAsBytes();
           uploadTask = imageRef.putData(imageData);
         } else {
+          // Upload image file for mobile
           uploadTask = imageRef.putFile(File(profilePicture));
         }
 
@@ -453,16 +498,19 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
           });
         });
       } else {
+        // Update user information without changing the profile picture
         firestore.collection('users').doc(auth.currentUser!.uid).update({
           'username': usernameController.text,
           'description': descriptionController.text,
         });
       }
+      // Clear text controllers and show a success message
       usernameController.clear();
       descriptionController.clear();
       showInfoMessage("User info changed !", context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
+      // Navigate to a different page
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -471,8 +519,10 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
       );
     } catch (e) {
       if (kIsWeb) {
+        // Print error message for web
         print("error : ${e.toString()}");
       } else {
+        // Display error message for mobile
         showErrorMessage(e.toString().split('] ')[1], context);
       }
     }

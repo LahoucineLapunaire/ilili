@@ -25,25 +25,31 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
     getAllUsername();
   }
 
+  // This function retrieves all usernames from the Firestore database and populates usernameList.
   Future<void> getAllUsername() async {
     QuerySnapshot querySnapshot =
         await FirebaseFirestore.instance.collection("users").get();
 
+    // Loop through the retrieved documents and add usernames to usernameList.
     for (int i = 0; i < querySnapshot.docs.length; i++) {
       usernameList.add(querySnapshot.docs[i].get('username'));
     }
   }
 
+// Check if a given string contains spaces or special characters using regular expressions.
   bool containsSpacesOrSpecialCharacters(String input) {
-    RegExp regex = RegExp(r'[^\w,]');
-    return regex.hasMatch(input);
+    RegExp regex = RegExp(r'[^\w,]'); // Define a regular expression pattern.
+    return regex
+        .hasMatch(input); // Check if the pattern matches any part of the input.
   }
 
+// Check the validity of a username.
   bool checkUsername() {
     if (usernameList.contains(usernameController.text.toLowerCase())) {
       setState(
         () {
-          error = "Username already exists";
+          error =
+              "Username already exists"; // Display an error message if the username already exists.
         },
       );
       return false;
@@ -51,7 +57,8 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
     if (containsSpacesOrSpecialCharacters(usernameController.text)) {
       setState(
         () {
-          error = "Username cannot contain spaces or special characters";
+          error =
+              "Username cannot contain spaces or special characters"; // Display an error message for invalid characters.
         },
       );
       return false;
@@ -59,31 +66,35 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
     if (usernameController.text.length > 20) {
       setState(
         () {
-          error = "Username cannot be more than 20 characters";
+          error =
+              "Username cannot be more than 20 characters"; // Display an error message for a username that's too long.
         },
       );
       return false;
     }
     setState(
       () {
-        error = "";
+        error = ""; // Clear any previous error messages.
       },
     );
-    return true;
+    return true; // Username is valid.
   }
 
+// Set the username in Firestore if it passes validation.
   Future<void> setUsername() async {
     if (checkUsername()) {
       await FirebaseFirestore.instance
           .collection("users")
           .doc(auth.currentUser!.uid)
-          .update({"username": usernameController.text.toLowerCase()});
+          .update({
+        "username": usernameController.text.toLowerCase()
+      }); // Update the username in Firestore.
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => AppRouter(index: 2),
         ),
-      );
+      ); // Navigate to the specified route.
     }
   }
 

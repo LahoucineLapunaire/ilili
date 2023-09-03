@@ -39,12 +39,16 @@ class _PostPageState extends State<PostPage> {
     super.initState();
   }
 
+// Function to fetch comments for a post
   Future<void> getComments() async {
     try {
       List<dynamic> result = [];
+      // Fetch the post data
       final postSnapshot =
           await firestore.collection('posts').doc(widget.postId).get();
       final comments = postSnapshot.data()?['comments'];
+
+      // Loop through the comments and fetch details for each comment
       for (String comment in comments) {
         final postSnapshot =
             await firestore.collection('comments').doc(comment).get();
@@ -55,7 +59,11 @@ class _PostPageState extends State<PostPage> {
           "userId": postSnapshot.data()?['userId'],
         });
       }
+
+      // Sort the comments by timestamp in descending order
       result.sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
+
+      // Update the commentList in the state
       setState(() {
         commentList = result;
       });
@@ -80,10 +88,10 @@ class _PostPageState extends State<PostPage> {
             icon: Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () {
               Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AppRouter(index: 0),
-        ));
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AppRouter(index: 0),
+                  ));
             },
           ),
           title: Text(
@@ -108,15 +116,16 @@ class _PostPageState extends State<PostPage> {
           ],
         ),
         body: SingleChildScrollView(
-          child: WillPopScope(onWillPop: (){
+            child: WillPopScope(
+          onWillPop: () {
             Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AppRouter(index: 0),
-        ));
-        return Future.value(false);
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AppRouter(index: 0),
+                ));
+            return Future.value(false);
           },
-          child : Center(
+          child: Center(
             child: Column(
               children: [
                 AudioPlayerWidget(
@@ -145,8 +154,8 @@ class _PostPageState extends State<PostPage> {
                     })
               ],
             ),
-          ),)
-        ));
+          ),
+        )));
   }
 }
 
@@ -162,8 +171,10 @@ class SortSection extends StatefulWidget {
 class _SortSectionState extends State<SortSection> {
   String sortType = "newest"; // Make sure this is declared here
 
+// Function to sort comments based on the selected criteria
   void sortComments(sortType) {
     List<dynamic> result = commentList;
+
     if (sortType == "newest") {
       result.sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
     } else if (sortType == "oldest") {
@@ -173,8 +184,9 @@ class _SortSectionState extends State<SortSection> {
     } else if (sortType == "least liked") {
       result.sort((a, b) => a['likes'].length.compareTo(b['likes'].length));
     }
-    widget
-        .onSortChanged(result); // Call the callback function with updated list
+
+    // Call the callback function with the updated list
+    widget.onSortChanged(result);
   }
 
   @override
@@ -281,6 +293,7 @@ class _CommentWidgetState extends State<CommentWidget> {
     getUser();
   }
 
+// Function to fetch details of a single comment
   getComment() {
     try {
       bool _isLiked = false;
@@ -304,6 +317,7 @@ class _CommentWidgetState extends State<CommentWidget> {
     }
   }
 
+// Function to fetch user details associated with a comment
   getUser() {
     try {
       firestore
@@ -322,9 +336,11 @@ class _CommentWidgetState extends State<CommentWidget> {
     }
   }
 
+// Function to handle liking/unliking a comment
   likeComment() {
     try {
       if (isLiked) {
+        // Unlike the comment
         firestore.collection('comments').doc(widget.commentId).update({
           "likes": FieldValue.arrayRemove([auth.currentUser!.uid]),
           "score": FieldValue.increment(-1)
@@ -333,6 +349,7 @@ class _CommentWidgetState extends State<CommentWidget> {
           likes.remove(auth.currentUser!.uid);
         });
       } else {
+        // Like the comment
         setState(() {
           likes.add(auth.currentUser!.uid);
         });
@@ -349,26 +366,31 @@ class _CommentWidgetState extends State<CommentWidget> {
     }
   }
 
+  // Function to format timestamp into a readable format
   String formatTimestamp(Timestamp timestamp) {
-  final maintenant = Timestamp.now();
-  final difference = maintenant.seconds - timestamp.seconds;
+    final maintenant = Timestamp.now();
+    final difference = maintenant.seconds - timestamp.seconds;
 
-  if (difference < 60) {
-    return '$difference sec';
-  } else if (difference < 60 * 60) {
-    return '${difference ~/ 60} min';
-  } else if (difference < 60 * 60 * 24) {
-    return '${difference ~/ (60 * 60)} h';
-  } else if (difference < 60 * 60 * 24 * 7) {
-    return '${difference ~/ (60 * 60 * 24)} j';
-  } else if (difference < 60 * 60 * 24 * 30) {
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000);
-    return DateFormat('MM/dd/yyyy', 'en_US').format(dateTime); // Format américain
-  } else {
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000);
-    return DateFormat('MM/dd/yyyy', 'en_US').format(dateTime); // Format américain pour les mois
+    if (difference < 60) {
+      return '$difference sec';
+    } else if (difference < 60 * 60) {
+      return '${difference ~/ 60} min';
+    } else if (difference < 60 * 60 * 24) {
+      return '${difference ~/ (60 * 60)} h';
+    } else if (difference < 60 * 60 * 24 * 7) {
+      return '${difference ~/ (60 * 60 * 24)} j';
+    } else if (difference < 60 * 60 * 24 * 30) {
+      final dateTime =
+          DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000);
+      return DateFormat('MM/dd/yyyy', 'en_US')
+          .format(dateTime); // American format
+    } else {
+      final dateTime =
+          DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000);
+      return DateFormat('MM/dd/yyyy', 'en_US')
+          .format(dateTime); // American format for months
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -409,9 +431,9 @@ class _CommentWidgetState extends State<CommentWidget> {
                   ),
                   SizedBox(width: 10),
                   Opacity(
-                opacity: 0.6,
-                child: Text(formatTimestamp(timestamp)),
-              ),
+                    opacity: 0.6,
+                    child: Text(formatTimestamp(timestamp)),
+                  ),
                 ],
               ),
               PopupMenuButton<String>(
@@ -447,15 +469,19 @@ class _CommentWidgetState extends State<CommentWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(children: [
-                SizedBox(width: 50,),
-                Text(
-                comment,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 50,
+                  ),
+                  Text(
+                    comment,
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
-              ],),
               Row(
                 children: [
                   Text(likes.length.toString()),

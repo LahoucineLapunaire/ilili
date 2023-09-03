@@ -83,23 +83,34 @@ class _EmailSectionState extends State<EmailSection> {
   bool confirmation = false;
 
   Future<void> sendPasswordResetEmail() async {
+    // Show an error message if any of the required fields are empty
     showErrorMessage("All fields must be filled", context);
+
+    // Check if the email field is empty and return if it is
     if (emailController.text == '') {
       return;
     }
+
     try {
+      // Attempt to send a password reset email using Firebase Authentication
       await auth
           .sendPasswordResetEmail(email: emailController.text)
           .then((value) {
+        // If the password reset email is sent successfully, set 'confirmation' to true
         setState(() {
           confirmation = true;
         });
       });
+
+      // Show a success message if the password reset email is sent successfully
       showInfoMessage('Password reset email sent successfully', context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
+
+      // Log a success message to the console
       print('Password reset email sent successfully');
     } catch (e) {
+      // Show an error message if there's an error and log the error to the console
       showErrorMessage(e.toString().split('] ')[1], context);
       print('Error sending password reset email: $e');
     }

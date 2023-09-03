@@ -44,15 +44,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> checkUsername() async {
+    // Fetch the user document from Firestore based on the current user's UID
     DocumentSnapshot ds =
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
 
+    // Check if the document exists or if the username field is empty or null
     if (ds.exists == false ||
         ds.get('username') == "" ||
         ds.get('username') == null) {
+      // If any of the conditions are met, navigate to the SetUsernamePage
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => SetUsernamePage()));
     } else {
+      // If conditions are not met, update the userInfo state with the fetched data
       if (mounted) {
         setState(() {
           userInfo['username'] = ds.get('username');
@@ -63,12 +67,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getNumbersLastMessage() async {
+    // Fetch the user document again for this function
     DocumentSnapshot userDoc =
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
+
+    // Initialize variables to keep track of unread messages and chat IDs
     int _unreadMessages = 0;
     List<String> chats = List<String>.from(userDoc['chats']);
-    List<dynamic> result = [];
-    String lastMessage = '';
+
+    // Iterate through chat IDs and get the last message for each chat
     for (String chatId in chats) {
       QuerySnapshot<Map<String, dynamic>> chatSnapshot = await firestore
           .collection('chats')
@@ -77,11 +84,15 @@ class _HomePageState extends State<HomePage> {
           .orderBy('timestamp', descending: true)
           .limit(1)
           .get();
+
+      // Check if the last message is unread and update the unread message count
       if (chatSnapshot.docs.isNotEmpty) {
         if (!chatSnapshot.docs.first['read']) {
           _unreadMessages++;
         }
       }
+
+      // Update the unreadMessages state if the component is still mounted
       if (mounted) {
         setState(() {
           unreadMessages = _unreadMessages;

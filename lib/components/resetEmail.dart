@@ -81,17 +81,24 @@ class EmailSection extends StatefulWidget {
 class _EmailSectionState extends State<EmailSection> {
   TextEditingController emailController = TextEditingController();
 
+  // This function is used to send a password reset email to the current user.
   Future<void> sendEmailResetEmail() async {
+    // Check if the email field is empty.
     if (emailController.text == '') {
       showErrorMessage("All fields must be filled", context);
       return;
     }
+
     try {
+      // Attempt to update the current user's email with the new email provided.
       await auth.currentUser?.updateEmail(emailController.text);
+
+      // If the email update is successful, show a success message.
       showInfoMessage('Email changed successfully', context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
     } catch (e) {
+      // If there's an error during the email update, show an error message.
       showErrorMessage(e.toString().split('] ')[1], context);
       print('Error sending Email reset email : \n $e');
     }

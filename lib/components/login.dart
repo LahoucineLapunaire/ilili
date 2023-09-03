@@ -98,21 +98,29 @@ class _FormSectionState extends State<FormSection> {
 
   void login() async {
     try {
+      // Check if email and password fields are empty
       if (emailController.text == '' || passwordController.text == '') {
         showErrorMessage("All fields must be filled", context);
         return;
       }
+
+      // Attempt to sign in with the provided email and password
       await auth
           .signInWithEmailAndPassword(
               email: emailController.text, password: passwordController.text)
-          .then((value) => {print("User ${value.user?.email} logged in")});
+          .then((value) {
+        // If successful, print a success message
+        print("User ${value.user?.email} logged in");
+      });
     } catch (e) {
       if (mounted) {
+        // Check the error message to determine the specific error
         if (e.toString().split('] ')[1] ==
             "There is no user record corresponding to this identifier. The user may have been deleted.") {
           showErrorMessage("User not found", context);
           return;
         } else {
+          // If there is an error, print the error message and display it to the user
           print("Error : $e");
           showErrorMessage(e.toString().split('] ')[1], context);
         }
@@ -296,9 +304,9 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
     try {
       // Trigger the Google sign-in flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn(
-              clientId:
-                  "593268336010-9o5us0954qr95sqrbmcl6j57dm4keib1.apps.googleusercontent.com")
-          .signIn();
+        clientId:
+            "YOUR_CLIENT_ID_HERE", // Replace with your Google OAuth2 client ID
+      ).signIn();
 
       print(googleUser);
 
@@ -319,7 +327,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
 
         final String uid = userCredential.user!.uid;
 
-        // Check if the user already exists
+        // Check if the user already exists in Firestore
         final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
             await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
@@ -327,16 +335,16 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
           // User already exists, log in and navigate to HomePage
           // Add your own navigation logic here
           print('User already exists');
-          // Navigate to HomePage
+          // Example navigation to HomePage:
           // Navigator.pushReplacement(
           //   context,
           //   MaterialPageRoute(builder: (context) => HomePage()),
           // );
         } else {
           // User does not exist, create a new document in Firestore
-          await firestore.collection('users').doc(uid).set({
+          await FirebaseFirestore.instance.collection('users').doc(uid).set({
             'profilePicture':
-                'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
+                'YOUR_DEFAULT_PROFILE_IMAGE_URL_HERE', // Replace with your default profile image URL
             'username': '',
             'posts': [],
             'followers': [],

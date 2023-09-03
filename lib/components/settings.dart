@@ -38,16 +38,21 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void getUserInfo() {
     try {
+      // Access the Firestore collection "users" and get the document with the current user's UID.
       firestore
           .collection("users")
           .doc(auth.currentUser?.uid)
           .get()
           .then((value) {
+        // Use a callback function to handle the result of the Firestore query.
         setState(() {
+          // Set the "username" state variable to the value obtained from Firestore.
+          // Note: value.data()?['username'] is used to safely access the 'username' field in the Firestore document.
           username = value.data()?['username'];
         });
       });
     } catch (e) {
+      // Handle any errors that may occur during this operation.
       print("Error: $e");
     }
   }
@@ -179,35 +184,51 @@ class _NotificationSectionState extends State<NotificationSection> {
     getNotificationState();
   }
 
+  // Function to retrieve the notification state from SharedPreferences
   void getNotificationState() async {
     try {
+      // Get an instance of SharedPreferences
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      // Set the 'notification' variable to the stored boolean value, defaulting to true if not found
       setState(() {
         notification = prefs.getBool("notification") ?? true;
       });
     } catch (e) {
+      // Handle any errors that occur during SharedPreferences retrieval
       print("Error: $e");
     }
   }
 
+// Function to set values in SharedPreferences and subscribe/unsubscribe from topics
   void setValues(String pref, bool value) async {
     try {
+      // Get an instance of Firebase Messaging
       var messaging = FirebaseMessaging.instance;
+
+      // Get an instance of SharedPreferences
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      // Set the boolean preference with the given key to the provided value
       prefs.setBool(pref, value);
+
+      // Update the 'notification' variable with the new value
       setState(() {
         notification = value;
       });
+
+      // Subscribe or unsubscribe from topics based on the new value
       if (value) {
         messaging.subscribeToTopic(auth.currentUser!.uid);
         messaging.subscribeToTopic("general");
-        print("subscribed to topic ${auth.currentUser!.uid}");
+        print("Subscribed to topic ${auth.currentUser!.uid}");
       } else {
         messaging.unsubscribeFromTopic(auth.currentUser!.uid);
         messaging.unsubscribeFromTopic("general");
-        print("unsubscribed from topic ${auth.currentUser!.uid}");
+        print("Unsubscribed from topic ${auth.currentUser!.uid}");
       }
     } catch (e) {
+      // Handle any errors that occur during SharedPreferences update or topic subscription
       print("Error: ${e.toString()}");
     }
   }
@@ -272,19 +293,29 @@ class _AppSectionState extends State<AppSection> {
     getLanguage();
   }
 
+  // Function to retrieve the selected language preference from SharedPreferences.
   void getLanguage() async {
     try {
+      // Access the SharedPreferences instance to store key-value pairs.
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      // Use setState to update the selectedLanguage variable with the stored value.
       setState(() {
         selectedLanguage = prefs.getString("language") ?? 'English';
+        // If no language preference is found in SharedPreferences, default to 'English'.
       });
     } catch (e) {
+      // Handle any errors that may occur during SharedPreferences access.
       print("Error: $e");
     }
   }
 
+// Function to set the user's preferred language in SharedPreferences.
   void setLanguage(String value) async {
+    // Access the SharedPreferences instance to store key-value pairs.
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Store the selected language preference with the key "language".
     prefs.setString("language", value);
   }
 
@@ -519,20 +550,19 @@ class LogoutSection extends StatelessWidget {
     );
   }
 
-  Future<void> deleteCacheDir() async {
-    final cacheDir = await getTemporaryDirectory();
-
-    if (cacheDir.existsSync()) {
-      cacheDir.deleteSync(recursive: true);
-    }
-  }
-
+// Function to log the user out
   void logout() async {
     try {
+      // Sign out the user from Firebase authentication
       auth.signOut();
+
+      // Create an instance of GoogleSignIn
       final googleSignIn = GoogleSignIn();
+
+      // Sign out the user from Google Sign-In
       await googleSignIn.signOut();
     } catch (e) {
+      // Handle any exceptions that may occur during the logout process
       print(e);
     }
   }
@@ -576,10 +606,14 @@ class _ContactSupportModalState extends State<ContactSupportModal> {
   TextEditingController objectController = TextEditingController();
   TextEditingController messageController = TextEditingController();
 
+  // Function to send a support message
   void sendSupportMessage() async {
     try {
+      // Get user preferences
       final prefs = await SharedPreferences.getInstance();
+      // Retrieve SMTP key from preferences or use an empty string as default
       var smtpkey = await prefs.getString('smtp_key') ?? '';
+      // Define the SMTP server using Gmail
       final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
 
       // Create a message
@@ -587,7 +621,7 @@ class _ContactSupportModalState extends State<ContactSupportModal> {
         ..from = Address(
             auth.currentUser!.email ?? "", auth.currentUser?.displayName)
         ..recipients.add('moderation.ilili@gmail.com')
-        ..subject = '[Support] ${objectController.text}'
+        ..subject = '[Support] ${objectController.text}' // Subject of the email
         ..html = '''
 <!DOCTYPE html>
 <html>
@@ -603,7 +637,7 @@ class _ContactSupportModalState extends State<ContactSupportModal> {
     font-size: 24px;
     margin-bottom: 10px;
   }
-  h1 {
+  h2 {
     color: #0066ff;
     font-size: 20px;
     margin-bottom: 10px;
@@ -621,14 +655,23 @@ class _ContactSupportModalState extends State<ContactSupportModal> {
 <p>${messageController.text}</p>
 </body>
 </html>
-''';
+'''; // HTML content of the email
+
+      // Send the email using the specified SMTP server
       final sendReport = await send(message, smtpServer);
+
+      // Show a success message
       showInfoMessage("Your message has been correctly sent", context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
+
+      // Print a confirmation message to the console
       print('Message sent: ${sendReport.toString()}');
+
+      // Close the current screen or navigate back
       Navigator.pop(context);
     } catch (e) {
+      // Handle any errors that occur during the email sending process
       print('Error sending email: $e');
     }
   }
@@ -725,16 +768,23 @@ class _ReportProblemModalState extends State<ReportProblemModal> {
 
   void sendReportProblem() async {
     try {
+      // Retrieve SMTP key from SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       var smtpkey = await prefs.getString('smtp_key') ?? '';
+
+      // Configure the SMTP server for sending emails (using Gmail)
       final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
 
-      // Create a message
+      // Create an email message
       final message = Message()
+        // Set the sender's email and display name (if available)
         ..from = Address(
             auth.currentUser!.email ?? "", auth.currentUser?.displayName)
+        // Add the recipient's email address
         ..recipients.add('moderation.ilili@gmail.com')
+        // Set the subject of the email
         ..subject = '[Problem] ${objectController.text}'
+        // Define the email content as an HTML template
         ..html = '''
 <!DOCTYPE html>
 <html>
@@ -750,7 +800,7 @@ class _ReportProblemModalState extends State<ReportProblemModal> {
     font-size: 24px;
     margin-bottom: 10px;
   }
-  h1 {
+  h2 {
     color: #0066ff;
     font-size: 20px;
     margin-bottom: 10px;
@@ -769,13 +819,22 @@ class _ReportProblemModalState extends State<ReportProblemModal> {
 </body>
 </html>
 ''';
+
+      // Send the email using the configured SMTP server
       final sendReport = await send(message, smtpServer);
+
+      // Display a success message to the user
       showInfoMessage("Your message has been correctly sent", context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
+
+      // Print a message indicating that the email was sent successfully
       print('Message sent: ${sendReport.toString()}');
+
+      // Close the current screen (assuming this function is used in a screen)
       Navigator.pop(context);
     } catch (e) {
+      // Handle any errors that occur during the email sending process
       print('Error sending email: $e');
     }
   }

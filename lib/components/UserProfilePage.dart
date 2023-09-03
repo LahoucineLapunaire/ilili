@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/changeProfile.dart';
 import 'package:Ilili/components/chat.dart';
-import 'package:Ilili/components/floattingButton.dart';
 import 'package:Ilili/components/notification.dart';
 import 'package:Ilili/components/widget.dart';
 
@@ -70,27 +69,32 @@ class _TopSectionState extends State<TopSection> {
     getMyInfo();
   }
 
+  // This function allows the user to follow or unfollow another user.
   void follow() async {
     if (followers.contains(auth.currentUser!.uid)) {
-      firestore.collection('users').doc(widget.userId).update({
+      // If the user is already following, unfollow them.
+      await firestore.collection('users').doc(widget.userId).update({
         'followers': FieldValue.arrayRemove([auth.currentUser!.uid])
       });
-      firestore.collection('users').doc(auth.currentUser!.uid).update({
+      await firestore.collection('users').doc(auth.currentUser!.uid).update({
         'following': FieldValue.arrayRemove([widget.userId])
       });
       setState(() {
         followers.remove(auth.currentUser!.uid);
       });
     } else {
-      firestore.collection('users').doc(widget.userId).update({
+      // If the user is not following, follow them.
+      await firestore.collection('users').doc(widget.userId).update({
         'followers': FieldValue.arrayUnion([auth.currentUser!.uid])
       });
-      firestore.collection('users').doc(auth.currentUser!.uid).update({
+      await firestore.collection('users').doc(auth.currentUser!.uid).update({
         'followings': FieldValue.arrayUnion([widget.userId])
       });
       setState(() {
         followers.add(auth.currentUser!.uid);
       });
+
+      // Send a notification to the user being followed.
       sendNotificationToTopic("${widget.userId}", "New followers",
           "$myUsername started to following you", myProfilePicture, {
         "sender": auth.currentUser!.uid,
@@ -101,11 +105,7 @@ class _TopSectionState extends State<TopSection> {
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
+// This function retrieves data of the user being viewed.
   void getUserData() async {
     DocumentSnapshot ds =
         await firestore.collection('users').doc(widget.userId).get();
@@ -120,6 +120,7 @@ class _TopSectionState extends State<TopSection> {
     });
   }
 
+// This function retrieves the current user's information.
   void getMyInfo() async {
     DocumentSnapshot ds =
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
@@ -128,6 +129,11 @@ class _TopSectionState extends State<TopSection> {
       myProfilePicture = ds.get('profilePicture');
       myUsername = ds.get('username');
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -339,11 +345,6 @@ class _PostSectionState extends State<PostSection> {
     getPosts();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   void getPosts() async {
     QuerySnapshot<Map<String, dynamic>> qs = await FirebaseFirestore.instance
         .collection('posts')
@@ -353,6 +354,11 @@ class _PostSectionState extends State<PostSection> {
     setState(() {
       posts = qs.docs.map((e) => e.id).toList();
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override

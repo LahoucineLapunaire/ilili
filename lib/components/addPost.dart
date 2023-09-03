@@ -174,6 +174,7 @@ class _ButtonSectionState extends State<ButtonSection> {
   bool isRecording = false;
   String pathToAudio = "";
 
+  // Function to start audio recording
   void startRecording() async {
     try {
       if (audioRecorder != null) {
@@ -184,6 +185,7 @@ class _ButtonSectionState extends State<ButtonSection> {
       await audioPlayer.stop();
       File existingFile = File('audio.aac');
       if (existingFile.existsSync()) {
+        // Delete existing audio file if it exists
         await existingFile.delete();
         print('Existing file deleted');
       }
@@ -192,7 +194,7 @@ class _ButtonSectionState extends State<ButtonSection> {
       }
       audioRecorder = FlutterSoundRecorder();
 
-      // Start recording audio
+      // Start recording audio to 'audio.aac' file
       await audioRecorder?.openRecorder();
       await audioRecorder!.startRecorder(toFile: 'audio.aac');
       setState(() {
@@ -205,6 +207,7 @@ class _ButtonSectionState extends State<ButtonSection> {
     }
   }
 
+// Function to stop audio recording
   void stopRecording() async {
     try {
       if (audioRecorder != null) {
@@ -223,8 +226,10 @@ class _ButtonSectionState extends State<ButtonSection> {
           isRecording = false;
         });
         if (Platform.isIOS) {
+          // Play recorded audio on iOS using DeviceFileSource
           audioPlayer.play(DeviceFileSource(audioPath));
         } else {
+          // Play recorded audio on other platforms using UrlSource
           audioPlayer.play(UrlSource(audioPath));
         }
       }
@@ -234,22 +239,24 @@ class _ButtonSectionState extends State<ButtonSection> {
     }
   }
 
+// Function to create UrlSource from bytes
   UrlSource urlSourceFromBytes(Uint8List bytes,
       {String mimeType = "audio/mpeg"}) {
     return UrlSource(Uri.dataFromBytes(bytes, mimeType: mimeType).toString());
   }
 
+// Function to pick an audio file
   Future<void> pickAudioFile() async {
     try {
       FilePickerResult? result;
       if (Platform.isIOS) {
-        result = await FilePicker.platform
-            .pickFiles(type: FileType.custom, allowedExtensions: [
-          'wav',
-          'mp3',
-          'aac',
-        ]);
+        // Allow custom file types on iOS
+        result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['wav', 'mp3', 'aac'],
+        );
       } else {
+        // Pick audio file on other platforms
         result = await FilePicker.platform.pickFiles(
           type: FileType.audio,
         );
@@ -257,6 +264,7 @@ class _ButtonSectionState extends State<ButtonSection> {
       if (result != null) {
         PlatformFile file = result.files.first;
         if (kIsWeb) {
+          // Handle audio file selection on web
           Uint8List bytes = file.bytes!;
           setState(() {
             audioPlayer.setSource(urlSourceFromBytes(bytes));
@@ -264,11 +272,13 @@ class _ButtonSectionState extends State<ButtonSection> {
             urlSource = urlSourceFromBytes(bytes);
           });
         } else if (Platform.isIOS) {
+          // Handle audio file selection on iOS
           setState(() {
             audioPath = file.path!;
             audioPlayer.setSourceDeviceFile(audioPath);
           });
         } else {
+          // Handle audio file selection on other platforms
           setState(() {
             audioPath = file.path!;
             audioPlayer.setSourceUrl(file.path!);
@@ -281,6 +291,7 @@ class _ButtonSectionState extends State<ButtonSection> {
     }
   }
 
+// Function to request microphone permission
   Future<bool> askPermission() async {
     var microphoneStatus = await Permission.microphone.request();
     if (microphoneStatus != PermissionStatus.granted) {
@@ -407,33 +418,45 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
 
   void playPause() async {
     try {
+      // Check if the audio is currently playing
       if (isPlaying) {
+        // If playing, pause the audio
         await audioPlayer.pause();
         setState(() => isPlaying = false);
       } else {
+        // If not playing, start playing the audio
         if (kIsWeb) {
+          // On web, play the audio using the provided URL source
           await audioPlayer.play(urlSource);
         } else {
+          // On mobile, play the audio using the local audioPath
           await audioPlayer.play(UrlSource(audioPath));
         }
 
+        // Update the state to indicate that the audio is now playing
         setState(() => isPlaying = true);
       }
     } catch (e) {
+      // Handle any errors that may occur during playback
       showErrorMessage(e.toString(), context);
     }
   }
 
+// Seek to a specific position in the audio
   void _seekToSecond(int second) {
+    // Create a new duration based on the specified second
     Duration newDuration = Duration(seconds: second);
+    // Seek to the new duration in the audio
     audioPlayer.seek(newDuration);
   }
 
+// Format the position in seconds to a readable format (minutes:seconds)
   String formatPosition(int position) {
+    // Convert the position to seconds and format it as minutes:seconds
     double result = position / 1000;
     String minutes = (result / 60).floor().toString();
-    String secondes = (result % 60).floor().toString();
-    return minutes + ':' + secondes;
+    String seconds = (result % 60).floor().toString();
+    return minutes + ':' + seconds;
   }
 
   @override
@@ -490,25 +513,37 @@ class _TagsSectionState extends State<TagsSection> {
 
   void addTag() {
     try {
+      // Check if the tag already exists in the tagsList
       if (tagsList.contains(tagController.text)) {
-        showErrorMessage("Tag already exists", context);
-        return;
-      }
-      if (tagsList.length >= 3) {
-        showErrorMessage("You can only add 3 tags", context);
-        return;
-      }
-      if (tagController.text == "") {
-        showErrorMessage("Tag can't be empty", context);
-        return;
+        showErrorMessage(
+            "Tag already exists", context); // Display an error message
+        return; // Exit the function
       }
 
+      // Check if the maximum number of tags (3) has been reached
+      if (tagsList.length >= 3) {
+        showErrorMessage(
+            "You can only add 3 tags", context); // Display an error message
+        return; // Exit the function
+      }
+
+      // Check if the tag is empty
+      if (tagController.text == "") {
+        showErrorMessage(
+            "Tag can't be empty", context); // Display an error message
+        return; // Exit the function
+      }
+
+      // If all checks pass, add the tag to the tagsList
       setState(() {
         tagsList.add(tagController.text);
       });
+
+      // Clear the text field after adding the tag
       tagController.clear();
     } catch (e) {
-      showErrorMessage(e.toString(), context);
+      showErrorMessage(e.toString(),
+          context); // Handle any exceptions and show an error message
     }
   }
 
@@ -591,25 +626,34 @@ class _SendButtonSectionState extends State<SendButtonSection> {
 
   void loadInterstitialAd() {
     try {
+      // Load an Interstitial Ad
       InterstitialAd.load(
-        adUnitId: AdHelper.interstitialAdUnitId,
-        request: AdRequest(),
+        adUnitId:
+            AdHelper.interstitialAdUnitId, // Ad Unit ID for the interstitial ad
+        request: AdRequest(), // Create an ad request
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (ad) {
+            // Ad successfully loaded
             ad.fullScreenContentCallback = FullScreenContentCallback(
-              onAdDismissedFullScreenContent: (ad) {},
+              onAdDismissedFullScreenContent: (ad) {
+                // Interstitial ad dismissed
+                // You can add custom logic here if needed
+              },
             );
 
+            // Update the state with the loaded interstitial ad
             setState(() {
               interstitialAd = ad;
             });
           },
           onAdFailedToLoad: (err) {
+            // Failed to load the interstitial ad
             print('Failed to load an interstitial ad: ${err.message}');
           },
         ),
       );
     } catch (e) {
+      // Handle any errors that may occur during ad loading
       print("error interstitial ad : ${e.toString()}");
     }
   }
@@ -631,17 +675,20 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       if (user != null) {
         String userId = user.uid;
 
+        // Query user's posts
         QuerySnapshot snapshot = await FirebaseFirestore.instance
             .collection('users')
             .doc(userId)
             .collection('posts')
             .get();
 
+        // Extract post data from the query result
         List<dynamic> posts = snapshot.docs.map((doc) => doc.data()).toList();
 
         return posts;
       }
     } catch (e) {
+      // Handle any errors that occur during post retrieval
       showErrorMessage(e.toString(), context);
       print('Error getting posts: $e');
     }
@@ -653,16 +700,22 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       String name = generateUniqueFileName();
       List<dynamic> posts = await getPosts();
 
+      // Add the new post's name to the user's list of posts
       posts.add(name);
       String title = titleController.text;
 
       Reference postRef;
+
+      // Determine the storage reference based on the platform
       if (kIsWeb) {
         postRef = webStorageRef.child(name);
       } else {
         postRef = storageRef.child(name);
       }
+
       UploadTask uploadTask;
+
+      // Determine the upload task based on the platform
       if (kIsWeb) {
         uploadTask = postRef.putData(urlBytes);
       } else {
@@ -672,7 +725,8 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       await uploadTask.whenComplete(() async {
         String downloadURL = await postRef.getDownloadURL();
 
-        FirebaseFirestore.instance.collection('posts').doc(name).set({
+        // Create a new post in the 'posts' collection
+        await FirebaseFirestore.instance.collection('posts').doc(name).set({
           'userId': auth.currentUser!.uid,
           "title": title,
           'audio': downloadURL,
@@ -683,6 +737,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           'score': 0,
         });
 
+        // Update the user's 'posts' field with the new post
         FirebaseFirestore.instance
             .collection('users')
             .doc(auth.currentUser!.uid)
@@ -690,11 +745,15 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           'posts': posts,
         });
       });
+
+      // Display a success message
       showInfoMessage("Your post is posted !", context, () {
         if (mounted) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
         }
       });
+
+      // Navigate to a different screen (you might need to define AppRouter)
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -702,6 +761,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
         ),
       );
     } catch (e) {
+      // Handle any errors that occur during post submission
       print(e.toString());
     }
   }

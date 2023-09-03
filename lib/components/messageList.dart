@@ -1,9 +1,9 @@
+import 'package:Ilili/components/widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/chat.dart';
-import 'package:Ilili/components/floattingButton.dart';
 
 import 'appRouter.dart';
 
@@ -27,13 +27,18 @@ class _MessageListPageState extends State<MessageListPage> {
 
   getConversation() async {
     try {
+      // Fetch the user's document from Firestore using their UID
       DocumentSnapshot userDoc =
           await firestore.collection('users').doc(auth.currentUser!.uid).get();
 
+      // Extract the list of chat IDs from the user's document
       List<String> chats = List<String>.from(userDoc['chats']);
       List<dynamic> result = [];
       String lastMessage = '';
+
+      // Iterate through each chat ID in the user's chats
       for (String chatId in chats) {
+        // Query the Firestore for the last message in the chat, ordered by timestamp
         QuerySnapshot<Map<String, dynamic>> chatSnapshot = await firestore
             .collection('chats')
             .doc(auth.currentUser!.uid)
@@ -41,20 +46,28 @@ class _MessageListPageState extends State<MessageListPage> {
             .orderBy('timestamp', descending: true)
             .limit(1)
             .get();
+
+        // Check if there are any messages in the chat
         if (chatSnapshot.docs.isNotEmpty) {
+          // Get the last message from the first document in the query result
           lastMessage = chatSnapshot.docs.first['message'];
         } else {
-          lastMessage = '';
+          lastMessage = ''; // No messages in this chat
         }
+
+        // Add chat information (user ID and last message) to the result list
         result.add({
           'userId': chatId,
           'lastMessage': lastMessage,
         });
       }
+
+      // Update the chatList state variable with the result
       setState(() {
         chatList = result;
       });
     } catch (e) {
+      // Handle any errors that may occur during the execution
       print("Error getting conversations : $e");
     }
   }
@@ -188,14 +201,26 @@ class _UserCardSectionState extends State<UserCardSection> {
     getUserInfo();
   }
 
-  getUserInfo() {
+  // Function to fetch user information from Firestore based on userId
+  void getUserInfo() {
+    // Access the 'users' collection and retrieve a document with the provided userId
     firestore.collection('users').doc(widget.userId).get().then((value) {
+      // Check if the widget is still mounted (to avoid state changes on an unmounted widget)
       if (mounted) {
+        // Update the widget's state with the fetched user information
         setState(() {
+          // Set the 'username' variable to the 'username' field in Firestore
           username = value['username'];
+
+          // Set the 'profilePicture' variable to the 'profilePicture' field in Firestore
           profilePicture = value['profilePicture'];
+
+          // Set 'isPictureLoaded' to true to indicate that the profile picture has been loaded
           isPictureLoaded = true;
+
+          // Check if the 'lastMessage' is longer than 20 characters
           if (widget.lastMessage.length > 20) {
+            // If so, truncate the 'lastMessage' and append '...' to indicate it's shortened
             message = widget.lastMessage.substring(0, 20) + '...';
           }
         });
@@ -269,6 +294,33 @@ class _UserCardSectionState extends State<UserCardSection> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class FloatingActionButtonUserMessage extends StatefulWidget {
+  const FloatingActionButtonUserMessage({super.key});
+
+  @override
+  State<FloatingActionButtonUserMessage> createState() =>
+      _FloatingActionButtonUserMessageState();
+}
+
+class _FloatingActionButtonUserMessageState
+    extends State<FloatingActionButtonUserMessage> {
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      backgroundColor: Color(0xFF6A1B9A),
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return UsersListModal();
+          },
+        );
+      },
+      child: Icon(Icons.add),
     );
   }
 }

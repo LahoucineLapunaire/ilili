@@ -41,23 +41,31 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+// Scroll to the bottom of a scrollable view using a scroll controller.
   void scrollToBottom() {
     try {
+      // Use the scroll controller to jump to the maximum scroll extent.
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
     } catch (e) {
+      // Handle any exceptions that may occur while scrolling.
       print(e.toString());
     }
   }
 
-  getMyInfo() async {
+// Fetch user information from Firestore for the currently authenticated user.
+  void getMyInfo() async {
     try {
+      // Retrieve the user's document from the "users" collection using their UID.
       DocumentSnapshot documentSnapshot =
           await firestore.collection("users").doc(auth.currentUser?.uid).get();
+
+      // Update the state with the user's profile picture and username.
       setState(() {
         myProfilePicture = documentSnapshot.get("profilePicture");
         myUsername = documentSnapshot.get("username");
       });
     } catch (e) {
+      // Handle any exceptions that may occur while fetching user information.
       print(e.toString());
     }
   }
@@ -123,11 +131,15 @@ class _ListSectionState extends State<ListSection> {
 
   void markAllAsRead() async {
     try {
+      // Fetch a QuerySnapshot containing all documents in the chat collection
       QuerySnapshot querySnapshot = await chatRef
           .doc(auth.currentUser!.uid)
           .collection(widget.otherUserID)
           .get();
+
+      // Loop through each document in the QuerySnapshot
       for (QueryDocumentSnapshot document in querySnapshot.docs) {
+        // Update the 'read' field of the current document to 'true'
         await chatRef
             .doc(auth.currentUser!.uid)
             .collection(widget.otherUserID)
@@ -135,6 +147,7 @@ class _ListSectionState extends State<ListSection> {
             .update({'read': true});
       }
     } catch (e) {
+      // Handle any exceptions that may occur during the process
       print(e.toString());
     }
   }
@@ -209,18 +222,24 @@ class _MessageFieldState extends State<MessageField> {
   }
 
   Future<void> sendMessage() async {
+    // Check if the text input is empty
     if (textField.text.isEmpty) {
       return;
     }
+
+    // Get the current date and time
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd – kk:mm:ss').format(now);
+
     try {
+      // Add the message to the sender's chat collection
       chatRef.doc(auth.currentUser?.uid).collection(widget.otherUserID).add({
         'message': textField.text,
         'userId': auth.currentUser?.uid,
         'timestamp': formattedDate,
         'read': true,
       }).then((value) {
+        // Add the message to the receiver's chat collection
         chatRef
             .doc(widget.otherUserID)
             .collection(auth.currentUser?.uid ?? "")
@@ -230,10 +249,14 @@ class _MessageFieldState extends State<MessageField> {
           'timestamp': formattedDate,
           'read': false,
         }).then((value) {
+          // Add the conversation to the user's chats list
           addConversation();
+          // Clear the text input field
           textField.clear();
         });
       });
+
+      // Send a notification to the receiver
       sendNotificationToTopic("${widget.otherUserID}", "$myUsername",
           "${textField.text}", myProfilePicture, {
         "sender": auth.currentUser!.uid,
@@ -248,6 +271,7 @@ class _MessageFieldState extends State<MessageField> {
 
   void addConversation() async {
     try {
+      // Get the user's chats list and update it
       DocumentSnapshot documentSnapshot =
           await firestore.collection("users").doc(auth.currentUser?.uid).get();
       List<dynamic> chats = documentSnapshot.get("chats");
@@ -257,6 +281,8 @@ class _MessageFieldState extends State<MessageField> {
           "chats": chats,
         });
       }
+
+      // Get the receiver's chats list and update it
       documentSnapshot =
           await firestore.collection("users").doc(widget.otherUserID).get();
       chats = documentSnapshot.get("chats");
@@ -273,11 +299,13 @@ class _MessageFieldState extends State<MessageField> {
 
   void changeMargin(bool isFocused) {
     if (isFocused) {
+      // If the text input is focused, change the margin to make space for the keyboard
       print("focused");
       setState(() {
         margin = EdgeInsets.only(bottom: 50);
       });
     } else {
+      // If the text input is not focused, reset the margin
       print("not focused");
       setState(() {
         margin = EdgeInsets.only(bottom: 0);

@@ -99,12 +99,15 @@ class _FormSectionState extends State<FormSection> {
   String passwordStrength = "";
   bool obscureText = true;
 
+  // Function to send email verification
   Future<void> sendEmailVerification() async {
     try {
       FirebaseAuth auth = FirebaseAuth.instance;
       User? user = auth.currentUser;
 
+      // Check if user is not null and email is not verified
       if (user != null && !user.emailVerified) {
+        // Send email verification
         await user.sendEmailVerification();
         showInfoMessage('Email verification sent to ${user.email}', context,
             () {
@@ -112,44 +115,58 @@ class _FormSectionState extends State<FormSection> {
         });
         print('Email verification sent to ${user.email}');
       } else {
+        // User is null or email is already verified
         showErrorMessage('No user or email is already verified', context);
         print('No user or email is already verified');
       }
     } catch (e) {
       if (mounted) {
+        // Handle errors and show error message
         showErrorMessage(e.toString(), context);
       }
     }
   }
 
+// Function to sign up user
   Future<void> signup() async {
+    // Check if required fields are empty
     if (emailController.text == '' ||
         passwordController.text == '' ||
         passwordConfirmationController.text == '') {
       showErrorMessage("All fields must be filled", context);
       return;
     }
+
+    // Check if terms of use are accepted
     if (termOfUses == false) {
       showErrorMessage("You must accept the terms of use", context);
       return;
     }
+
+    // Check if passwords match
     if (passwordController.text != passwordConfirmationController.text) {
       showErrorMessage("Passwords must be the same", context);
       return;
     }
+
+    // Check password strength
     if (passwordStrength != "") {
       showErrorMessage("Password must be strong", context);
       return;
     }
+
     try {
+      // Create user with email and password
       UserCredential userCredential = await auth.createUserWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );
       User? user = userCredential.user;
 
+      // Get user's UID
       String uid = userCredential.user?.uid ?? '';
 
+      // Create a document for the user
       await firestore.collection('users').doc(uid).set({
         'profilePicture':
             'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
@@ -162,18 +179,24 @@ class _FormSectionState extends State<FormSection> {
       });
 
       print('User signed up and document created successfully!');
+
+      // Send email verification
       sendEmailVerification();
+
+      // Show success message
       showInfoMessage("User signed up successfully!", context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
     } catch (e) {
       print('Error signing up user and creating document: $e');
       if (mounted) {
+        // Handle errors and show error message
         showErrorMessage(e.toString().split('] ')[1], context);
       }
     }
   }
 
+// Function to verify password strength
   void verifyStrongPassword() {
     bool lenght = passwordController.text.length >= 8;
     bool upperCase = passwordController.text.contains(RegExp(r'[A-Z]'));
@@ -181,6 +204,8 @@ class _FormSectionState extends State<FormSection> {
         passwordController.text.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
     bool number = passwordController.text.contains(RegExp(r'[0-9]'));
     String message = "";
+
+    // Check password strength requirements
     if (!lenght || !upperCase || !specialChar || !number) {
       message = "Please enter a password that contains : ";
     }
@@ -196,6 +221,7 @@ class _FormSectionState extends State<FormSection> {
     if (!number) {
       message += "\nat least one number, ";
     }
+
     setState(() {
       passwordStrength = message;
     });
