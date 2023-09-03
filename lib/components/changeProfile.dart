@@ -28,9 +28,9 @@ class ChangeProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Color(0xFFFAFAFA),
+          backgroundColor: const Color(0xFFFAFAFA),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -45,8 +45,8 @@ class ChangeProfilePage extends StatelessWidget {
             ),
           ),
         ),
-        backgroundColor: Color(0xFFFAFAFA),
-        body: SingleChildScrollView(
+        backgroundColor: const Color(0xFFFAFAFA),
+        body: const SingleChildScrollView(
           child: Center(
               child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -70,7 +70,7 @@ class HeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 20),
+      padding: const EdgeInsets.only(left: 20),
       width: double.maxFinite,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
@@ -182,7 +182,7 @@ class _ProfilPictureSectionState extends State<ProfilPictureSection> {
 }
 
 class UserInfoWidget extends StatefulWidget {
-  UserInfoWidget({Key? key});
+  const UserInfoWidget({Key? key});
 
   @override
   _UserInfoWidgetState createState() => _UserInfoWidgetState();
@@ -307,7 +307,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
-              prefixIcon: Icon(Icons.person),
+              prefixIcon: const Icon(Icons.person),
               labelText: 'Username',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20),
@@ -315,15 +315,15 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
             ),
           ),
         ),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         if (error != "")
           Padding(
-            padding: EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.only(bottom: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error, color: Colors.red),
-                SizedBox(width: 5),
+                const Icon(Icons.error, color: Colors.red),
+                const SizedBox(width: 5),
                 Text(
                   error,
                   textAlign: TextAlign.center,
@@ -335,11 +335,11 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
               ],
             ),
           ),
-        SizedBox(height: 15),
+        const SizedBox(height: 15),
         Container(
           height: 200,
           width: 300,
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(8),
@@ -350,7 +350,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
                 maxLines: null,
                 controller: descriptionController,
                 maxLength: 250,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintMaxLines: null,
                   border: InputBorder.none,
                   counterText: "",
@@ -361,8 +361,8 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
                 bottom: 0,
                 right: 0,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: const BoxDecoration(
                     color: Colors.grey,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(8),
@@ -371,7 +371,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
                   ),
                   child: Text(
                     '${descriptionController.text.length}/250',
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ),
@@ -473,10 +473,10 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
         Reference imageRef;
         if (kIsWeb) {
           // Set the image reference for web
-          imageRef = webStorageRef.child(auth.currentUser!.uid + ".jpg");
+          imageRef = webStorageRef.child("${auth.currentUser!.uid}.jpg");
         } else {
           // Set the image reference for mobile
-          imageRef = storageRef.child(auth.currentUser!.uid + ".jpg");
+          imageRef = storageRef.child("${auth.currentUser!.uid}.jpg");
         }
         UploadTask uploadTask;
         if (kIsWeb) {
@@ -514,7 +514,7 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => AppRouter(index: 2),
+          builder: (context) => const AppRouter(index: 2),
         ),
       );
     } catch (e) {
@@ -534,15 +534,16 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
       onPressed: () {
         changeUserInfo();
       },
-      child: Text('Save modifications'),
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        minimumSize: Size(250, 50), // Set the width and height of the button
+        minimumSize:
+            const Size(250, 50), // Set the width and height of the button
         backgroundColor:
-            Color(0xFF6A1B9A), // Set the background color of the button
+            const Color(0xFF6A1B9A), // Set the background color of the button
       ),
+      child: const Text('Save modifications'),
     );
   }
 }

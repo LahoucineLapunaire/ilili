@@ -15,7 +15,7 @@ class ResetPassword extends StatefulWidget {
 class _ResetPasswordState extends State<ResetPassword> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Color(0xFFFAFAFA),
       body: Center(
         child: Column(
@@ -40,7 +40,7 @@ class TextTop extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.only(left: 20),
+          padding: const EdgeInsets.only(left: 20),
           width: double.maxFinite,
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -120,14 +120,14 @@ class _EmailSectionState extends State<EmailSection> {
           children: [
             if (confirmation)
               Padding(
-                padding: EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   children: [
-                    Icon(Icons.check, color: Colors.green),
-                    SizedBox(width: 5),
+                    const Icon(Icons.check, color: Colors.green),
+                    const SizedBox(width: 5),
                     Container(
                       width: 250,
-                      child: Text(
+                      child: const Text(
                         "Password reset email sent successfully, please check your email",
                         style: TextStyle(
                             color: Colors.green, fontWeight: FontWeight.bold),
@@ -141,24 +141,24 @@ class _EmailSectionState extends State<EmailSection> {
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.white,
-                prefixIcon: Icon(Icons.email),
+                prefixIcon: const Icon(Icons.email),
                 labelText: 'Email',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
                 sendPasswordResetEmail();
               },
-              child: Text(
-                "Reset Password",
-              ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF6A1B9A),
-                minimumSize: Size(250, 50),
+                backgroundColor: const Color(0xFF6A1B9A),
+                minimumSize: const Size(250, 50),
+              ),
+              child: const Text(
+                "Reset Password",
               ),
             )
           ],

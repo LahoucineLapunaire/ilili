@@ -20,6 +20,7 @@ class MessageListPage extends StatefulWidget {
 class _MessageListPageState extends State<MessageListPage> {
   List<dynamic> chatList = [];
 
+  @override
   void initState() {
     super.initState();
     getConversation();
@@ -75,16 +76,16 @@ class _MessageListPageState extends State<MessageListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        floatingActionButton: FloatingActionButtonUserMessage(),
+        floatingActionButton: const FloatingActionButtonUserMessage(),
         appBar: AppBar(
-          backgroundColor: Color(0xFFFAFAFA),
+          backgroundColor: const Color(0xFFFAFAFA),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () {
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AppRouter(index: 0),
+                    builder: (context) => const AppRouter(index: 0),
                   ));
             },
           ),
@@ -103,7 +104,7 @@ class _MessageListPageState extends State<MessageListPage> {
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AppRouter(index: 0),
+                  builder: (context) => const AppRouter(index: 0),
                 ));
             return Future.value(false);
           },
@@ -116,7 +117,7 @@ class _MessageListPageState extends State<MessageListPage> {
               builder: (context, userSnapshot) {
                 print(userSnapshot.connectionState);
                 if (userSnapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
+                  return const CircularProgressIndicator();
                 }
 
                 List<String> chatIds = userSnapshot.data!['chats'] != null
@@ -126,7 +127,7 @@ class _MessageListPageState extends State<MessageListPage> {
                 if (chatIds.isEmpty) {
                   return Container(
                     height: 200,
-                    child: Center(
+                    child: const Center(
                       child: Text(
                         "No message yet, to start a chat, please press the + button.",
                         style: TextStyle(
@@ -196,6 +197,7 @@ class _UserCardSectionState extends State<UserCardSection> {
   String message = '';
   bool isPictureLoaded = false;
 
+  @override
   void initState() {
     super.initState();
     getUserInfo();
@@ -221,7 +223,7 @@ class _UserCardSectionState extends State<UserCardSection> {
           // Check if the 'lastMessage' is longer than 20 characters
           if (widget.lastMessage.length > 20) {
             // If so, truncate the 'lastMessage' and append '...' to indicate it's shortened
-            message = widget.lastMessage.substring(0, 20) + '...';
+            message = '${widget.lastMessage.substring(0, 20)}...';
           }
         });
       }
@@ -247,7 +249,7 @@ class _UserCardSectionState extends State<UserCardSection> {
       },
       child: Container(
         color: Colors.white,
-        padding: EdgeInsets.fromLTRB(20, 15, 15, 15),
+        padding: const EdgeInsets.fromLTRB(20, 15, 15, 15),
         child: Row(
           children: [
             isPictureLoaded
@@ -258,7 +260,7 @@ class _UserCardSectionState extends State<UserCardSection> {
                       backgroundImage: NetworkImage(profilePicture),
                     ),
                   )
-                : Center(
+                : const Center(
                     child: CircularProgressIndicator(
                       color: Colors.grey,
                     ),
@@ -268,24 +270,24 @@ class _UserCardSectionState extends State<UserCardSection> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(username,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     )),
                 widget.isRead
                     ? Text(
                         widget.lastMessage.length > 20
-                            ? widget.lastMessage.substring(0, 20) + '...'
+                            ? '${widget.lastMessage.substring(0, 20)}...'
                             : widget.lastMessage,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 14,
                             color: Colors.grey,
                             fontWeight: FontWeight.w400))
                     : Text(
                         widget.lastMessage.length > 20
-                            ? widget.lastMessage.substring(0, 20) + '...'
+                            ? '${widget.lastMessage.substring(0, 20)}...'
                             : widget.lastMessage,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black,
                             fontWeight: FontWeight.bold)),
@@ -311,16 +313,16 @@ class _FloatingActionButtonUserMessageState
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
-      backgroundColor: Color(0xFF6A1B9A),
+      backgroundColor: const Color(0xFF6A1B9A),
       onPressed: () {
         showModalBottomSheet(
           context: context,
           builder: (BuildContext context) {
-            return UsersListModal();
+            return const UsersListModal();
           },
         );
       },
-      child: Icon(Icons.add),
+      child: const Icon(Icons.add),
     );
   }
 }

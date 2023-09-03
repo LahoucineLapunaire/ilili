@@ -91,7 +91,7 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => AppRouter(index: 2),
+          builder: (context) => const AppRouter(index: 2),
         ),
       ); // Navigate to the specified route.
     }
@@ -109,8 +109,8 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextTop(),
-            SizedBox(height: 30),
+            const TextTop(),
+            const SizedBox(height: 30),
             Container(
               width: 300,
               child: TextField(
@@ -121,7 +121,7 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
-                  prefixIcon: Icon(Icons.person),
+                  prefixIcon: const Icon(Icons.person),
                   labelText: 'Username',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -129,15 +129,15 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
                 ),
               ),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             if (error != "")
               Padding(
-                padding: EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error, color: Colors.red),
-                    SizedBox(width: 5),
+                    const Icon(Icons.error, color: Colors.red),
+                    const SizedBox(width: 5),
                     Text(
                       error,
                       textAlign: TextAlign.center,
@@ -149,17 +149,17 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
                   ],
                 ),
               ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
                 setUsername();
               },
-              child: Text(
-                "Set My Username",
-              ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF6A1B9A),
-                minimumSize: Size(250, 50),
+                backgroundColor: const Color(0xFF6A1B9A),
+                minimumSize: const Size(250, 50),
+              ),
+              child: const Text(
+                "Set My Username",
               ),
             )
           ],
@@ -177,7 +177,7 @@ class TextTop extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.only(left: 20),
+          padding: const EdgeInsets.only(left: 20),
           width: double.maxFinite,
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

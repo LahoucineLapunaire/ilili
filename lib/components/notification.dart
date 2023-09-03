@@ -12,11 +12,11 @@ Future<void> sendNotificationToTopic(
 ) async {
   // Obtain an access token
   var credential = await obtainCredentials().then((value) {
-    return value.accessToken.data as String;
+    return value.accessToken.data;
   });
 
   // Define the FCM (Firebase Cloud Messaging) endpoint
-  final String fcmEndpoint =
+  const String fcmEndpoint =
       'https://fcm.googleapis.com/v1/projects/ilili-7ebc6/messages:send';
 
   // Define headers for the HTTP request
@@ -56,8 +56,8 @@ Future<void> sendNotificationToTopic(
 
 Future<AccessCredentials> obtainCredentials() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  var privateKeyId = await prefs.getString('private_key_id') ?? "";
-  var privateKey = await prefs.getString('private_key') ?? "";
+  var privateKeyId = prefs.getString('private_key_id') ?? "";
+  var privateKey = prefs.getString('private_key') ?? "";
 
   // Replace escaped newline characters with actual newline characters
   privateKey = privateKey.replaceAll("\\n", "\n");

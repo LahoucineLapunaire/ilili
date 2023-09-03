@@ -53,43 +53,43 @@ class _AddPostPageState extends State<AddPostPage> {
             child: Container(
           height: MediaQuery.of(context).size.height,
           width: double.maxFinite,
-          child: Column(
+          child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const DelayedDisplay(
+              DelayedDisplay(
                 delay: Duration(milliseconds: 500),
                 child: HeaderSection(),
               ),
-              const SizedBox(height: 20),
-              const DelayedDisplay(
+              SizedBox(height: 20),
+              DelayedDisplay(
                 delay: Duration(milliseconds: 700),
                 child: TitleSection(),
               ),
-              const SizedBox(height: 20),
-              const DelayedDisplay(
+              SizedBox(height: 20),
+              DelayedDisplay(
                 delay: Duration(milliseconds: 900),
                 child: ButtonSection(),
               ),
-              const SizedBox(height: 30),
+              SizedBox(height: 30),
               DelayedDisplay(
-                delay: const Duration(milliseconds: 1100),
+                delay: Duration(milliseconds: 1100),
                 child: AudioPlayerSection(),
               ),
-              const SizedBox(height: 30),
-              const Divider(
+              SizedBox(height: 30),
+              Divider(
                 height: 30,
                 thickness: 2,
               ),
-              const DelayedDisplay(
+              DelayedDisplay(
                 delay: Duration(milliseconds: 1300),
                 child: TagsSection(),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               DelayedDisplay(
-                delay: const Duration(milliseconds: 1500),
+                delay: Duration(milliseconds: 1500),
                 child: SendButtonSection(),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
             ],
           ),
         )),
@@ -638,7 +638,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       InterstitialAd.load(
         adUnitId:
             AdHelper.interstitialAdUnitId, // Ad Unit ID for the interstitial ad
-        request: AdRequest(), // Create an ad request
+        request: const AdRequest(), // Create an ad request
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (ad) {
             // Ad successfully loaded
@@ -765,7 +765,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => AppRouter(index: 0),
+          builder: (context) => const AppRouter(index: 0),
         ),
       );
     } catch (e) {
@@ -789,23 +789,23 @@ class _SendButtonSectionState extends State<SendButtonSection> {
     }
     // Create a AlertDialog
     AlertDialog alertDialog = AlertDialog(
-      title: Text("Do you want to post this audio?"),
+      title: const Text("Do you want to post this audio?"),
       actions: [
         // OK button
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
           ),
-          child: Text('No', style: TextStyle(color: Colors.black)),
+          child: const Text('No', style: TextStyle(color: Colors.black)),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFF6A1B9A),
+            backgroundColor: const Color(0xFF6A1B9A),
           ),
-          child: Text('Yes', style: TextStyle(color: Colors.white)),
+          child: const Text('Yes', style: TextStyle(color: Colors.white)),
           onPressed: () {
             if (kIsWeb) {
               postAudio();
@@ -838,19 +838,20 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       onPressed: () {
         showConfirmAlert(context);
       },
-      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(Icons.send),
-        SizedBox(width: 10),
-        Text('Post Audio')
-      ]),
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        fixedSize: Size(250, 50), // Set the width and height of the button
+        fixedSize:
+            const Size(250, 50), // Set the width and height of the button
         backgroundColor:
-            Color(0xFF6A1B9A), // Set the background color of the button
+            const Color(0xFF6A1B9A), // Set the background color of the button
       ),
+      child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Icon(Icons.send),
+        SizedBox(width: 10),
+        Text('Post Audio')
+      ]),
     );
   }
 }

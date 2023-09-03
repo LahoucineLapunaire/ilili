@@ -14,7 +14,7 @@ class OwnerProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
         backgroundColor: Color(0xFFFAFAFA),
         body: SingleChildScrollView(
           child: Center(
@@ -24,12 +24,12 @@ class OwnerProfilePage extends StatelessWidget {
                 height: 30,
               ),
               DelayedDisplay(
-                child: TopSection(),
                 delay: Duration(microseconds: 500),
+                child: TopSection(),
               ),
               DelayedDisplay(
-                child: PostSection(),
                 delay: Duration(microseconds: 800),
+                child: PostSection(),
               ),
             ],
           )),
@@ -95,7 +95,7 @@ class _TopSectionState extends State<TopSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(50),
             topRight: Radius.circular(50),
@@ -111,7 +111,7 @@ class _TopSectionState extends State<TopSection> {
           boxShadow: [
             BoxShadow(
               color: Colors.grey,
-              offset: const Offset(
+              offset: Offset(
                 0.0,
                 5.0,
               ),
@@ -120,26 +120,27 @@ class _TopSectionState extends State<TopSection> {
           ]),
       child: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               IconButton(
-                icon: Icon(Icons.settings, color: Colors.black),
+                icon: const Icon(Icons.settings, color: Colors.black),
                 onPressed: () {
                   try {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SettingsPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const SettingsPage()),
                     );
                   } catch (e) {
                     print("Error: ${e.toString()}");
                   }
                 },
               ),
-              SizedBox(
+              const SizedBox(
                 width: 10,
               )
             ],
@@ -152,7 +153,7 @@ class _TopSectionState extends State<TopSection> {
                   showModalBottomSheet(
                     context: context,
                     builder: (BuildContext context) {
-                      return FollowersListModal();
+                      return const FollowersListModal();
                     },
                   );
                 },
@@ -160,13 +161,13 @@ class _TopSectionState extends State<TopSection> {
                   children: [
                     Text(
                       "${followers.length}",
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    Text(
+                    const Text(
                       "followers",
                       style: TextStyle(
                         fontSize: 14,
@@ -201,7 +202,7 @@ class _TopSectionState extends State<TopSection> {
                           backgroundImage: NetworkImage(profilPicture),
                         ),
                       )
-                    : Center(
+                    : const Center(
                         child: CircularProgressIndicator(
                           color: Colors.grey,
                         ),
@@ -212,7 +213,7 @@ class _TopSectionState extends State<TopSection> {
                   showModalBottomSheet(
                     context: context,
                     builder: (BuildContext context) {
-                      return FollowingsListModal();
+                      return const FollowingsListModal();
                     },
                   );
                 },
@@ -220,13 +221,13 @@ class _TopSectionState extends State<TopSection> {
                   children: [
                     Text(
                       "${followings.length}",
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    Text(
+                    const Text(
                       "followings",
                       style: TextStyle(
                         fontSize: 14,
@@ -239,20 +240,20 @@ class _TopSectionState extends State<TopSection> {
               ),
             ],
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
-            "$username",
+            username,
             style: TextStyle(
                 fontFamily: GoogleFonts.poppins().fontFamily,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.white),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
             child: Text(
-              "$description",
+              description,
               style: TextStyle(
                 fontFamily: GoogleFonts.poppins().fontFamily,
                 fontSize: 14,
@@ -261,7 +262,7 @@ class _TopSectionState extends State<TopSection> {
               ),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -321,10 +322,10 @@ class _PostSectionState extends State<PostSection> {
 
   @override
   Widget build(BuildContext context) {
-    return posts.length == 0
+    return posts.isEmpty
         ? Container(
             height: 200,
-            child: Center(
+            child: const Center(
               child: Text(
                 "No posts yet, to add a post, please go to the add Post page",
                 style: TextStyle(
@@ -336,7 +337,7 @@ class _PostSectionState extends State<PostSection> {
           )
         : ListView(
             shrinkWrap: true,
-            physics: ClampingScrollPhysics(),
+            physics: const ClampingScrollPhysics(),
             children: [
               for (var post in posts)
                 AudioPlayerWidget(

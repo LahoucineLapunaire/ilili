@@ -294,20 +294,20 @@ class _CommentWidgetState extends State<CommentWidget> {
 // Function to fetch details of a single comment
   getComment() {
     try {
-      bool _isLiked = false;
+      bool isLiked = false;
       firestore
           .collection('comments')
           .doc(widget.commentId)
           .get()
           .then((postSnapshot) {
         if (postSnapshot.data()?['likes'].contains(auth.currentUser!.uid)) {
-          _isLiked = true;
+          isLiked = true;
         }
         setState(() {
           comment = postSnapshot.data()?['comment'];
           timestamp = postSnapshot.data()?['timestamp'];
           likes = postSnapshot.data()?['likes'];
-          isLiked = _isLiked;
+          isLiked = isLiked;
         });
       });
     } catch (e) {
@@ -457,8 +457,8 @@ class _CommentWidgetState extends State<CommentWidget> {
                 itemBuilder: (BuildContext context) => [
                   const PopupMenuItem(
                     value: 'Report Comment',
-                    child: Text('Report Comment'),
                     textStyle: TextStyle(color: Colors.black),
+                    child: Text('Report Comment'),
                   ),
                 ],
               )

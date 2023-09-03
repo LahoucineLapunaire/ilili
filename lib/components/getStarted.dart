@@ -15,7 +15,7 @@ class GetStartedPage extends StatelessWidget {
               child: Container(
         height: MediaQuery.of(context).size.height,
         width: double.maxFinite,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             gradient: LinearGradient(
           colors: [
             Color(0xFF6A1B9A),
@@ -25,11 +25,11 @@ class GetStartedPage extends StatelessWidget {
           end: Alignment.topRight,
         )),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          DelayedDisplay(
+          const DelayedDisplay(
               delay: Duration(milliseconds: 500), child: LogoSection()),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           DelayedDisplay(
-              delay: Duration(milliseconds: 800),
+              delay: const Duration(milliseconds: 800),
               child: Text(
                 "Ilili: Where your voice matters.",
                 style: TextStyle(
@@ -38,9 +38,9 @@ class GetStartedPage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: Colors.white),
               )),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           DelayedDisplay(
-              delay: Duration(milliseconds: 1200),
+              delay: const Duration(milliseconds: 1200),
               child: Text(
                 "Let's Get Started",
                 style: TextStyle(
@@ -49,11 +49,11 @@ class GetStartedPage extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: Colors.white),
               )),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           DelayedDisplay(
-              delay: Duration(milliseconds: 1200),
+              delay: const Duration(milliseconds: 1200),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   "Ilili is in a beta version, we are working hard to make it better. Please report any bug you find.",
                   style: TextStyle(
@@ -62,8 +62,8 @@ class GetStartedPage extends StatelessWidget {
                       color: Colors.white),
                 ),
               )),
-          SizedBox(height: 20),
-          DelayedDisplay(
+          const SizedBox(height: 20),
+          const DelayedDisplay(
               delay: Duration(milliseconds: 1500), child: ButtonSetion()),
         ]),
       ))),
@@ -72,7 +72,7 @@ class GetStartedPage extends StatelessWidget {
 }
 
 class LogoSection extends StatelessWidget {
-  LogoSection({super.key});
+  const LogoSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +81,7 @@ class LogoSection extends StatelessWidget {
       height: 300,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        image: DecorationImage(
+        image: const DecorationImage(
           image: AssetImage('assets/images/ic_launcher.png'),
           fit: BoxFit.cover,
         ),
@@ -100,7 +100,7 @@ class ButtonSetion extends StatelessWidget {
     }
     if (name == "signup") {
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => LoginPage()));
+          context, MaterialPageRoute(builder: (context) => const LoginPage()));
     }
   }
 
@@ -111,24 +111,24 @@ class ButtonSetion extends StatelessWidget {
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
-            foregroundColor: Color(0xFF6A1B9A),
-            minimumSize: Size(250, 50),
+            foregroundColor: const Color(0xFF6A1B9A),
+            minimumSize: const Size(250, 50),
           ),
           onPressed: () => redirect(context, "login"),
-          child: Text("Join Now !"),
+          child: const Text("Join Now !"),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         ElevatedButton(
             onPressed: () => redirect(context, "signup"),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
-              minimumSize: Size(250, 50),
+              minimumSize: const Size(250, 50),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
             ),
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(

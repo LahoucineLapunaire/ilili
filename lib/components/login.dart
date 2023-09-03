@@ -22,31 +22,31 @@ class LoginPage extends StatelessWidget {
               child: Container(
         height: MediaQuery.of(context).size.height,
         width: double.maxFinite,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Color(0xFFFAFAFA),
         ),
-        child: Column(
+        child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             DelayedDisplay(
-                child: HeaderSection(), delay: Duration(milliseconds: 500)),
+                delay: Duration(milliseconds: 500), child: HeaderSection()),
             SizedBox(height: 50),
             DelayedDisplay(
-                child: FormSection(), delay: Duration(milliseconds: 800)),
+                delay: Duration(milliseconds: 800), child: FormSection()),
             SizedBox(height: 20),
             DelayedDisplay(
-                child: ToSignup(), delay: Duration(milliseconds: 1000)),
+                delay: Duration(milliseconds: 1000), child: ToSignup()),
             DelayedDisplay(
-                child: ToForgottedPassword(),
-                delay: Duration(milliseconds: 1000)),
+                delay: Duration(milliseconds: 1000),
+                child: ToForgottedPassword()),
             DelayedDisplay(
+                delay: Duration(milliseconds: 1000),
                 child: Divider(
                   height: 20,
                   thickness: 2,
-                ),
-                delay: Duration(milliseconds: 1000)),
+                )),
             DelayedDisplay(
-                child: GoogleLoginForm(), delay: Duration(milliseconds: 1200)),
+                delay: Duration(milliseconds: 1200), child: GoogleLoginForm()),
           ],
         ),
       ))),
@@ -60,7 +60,7 @@ class HeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 20),
+      padding: const EdgeInsets.only(left: 20),
       width: double.maxFinite,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
@@ -85,7 +85,7 @@ class HeaderSection extends StatelessWidget {
 }
 
 class FormSection extends StatefulWidget {
-  FormSection({super.key});
+  const FormSection({super.key});
 
   @override
   _FormSectionState createState() => _FormSectionState();
@@ -154,13 +154,13 @@ class _FormSectionState extends State<FormSection> {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   TextField(
                     controller: emailController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      prefixIcon: Icon(Icons.email),
+                      prefixIcon: const Icon(Icons.email),
                       labelText: 'Enter your email',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -169,7 +169,7 @@ class _FormSectionState extends State<FormSection> {
                   ),
                 ],
               )),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Container(
               width: 300,
               child: Column(
@@ -183,14 +183,14 @@ class _FormSectionState extends State<FormSection> {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   TextField(
                     obscureText: obscureText,
                     controller: passwordController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      prefixIcon: Icon(Icons.lock),
+                      prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
                         icon: Icon(
                           obscureText ? Icons.visibility : Icons.visibility_off,
@@ -209,14 +209,14 @@ class _FormSectionState extends State<FormSection> {
                   ),
                 ],
               )),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF6A1B9A),
-              minimumSize: Size(250, 50),
+              backgroundColor: const Color(0xFF6A1B9A),
+              minimumSize: const Size(250, 50),
             ),
             onPressed: () => login(),
-            child: Text("Login"),
+            child: const Text("Login"),
           ),
         ],
       ),
@@ -232,17 +232,17 @@ class ToSignup extends StatelessWidget {
     return ElevatedButton(
         onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => SignupPage()),
+              MaterialPageRoute(builder: (context) => const SignupPage()),
             ),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          minimumSize: Size(250, 50),
+          minimumSize: const Size(250, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
         ),
-        child: Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
@@ -273,20 +273,20 @@ class ToForgottedPassword extends StatelessWidget {
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ResetPassword()),
+          MaterialPageRoute(builder: (context) => const ResetPassword()),
         );
       },
-      child: Text(
-        "password forgotten ?",
-        style: TextStyle(color: Colors.black),
-      ),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
-        minimumSize: Size(250, 50),
+        minimumSize: const Size(250, 50),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
+      ),
+      child: const Text(
+        "password forgotten ?",
+        style: TextStyle(color: Colors.black),
       ),
     );
   }
@@ -382,7 +382,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
                 borderRadius:
                     BorderRadius.circular(30), // Set button border radius
               ),
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                   vertical: 10, horizontal: 16), // Set button padding
             ),
             child: Row(
@@ -392,9 +392,9 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
                   'assets/images/google.png', // Replace with the path to your Google icon image
                   height: 20, // Set the height of the icon
                 ),
-                SizedBox(
+                const SizedBox(
                     width: 10), // Add some spacing between the icon and text
-                Text(
+                const Text(
                   'Login with Google',
                   style: TextStyle(
                       fontSize: 16,

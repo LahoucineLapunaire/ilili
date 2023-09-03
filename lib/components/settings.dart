@@ -59,11 +59,11 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xFFFAFAFA),
+        backgroundColor: const Color(0xFFFAFAFA),
         appBar: AppBar(
-          backgroundColor: Color(0xFFFAFAFA),
+          backgroundColor: const Color(0xFFFAFAFA),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -79,43 +79,41 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         body: SingleChildScrollView(
-          child: Container(
-            child: Column(
-              children: [
-                ProfileSection(),
+          child: Column(
+            children: const [
+              ProfileSection(),
+              Divider(
+                height: 1,
+                thickness: 1,
+              ),
+              if (!kIsWeb) NotificationSection(),
+              if (!kIsWeb)
                 Divider(
                   height: 1,
                   thickness: 1,
                 ),
-                if (!kIsWeb) NotificationSection(),
-                if (!kIsWeb)
-                  Divider(
-                    height: 1,
-                    thickness: 1,
-                  ),
-                AppSection(),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                ),
-                SubscriptionSection(),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                ),
-                HelpSection(),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                ),
-                AboutSection(),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                ),
-                LogoutSection(),
-              ],
-            ),
+              AppSection(),
+              Divider(
+                height: 1,
+                thickness: 1,
+              ),
+              SubscriptionSection(),
+              Divider(
+                height: 1,
+                thickness: 1,
+              ),
+              HelpSection(),
+              Divider(
+                height: 1,
+                thickness: 1,
+              ),
+              AboutSection(),
+              Divider(
+                height: 1,
+                thickness: 1,
+              ),
+              LogoutSection(),
+            ],
           ),
         ));
   }
@@ -126,44 +124,44 @@ class ProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(Icons.account_circle), // Icon on the left side
-            title: Text(
-              'Account Settings', // Text for the title
-              style: TextStyle(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.account_circle), // Icon on the left side
+          title: Text(
+            'Account Settings', // Text for the title
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
             ),
           ),
-          ListTile(
-              title: Text("Account information"),
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => (ChangeProfilePage())));
-              }),
-          ListTile(
-            title: Text("Change email"),
+        ),
+        ListTile(
+            title: const Text("Account information"),
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => (ResetEmail())));
-            },
-          ),
-          ListTile(
-            title: Text("Change password"),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => (ResetPassword())));
-            },
-          ),
-        ],
-      ),
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => (const ChangeProfilePage())));
+            }),
+        ListTile(
+          title: const Text("Change email"),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => (const ResetEmail())));
+          },
+        ),
+        ListTile(
+          title: const Text("Change password"),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => (const ResetPassword())));
+          },
+        ),
+      ],
     );
   }
 }
@@ -234,42 +232,40 @@ class _NotificationSectionState extends State<NotificationSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(Icons.notifications), // Icon on the left side
-            title: Text(
-              'Notifications', // Text for the title
-              style: TextStyle(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.notifications), // Icon on the left side
+          title: Text(
+            'Notifications', // Text for the title
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
             ),
           ),
-          ListTile(
-            title: Text(
-              "Turn on/off notifications",
-              style: TextStyle(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-              ),
-            ),
-            subtitle: Text(
-                "Turn on/off notifications about followers, chat and comments",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-            trailing: Switch(
-              activeColor: Color(0xFF6A1B9A),
-              value: notification,
-              onChanged: (value) {
-                setValues("notification", value);
-              },
+        ),
+        ListTile(
+          title: Text(
+            "Turn on/off notifications",
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
             ),
           ),
-        ],
-      ),
+          subtitle: Text(
+              "Turn on/off notifications about followers, chat and comments",
+              style: TextStyle(
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              )),
+          trailing: Switch(
+            activeColor: const Color(0xFF6A1B9A),
+            value: notification,
+            onChanged: (value) {
+              setValues("notification", value);
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -287,6 +283,7 @@ class _AppSectionState extends State<AppSection> {
     'English',
   ];
 
+  @override
   void initState() {
     super.initState();
     getLanguage();
@@ -320,37 +317,35 @@ class _AppSectionState extends State<AppSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(Icons.app_settings_alt), // Icon on the left side
-            title: Text(
-              'General Settings', // Text for the title
-              style: TextStyle(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.app_settings_alt), // Icon on the left side
+          title: Text(
+            'General Settings', // Text for the title
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
             ),
           ),
-          DropdownButton<String>(
-            value: selectedLanguage,
-            onChanged: (newValue) {
-              setState(() {
-                selectedLanguage = newValue!;
-              });
-              setLanguage(newValue!);
-            },
-            items: languageOptions.map((language) {
-              return DropdownMenuItem<String>(
-                value: language,
-                child: Text(language),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
+        ),
+        DropdownButton<String>(
+          value: selectedLanguage,
+          onChanged: (newValue) {
+            setState(() {
+              selectedLanguage = newValue!;
+            });
+            setLanguage(newValue!);
+          },
+          items: languageOptions.map((language) {
+            return DropdownMenuItem<String>(
+              value: language,
+              child: Text(language),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 }
@@ -360,37 +355,35 @@ class SubscriptionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(Icons.monetization_on), // Icon on the left side
-            title: Text(
-              'Subscription', // Text for the title
-              style: TextStyle(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.monetization_on), // Icon on the left side
+          title: Text(
+            'Subscription', // Text for the title
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
             ),
           ),
-          ListTile(
-            title: Text("Available soon",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-            subtitle: subscription
-                ? Text("You are subscribed to ilili subsciption",
-                    style: TextStyle(
-                      fontFamily: GoogleFonts.poppins().fontFamily,
-                    ))
-                : Text("You are not subscribed to ilili subsciption",
-                    style: TextStyle(
-                      fontFamily: GoogleFonts.poppins().fontFamily,
-                    )),
-          )
-        ],
-      ),
+        ),
+        ListTile(
+          title: Text("Available soon",
+              style: TextStyle(
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              )),
+          subtitle: subscription
+              ? Text("You are subscribed to ilili subsciption",
+                  style: TextStyle(
+                    fontFamily: GoogleFonts.poppins().fontFamily,
+                  ))
+              : Text("You are not subscribed to ilili subsciption",
+                  style: TextStyle(
+                    fontFamily: GoogleFonts.poppins().fontFamily,
+                  )),
+        )
+      ],
     );
   }
 }
@@ -400,52 +393,50 @@ class HelpSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(Icons.help_rounded), // Icon on the left side
-            title: Text(
-              'Help and Support', // Text for the title
-              style: TextStyle(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.help_rounded), // Icon on the left side
+          title: Text(
+            'Help and Support', // Text for the title
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
             ),
           ),
-          ListTile(
-            title: Text("Contact support",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (context) => ContactSupportModal(),
-              );
-            },
-          ),
-          ListTile(
-            title: Text("View FAQs or Help Center",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-          ),
-          ListTile(
-            title: Text("Report a problem or bug",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (context) => ReportProblemModal(),
-              );
-            },
-          ),
-        ],
-      ),
+        ),
+        ListTile(
+          title: Text("Contact support",
+              style: TextStyle(
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              )),
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) => const ContactSupportModal(),
+            );
+          },
+        ),
+        ListTile(
+          title: Text("View FAQs or Help Center",
+              style: TextStyle(
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              )),
+        ),
+        ListTile(
+          title: Text("Report a problem or bug",
+              style: TextStyle(
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              )),
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) => const ReportProblemModal(),
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -455,56 +446,52 @@ class AboutSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(Icons.info), // Icon on the left side
-            title: Text(
-              'About and Legal', // Text for the title
-              style: TextStyle(
-                fontFamily: GoogleFonts.poppins().fontFamily,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.info), // Icon on the left side
+          title: Text(
+            'About and Legal', // Text for the title
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
             ),
           ),
-          ListTile(
-            title: Text("Legal Notice",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => (LegalNoticePage())));
-            },
-          ),
-          ListTile(
-            title: Text("Terms of Service",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => (TermsOfServicePage())));
-            },
-          ),
-          ListTile(
-            title: Text("Privacy Policy",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                )),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => (PrivacyPolicyPage())));
-            },
-          ),
-        ],
-      ),
+        ),
+        ListTile(
+          title: Text("Legal Notice",
+              style: TextStyle(
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              )),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => (LegalNoticePage())));
+          },
+        ),
+        ListTile(
+          title: Text("Terms of Service",
+              style: TextStyle(
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              )),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => (TermsOfServicePage())));
+          },
+        ),
+        ListTile(
+          title: Text("Privacy Policy",
+              style: TextStyle(
+                fontFamily: GoogleFonts.poppins().fontFamily,
+              )),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => (PrivacyPolicyPage())));
+          },
+        ),
+      ],
     );
   }
 }
@@ -515,23 +502,23 @@ class LogoutSection extends StatelessWidget {
   void showConfirmAlert(BuildContext context) {
     // Create a AlertDialog
     AlertDialog alertDialog = AlertDialog(
-      title: Text("Do you want to logout ?"),
+      title: const Text("Do you want to logout ?"),
       actions: [
         // OK button
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
           ),
-          child: Text('No', style: TextStyle(color: Colors.black)),
+          child: const Text('No', style: TextStyle(color: Colors.black)),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFF6A1B9A),
+            backgroundColor: const Color(0xFF6A1B9A),
           ),
-          child: Text('Yes', style: TextStyle(color: Colors.white)),
+          child: const Text('Yes', style: TextStyle(color: Colors.white)),
           onPressed: () {
             logout();
             Navigator.of(context).pop();
@@ -568,26 +555,24 @@ class LogoutSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: ElevatedButton(
-        onPressed: () {
-          showConfirmAlert(context);
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent, // Set transparent background
-          elevation: 0, // Remove elevation and shadow
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0), // No border radius
-          ),
+    return ElevatedButton(
+      onPressed: () {
+        showConfirmAlert(context);
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.transparent, // Set transparent background
+        elevation: 0, // Remove elevation and shadow
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0), // No border radius
         ),
-        child: Text(
-          "Logout",
-          style: TextStyle(
-            fontFamily: GoogleFonts.poppins().fontFamily,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.red,
-          ),
+      ),
+      child: Text(
+        "Logout",
+        style: TextStyle(
+          fontFamily: GoogleFonts.poppins().fontFamily,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.red,
         ),
       ),
     );
@@ -611,7 +596,7 @@ class _ContactSupportModalState extends State<ContactSupportModal> {
       // Get user preferences
       final prefs = await SharedPreferences.getInstance();
       // Retrieve SMTP key from preferences or use an empty string as default
-      var smtpkey = await prefs.getString('smtp_key') ?? '';
+      var smtpkey = prefs.getString('smtp_key') ?? '';
       // Define the SMTP server using Gmail
       final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
 
@@ -649,7 +634,7 @@ class _ContactSupportModalState extends State<ContactSupportModal> {
 </style>
 </head>
 <body>
-<h1>Support message from ${username} (uid: ${auth.currentUser?.uid}) (email: ${auth.currentUser?.email})</h1>
+<h1>Support message from $username (uid: ${auth.currentUser?.uid}) (email: ${auth.currentUser?.email})</h1>
 <h2>Object: ${objectController.text}</h2>
 <p>${messageController.text}</p>
 </body>
@@ -679,12 +664,12 @@ class _ContactSupportModalState extends State<ContactSupportModal> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
+        padding: const EdgeInsets.fromLTRB(15, 15, 15, 15),
         height: 500,
         child: Column(
           children: [
             if (kIsWeb)
-              Text(
+              const Text(
                 "If you are using the web version of Ilili, please contact us at moderation.ilili@gmail.com",
                 style: TextStyle(
                   color: Colors.red,
@@ -692,26 +677,26 @@ class _ContactSupportModalState extends State<ContactSupportModal> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            if (kIsWeb) SizedBox(height: 10),
-            Text(
+            if (kIsWeb) const SizedBox(height: 10),
+            const Text(
               "Contact support, please tell us your questions",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             TextField(
               controller: objectController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Object',
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Container(
               height: 200,
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(8),
@@ -719,33 +704,33 @@ class _ContactSupportModalState extends State<ContactSupportModal> {
               child: TextField(
                 maxLines: null,
                 controller: messageController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: InputBorder.none,
                   hintText: 'Write your message ...',
                 ),
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             ElevatedButton(
               onPressed: () {
                 sendSupportMessage();
               },
-              child: Row(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                fixedSize: const Size(
+                    180, 35), // Set the width and height of the button
+                backgroundColor: const Color(
+                    0xFF6A1B9A), // Set the background color of the button
+              ),
+              child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.send),
                     SizedBox(width: 10),
                     Text("Send")
                   ]),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                fixedSize:
-                    Size(180, 35), // Set the width and height of the button
-                backgroundColor:
-                    Color(0xFF6A1B9A), // Set the background color of the button
-              ),
             )
           ],
         ),
@@ -769,7 +754,7 @@ class _ReportProblemModalState extends State<ReportProblemModal> {
     try {
       // Retrieve SMTP key from SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      var smtpkey = await prefs.getString('smtp_key') ?? '';
+      var smtpkey = prefs.getString('smtp_key') ?? '';
 
       // Configure the SMTP server for sending emails (using Gmail)
       final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
@@ -812,7 +797,7 @@ class _ReportProblemModalState extends State<ReportProblemModal> {
 </style>
 </head>
 <body>
-<h1>Problem message from ${username} (uid: ${auth.currentUser?.uid}) (email: ${auth.currentUser?.email})</h1>
+<h1>Problem message from $username (uid: ${auth.currentUser?.uid}) (email: ${auth.currentUser?.email})</h1>
 <h2>Object: ${objectController.text}</h2>
 <p>${messageController.text}</p>
 </body>
@@ -842,12 +827,12 @@ class _ReportProblemModalState extends State<ReportProblemModal> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
+        padding: const EdgeInsets.fromLTRB(15, 15, 15, 15),
         height: 500,
         child: Column(
           children: [
             if (kIsWeb)
-              Text(
+              const Text(
                 "If you are using the web version of Ilili, please contact us at moderation.ilili@gmail.com",
                 style: TextStyle(
                   color: Colors.red,
@@ -855,26 +840,26 @@ class _ReportProblemModalState extends State<ReportProblemModal> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            if (kIsWeb) SizedBox(height: 10),
-            Text(
+            if (kIsWeb) const SizedBox(height: 10),
+            const Text(
               "Please describe your problem or the bug you have encountered",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             TextField(
               controller: objectController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Object',
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Container(
               height: 200,
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(8),
@@ -882,33 +867,33 @@ class _ReportProblemModalState extends State<ReportProblemModal> {
               child: TextField(
                 maxLines: null,
                 controller: messageController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: InputBorder.none,
                   hintText: 'describe the problem ...',
                 ),
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             ElevatedButton(
               onPressed: () {
                 sendReportProblem();
               },
-              child: Row(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                fixedSize: const Size(
+                    180, 35), // Set the width and height of the button
+                backgroundColor: const Color(
+                    0xFF6A1B9A), // Set the background color of the button
+              ),
+              child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.send),
                     SizedBox(width: 10),
                     Text("Send")
                   ]),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                fixedSize:
-                    Size(180, 35), // Set the width and height of the button
-                backgroundColor:
-                    Color(0xFF6A1B9A), // Set the background color of the button
-              ),
             )
           ],
         ),

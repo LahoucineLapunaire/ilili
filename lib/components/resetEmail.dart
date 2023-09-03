@@ -15,7 +15,7 @@ class ResetEmail extends StatefulWidget {
 class _ResetEmailState extends State<ResetEmail> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Color(0xFFECEFF1),
       body: Center(
         child: Column(
@@ -40,7 +40,7 @@ class TextTop extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.only(left: 20),
+          padding: const EdgeInsets.only(left: 20),
           width: double.maxFinite,
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -111,24 +111,24 @@ class _EmailSectionState extends State<EmailSection> {
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.white,
-                prefixIcon: Icon(Icons.email),
+                prefixIcon: const Icon(Icons.email),
                 labelText: 'Email',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
                 sendEmailResetEmail();
               },
-              child: Text(
-                "Change Email",
-              ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF6A1B9A),
-                minimumSize: Size(250, 50),
+                backgroundColor: const Color(0xFF6A1B9A),
+                minimumSize: const Size(250, 50),
+              ),
+              child: const Text(
+                "Change Email",
               ),
             )
           ],

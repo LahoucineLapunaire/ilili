@@ -12,7 +12,7 @@ FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -30,7 +30,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     checkUsername();
     getFeedPosts();
@@ -50,8 +49,8 @@ class _HomePageState extends State<HomePage> {
         ds.get('username') == "" ||
         ds.get('username') == null) {
       // If any of the conditions are met, navigate to the SetUsernamePage
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => SetUsernamePage()));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const SetUsernamePage()));
     } else {
       // If conditions are not met, update the userInfo state with the fetched data
       if (mounted) {
@@ -69,7 +68,7 @@ class _HomePageState extends State<HomePage> {
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
 
     // Initialize variables to keep track of unread messages and chat IDs
-    int _unreadMessages = 0;
+    int unreadMessages = 0;
     List<String> chats = List<String>.from(userDoc['chats']);
 
     // Iterate through chat IDs and get the last message for each chat
@@ -85,14 +84,14 @@ class _HomePageState extends State<HomePage> {
       // Check if the last message is unread and update the unread message count
       if (chatSnapshot.docs.isNotEmpty) {
         if (!chatSnapshot.docs.first['read']) {
-          _unreadMessages++;
+          unreadMessages++;
         }
       }
 
       // Update the unreadMessages state if the component is still mounted
       if (mounted) {
         setState(() {
-          unreadMessages = _unreadMessages;
+          unreadMessages = unreadMessages;
         });
       }
     }
@@ -139,7 +138,7 @@ class _HomePageState extends State<HomePage> {
   void redirectToAddPost(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AppRouter(index: 1)),
+      MaterialPageRoute(builder: (context) => const AppRouter(index: 1)),
     );
   }
 
@@ -151,12 +150,12 @@ class _HomePageState extends State<HomePage> {
           onPressed: () {
             redirectToAddPost(context);
           },
-          child: Icon(Icons.add, color: Colors.white),
-          backgroundColor: Color(0xFF6A1B9A),
+          backgroundColor: const Color(0xFF6A1B9A),
+          child: const Icon(Icons.add, color: Colors.white),
         ),
         appBar: AppBar(
-          backgroundColor: Color(0xFFFAFAFA),
-          title: SizedBox(
+          backgroundColor: const Color(0xFFFAFAFA),
+          title: const SizedBox(
             height: 40,
             width: 40,
             child: CircleAvatar(
@@ -171,9 +170,9 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => MessageListPage()));
+                              builder: (context) => const MessageListPage()));
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.message,
                       color: Colors.black,
                     ),
@@ -185,23 +184,24 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => MessageListPage()));
+                                  builder: (context) =>
+                                      const MessageListPage()));
                         },
-                        icon: Icon(Icons.message, color: Colors.black),
+                        icon: const Icon(Icons.message, color: Colors.black),
                       ),
                       if (unreadMessages > 0)
                         Positioned(
                           top: 5,
                           right: 5,
                           child: Container(
-                            padding: EdgeInsets.all(4),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.red,
                             ),
                             child: Text(
                               unreadMessages.toString(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -215,12 +215,12 @@ class _HomePageState extends State<HomePage> {
         ),
         body: SingleChildScrollView(
             child: DelayedDisplay(
-          delay: Duration(milliseconds: 300),
+          delay: const Duration(milliseconds: 300),
           child: Center(
-            child: posts.length == 0
+            child: posts.isEmpty
                 ? Container(
                     height: 200,
-                    child: Center(
+                    child: const Center(
                       child: Text(
                         "No posts yet, please follow users to see their posts.",
                         style: TextStyle(
@@ -240,7 +240,7 @@ class _HomePageState extends State<HomePage> {
                           isOwner: post.userId == auth.currentUser!.uid,
                           inPostPage: false,
                         ),
-                      SizedBox(height: 100),
+                      const SizedBox(height: 100),
                     ],
                   ),
           ),
@@ -271,7 +271,7 @@ class SearchDelegateWidget extends SearchDelegate {
       onPressed: () {
         close(context, null);
       },
-      icon: Icon(Icons.arrow_back),
+      icon: const Icon(Icons.arrow_back),
     );
   }
 
@@ -284,7 +284,7 @@ class SearchDelegateWidget extends SearchDelegate {
             close(context, null);
           }
         },
-        icon: Icon(Icons.clear),
+        icon: const Icon(Icons.clear),
       ),
     ];
   }
@@ -298,7 +298,7 @@ class SearchDelegateWidget extends SearchDelegate {
           .get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasData) {
           final searchResults = snapshot.data!.docs;
           return ListView.builder(
@@ -314,11 +314,11 @@ class SearchDelegateWidget extends SearchDelegate {
             },
           );
         } else if (snapshot.hasError) {
-          return Center(
+          return const Center(
             child: Text('Error occurred while searching.'),
           );
         } else {
-          return Center(
+          return const Center(
             child: Text('No search results found.'),
           );
         }
@@ -336,7 +336,7 @@ class SearchDelegateWidget extends SearchDelegate {
       future: usersCollectionRef.get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasData) {
           final users = snapshot.data!.docs;
           List<UserHome> suggestion = users
@@ -371,11 +371,11 @@ class SearchDelegateWidget extends SearchDelegate {
             },
           );
         } else if (snapshot.hasError) {
-          return Center(
+          return const Center(
             child: Text('Error occurred while fetching users.'),
           );
         } else {
-          return Center(
+          return const Center(
             child: Text('No users found.'),
           );
         }

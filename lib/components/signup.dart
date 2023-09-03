@@ -14,7 +14,7 @@ GoogleSignIn googleSignIn = GoogleSignIn();
 bool termOfUses = false;
 
 class SignupPage extends StatelessWidget {
-  SignupPage({super.key});
+  const SignupPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,28 +24,28 @@ class SignupPage extends StatelessWidget {
               child: Container(
         height: MediaQuery.of(context).size.height,
         width: double.maxFinite,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Color(0xFFFAFAFA),
         ),
-        child: Column(
+        child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             DelayedDisplay(
-                child: HeaderSection(), delay: Duration(milliseconds: 500)),
+                delay: Duration(milliseconds: 500), child: HeaderSection()),
             SizedBox(height: 50),
             DelayedDisplay(
-                child: FormSection(), delay: Duration(milliseconds: 800)),
+                delay: Duration(milliseconds: 800), child: FormSection()),
             SizedBox(height: 10),
             DelayedDisplay(
-                child: ToLogin(), delay: Duration(milliseconds: 1000)),
+                delay: Duration(milliseconds: 1000), child: ToLogin()),
             DelayedDisplay(
+                delay: Duration(milliseconds: 1400),
                 child: Divider(
                   height: 10,
                   thickness: 2,
-                ),
-                delay: Duration(milliseconds: 1400)),
+                )),
             DelayedDisplay(
-                child: GoogleSignupForm(), delay: Duration(milliseconds: 1000)),
+                delay: Duration(milliseconds: 1000), child: GoogleSignupForm()),
           ],
         ),
       ))),
@@ -59,7 +59,7 @@ class HeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 20),
+      padding: const EdgeInsets.only(left: 20),
       width: double.maxFinite,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
@@ -84,7 +84,7 @@ class HeaderSection extends StatelessWidget {
 }
 
 class FormSection extends StatefulWidget {
-  FormSection({super.key});
+  const FormSection({super.key});
 
   @override
   _FormSectionState createState() => _FormSectionState();
@@ -161,7 +161,6 @@ class _FormSectionState extends State<FormSection> {
         email: emailController.text,
         password: passwordController.text,
       );
-      User? user = userCredential.user;
 
       // Get user's UID
       String uid = userCredential.user?.uid ?? '';
@@ -246,13 +245,13 @@ class _FormSectionState extends State<FormSection> {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   TextField(
                     controller: emailController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      prefixIcon: Icon(Icons.email),
+                      prefixIcon: const Icon(Icons.email),
                       labelText: 'Enter your email',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -261,7 +260,7 @@ class _FormSectionState extends State<FormSection> {
                   ),
                 ],
               )),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Container(
               width: 300,
               child: Column(
@@ -275,7 +274,7 @@ class _FormSectionState extends State<FormSection> {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   TextField(
                     obscureText: obscureText,
                     onChanged: (value) {
@@ -285,7 +284,7 @@ class _FormSectionState extends State<FormSection> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      prefixIcon: Icon(Icons.lock),
+                      prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
                         icon: Icon(
                           obscureText ? Icons.visibility : Icons.visibility_off,
@@ -306,23 +305,23 @@ class _FormSectionState extends State<FormSection> {
               )),
           if (passwordStrength != '')
             Padding(
-              padding: EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.only(bottom: 10),
               child: Row(
                 children: [
-                  Icon(Icons.error, color: Colors.red),
-                  SizedBox(width: 5),
+                  const Icon(Icons.error, color: Colors.red),
+                  const SizedBox(width: 5),
                   Container(
                     width: 250,
                     child: Text(
-                      "${passwordStrength}",
-                      style: TextStyle(
+                      "$passwordStrength",
+                      style: const TextStyle(
                           color: Colors.red, fontWeight: FontWeight.bold),
                     ),
                   )
                 ],
               ),
             ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Container(
               width: 300,
               child: Column(
@@ -336,7 +335,7 @@ class _FormSectionState extends State<FormSection> {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   TextField(
                     obscureText: obscureText,
                     controller: passwordConfirmationController,
@@ -364,7 +363,7 @@ class _FormSectionState extends State<FormSection> {
                       ),
                       filled: true,
                       fillColor: Colors.white,
-                      prefixIcon: Icon(Icons.lock),
+                      prefixIcon: const Icon(Icons.lock),
                       labelText: 'Enter your password again',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -373,17 +372,17 @@ class _FormSectionState extends State<FormSection> {
                   ),
                 ],
               )),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           if (passwordSame)
             Padding(
-              padding: EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.only(bottom: 10),
               child: Row(
                 children: [
-                  Icon(Icons.error, color: Colors.red),
-                  SizedBox(width: 5),
+                  const Icon(Icons.error, color: Colors.red),
+                  const SizedBox(width: 5),
                   Container(
                     width: 250,
-                    child: Text(
+                    child: const Text(
                       'Password and password confirmation must be the same',
                       style: TextStyle(
                           color: Colors.red, fontWeight: FontWeight.bold),
@@ -396,7 +395,7 @@ class _FormSectionState extends State<FormSection> {
             children: [
               Checkbox(
                 activeColor: Colors.white,
-                checkColor: Color(0xFF6A1B9A),
+                checkColor: const Color(0xFF6A1B9A),
                 value: termOfUses,
                 onChanged: (value) {
                   setState(() {
@@ -422,14 +421,14 @@ class _FormSectionState extends State<FormSection> {
               ),
             ],
           ),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF6A1B9A),
-              minimumSize: Size(250, 50),
+              backgroundColor: const Color(0xFF6A1B9A),
+              minimumSize: const Size(250, 50),
             ),
             onPressed: () => signup(),
-            child: Text("Join Now !"),
+            child: const Text("Join Now !"),
           ),
         ],
       ),
@@ -443,7 +442,7 @@ class ToLogin extends StatelessWidget {
   void redirectToLogin(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => const LoginPage()),
     );
   }
 
@@ -454,12 +453,12 @@ class ToLogin extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          minimumSize: Size(250, 50),
+          minimumSize: const Size(250, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
         ),
-        child: Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
@@ -544,7 +543,7 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
         }
       }
     } catch (e) {
-      print("error signing up with google: ${e}");
+      print("error signing up with google: $e");
     }
   }
 
@@ -567,7 +566,7 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
                 borderRadius:
                     BorderRadius.circular(30), // Set button border radius
               ),
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                   vertical: 10, horizontal: 16), // Set button padding
             ),
             child: Row(
@@ -577,9 +576,9 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
                   'assets/images/google.png', // Replace with the path to your Google icon image
                   height: 20, // Set the height of the icon
                 ),
-                SizedBox(
+                const SizedBox(
                     width: 10), // Add some spacing between the icon and text
-                Text(
+                const Text(
                   'Signup with Google',
                   style: TextStyle(
                       fontSize: 16,

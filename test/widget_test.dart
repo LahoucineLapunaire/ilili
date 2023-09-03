@@ -12,7 +12,7 @@ import 'package:Ilili/components/getStarted.dart';
 void main() {
   testWidgets('GetStartedPage test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
         home: GetStartedPage())); // Wrap the GetStartedPage with MaterialApp
 
     expect(find.text("Ilili: Where your voice matters."), findsOneWidget);

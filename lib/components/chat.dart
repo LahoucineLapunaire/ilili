@@ -30,12 +30,13 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final ScrollController scrollController = ScrollController();
 
+  @override
   void initState() {
     super.initState();
     getMyInfo();
     // Use addPostFrameCallback to perform actions after widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 500), () {
         scrollToBottom();
       });
     });
@@ -70,6 +71,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  @override
   void dispose() {
     super.dispose();
   }
@@ -77,11 +79,11 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xFFFAFAFA),
+        backgroundColor: const Color(0xFFFAFAFA),
         appBar: AppBar(
-          backgroundColor: Color(0xFFFAFAFA),
+          backgroundColor: const Color(0xFFFAFAFA),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -91,7 +93,7 @@ class _ChatPageState extends State<ChatPage> {
               CircleAvatar(
                 backgroundImage: NetworkImage(widget.profilePicture),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Text(
                 widget.username,
                 style: TextStyle(
@@ -125,6 +127,7 @@ class ListSection extends StatefulWidget {
 }
 
 class _ListSectionState extends State<ListSection> {
+  @override
   void initState() {
     super.initState();
   }
@@ -169,7 +172,7 @@ class _ListSectionState extends State<ListSection> {
         if (messageList.isEmpty) {
           return Container(
             height: 200,
-            child: Center(
+            child: const Center(
               child: Text(
                 "No message yet, please send a message to start a chat.",
                 style: TextStyle(
@@ -181,7 +184,7 @@ class _ListSectionState extends State<ListSection> {
           );
         }
         return Container(
-          margin: EdgeInsets.only(bottom: 50),
+          margin: const EdgeInsets.only(bottom: 50),
           child: Column(
             children: messageList.map((document) {
               return document['userId'] == auth.currentUser?.uid
@@ -201,7 +204,8 @@ class MessageField extends StatefulWidget {
   final String otherUserID;
   final String username;
 
-  MessageField(this.otherUserID, this.username, {Key? key}) : super(key: key);
+  const MessageField(this.otherUserID, this.username, {Key? key})
+      : super(key: key);
 
   @override
   _MessageFieldState createState() => _MessageFieldState();
@@ -211,6 +215,7 @@ class _MessageFieldState extends State<MessageField> {
   final textField = TextEditingController();
   EdgeInsets margin = EdgeInsets.zero;
 
+  @override
   void initState() {
     super.initState();
   }
@@ -257,8 +262,8 @@ class _MessageFieldState extends State<MessageField> {
       });
 
       // Send a notification to the receiver
-      sendNotificationToTopic("${widget.otherUserID}", "$myUsername",
-          "${textField.text}", myProfilePicture, {
+      sendNotificationToTopic(
+          widget.otherUserID, myUsername, textField.text, myProfilePicture, {
         "sender": auth.currentUser!.uid,
         "receiver": widget.otherUserID,
         "type": "chat",
@@ -302,13 +307,13 @@ class _MessageFieldState extends State<MessageField> {
       // If the text input is focused, change the margin to make space for the keyboard
       print("focused");
       setState(() {
-        margin = EdgeInsets.only(bottom: 50);
+        margin = const EdgeInsets.only(bottom: 50);
       });
     } else {
       // If the text input is not focused, reset the margin
       print("not focused");
       setState(() {
-        margin = EdgeInsets.only(bottom: 0);
+        margin = const EdgeInsets.only(bottom: 0);
       });
     }
   }
@@ -371,7 +376,7 @@ class CurrentUserMessage extends StatelessWidget {
                   fontSize: 12,
                 ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               isRead
                   ? const Icon(
                       Icons.done_all,
@@ -385,7 +390,7 @@ class CurrentUserMessage extends StatelessWidget {
                     ),
             ],
           ),
-          SizedBox(width: 10), // Add some spacing
+          const SizedBox(width: 10), // Add some spacing
           Flexible(
             // Use Flexible to adapt to text height
             child: Container(
@@ -435,7 +440,7 @@ class OtherUserMessage extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: 10), // Add some spacing
+          const SizedBox(width: 10), // Add some spacing
           Text(
             dateMessage.toString().substring(13, 18),
             style: TextStyle(

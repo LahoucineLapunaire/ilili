@@ -203,12 +203,12 @@ class UnLogged extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Color(0xFF6A1B9A),
+        primaryColor: const Color(0xFF6A1B9A),
       ),
       title: 'Ilili',
       initialRoute: '/',
       routes: {
-        '/': (context) => GetStartedPage(),
+        '/': (context) => const GetStartedPage(),
         '/privacypolicy': (context) => PrivacyPolicyPage(),
         '/termsofservice': (context) => TermsOfServicePage(),
       },
@@ -224,21 +224,22 @@ class Logged extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Color(0xFF6A1B9A), // Change this to your desired color
+        primaryColor:
+            const Color(0xFF6A1B9A), // Change this to your desired color
       ),
       title: 'Ilili',
       initialRoute: '/',
       routes: {
-        '/': (context) => AppRouter(
+        '/': (context) => const AppRouter(
               index: 0,
             ),
         '/privacypolicy': (context) => PrivacyPolicyPage(),
         '/termsofservice': (context) => TermsOfServicePage(),
-        '/profilepage': (context) => AppRouter(
+        '/profilepage': (context) => const AppRouter(
               index: 2,
             ),
-        '/addpost': (context) => AddPostPage(),
-        '/settings': (context) => SettingsPage(),
+        '/addpost': (context) => const AddPostPage(),
+        '/settings': (context) => const SettingsPage(),
       },
     );
   }
