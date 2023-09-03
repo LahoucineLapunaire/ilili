@@ -177,10 +177,14 @@ class Logged extends StatelessWidget {
       title: 'Ilili',
       initialRoute: '/',
       routes: {
-        '/': (context) => HomePage(),
+        '/': (context) => AppRouter(
+              index: 0,
+            ),
         '/privacypolicy': (context) => PrivacyPolicyPage(),
         '/termsofservice': (context) => TermsOfServicePage(),
-        '/profilepage': (context) => OwnerProfilePage(),
+        '/profilepage': (context) => AppRouter(
+              index: 2,
+            ),
         '/addpost': (context) => AddPostPage(),
         '/settings': (context) => SettingsPage(),
       },

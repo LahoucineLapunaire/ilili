@@ -123,7 +123,6 @@ class _ProfilPictureSectionState extends State<ProfilPictureSection> {
   void pickImage() async {
     final XFile? pickedFile =
         await picker.pickImage(source: ImageSource.gallery);
-    print(pickedFile?.path);
     setState(() {
       if (pickedFile != null) {
         image = File(pickedFile.path);
@@ -436,7 +435,6 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
         } else {
           imageRef = storageRef.child(auth.currentUser!.uid + ".jpg");
         }
-        print("Image ref : $imageRef");
         UploadTask uploadTask;
         if (kIsWeb) {
           Uint8List imageData = await XFile(profilePicture).readAsBytes();
@@ -473,7 +471,7 @@ class _ChangeInfoButtonState extends State<ChangeInfoButton> {
       );
     } catch (e) {
       if (kIsWeb) {
-        print("---------------------> ${e.toString()}");
+        print("error : ${e.toString()}");
       } else {
         showErrorMessage(e.toString().split('] ')[1], context);
       }

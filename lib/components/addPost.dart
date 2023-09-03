@@ -187,7 +187,7 @@ class _ButtonSectionState extends State<ButtonSection> {
         await existingFile.delete();
         print('Existing file deleted');
       }
-      if(!(await askPermission())){
+      if (!(await askPermission())) {
         return;
       }
       audioRecorder = FlutterSoundRecorder();
@@ -210,22 +210,21 @@ class _ButtonSectionState extends State<ButtonSection> {
       if (audioRecorder != null) {
         String filePath = '/data/user/0/com.example.ilili/cache/audio.aac';
         // Stop the ongoing recording
-        await audioRecorder!.stopRecorder().then((value){
-          if(value != null){
+        await audioRecorder!.stopRecorder().then((value) {
+          if (value != null) {
             filePath = value;
           }
         });
         await audioRecorder!.closeRecorder();
         audioRecorder = null;
-        
+
         setState(() {
           audioPath = filePath;
           isRecording = false;
         });
-        if(Platform.isIOS){
+        if (Platform.isIOS) {
           audioPlayer.play(DeviceFileSource(audioPath));
-        }
-        else{
+        } else {
           audioPlayer.play(UrlSource(audioPath));
         }
       }
@@ -243,22 +242,18 @@ class _ButtonSectionState extends State<ButtonSection> {
   Future<void> pickAudioFile() async {
     try {
       FilePickerResult? result;
-      if(Platform.isIOS){
-        result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: [
+      if (Platform.isIOS) {
+        result = await FilePicker.platform
+            .pickFiles(type: FileType.custom, allowedExtensions: [
           'wav',
           'mp3',
           'aac',
-        ]
-      );
-      }
-      else{
+        ]);
+      } else {
         result = await FilePicker.platform.pickFiles(
-        type: FileType.audio,
-      );
+          type: FileType.audio,
+        );
       }
-      print(result?.files);
       if (result != null) {
         PlatformFile file = result.files.first;
         if (kIsWeb) {
@@ -268,14 +263,12 @@ class _ButtonSectionState extends State<ButtonSection> {
             urlBytes = bytes;
             urlSource = urlSourceFromBytes(bytes);
           });
-        } 
-        else if(Platform.isIOS){
+        } else if (Platform.isIOS) {
           setState(() {
             audioPath = file.path!;
             audioPlayer.setSourceDeviceFile(audioPath);
           });
-        }
-        else {
+        } else {
           setState(() {
             audioPath = file.path!;
             audioPlayer.setSourceUrl(file.path!);
@@ -288,17 +281,16 @@ class _ButtonSectionState extends State<ButtonSection> {
     }
   }
 
-
   Future<bool> askPermission() async {
-  var microphoneStatus = await Permission.microphone.request();
-  if (microphoneStatus != PermissionStatus.granted) {
-    print('Microphone Permission not granted');
-    return false;
-  } else {
-    print('Microphone Permission granted');
-    return true;
+    var microphoneStatus = await Permission.microphone.request();
+    if (microphoneStatus != PermissionStatus.granted) {
+      print('Microphone Permission not granted');
+      return false;
+    } else {
+      print('Microphone Permission granted');
+      return true;
+    }
   }
-}
 
   @override
   void dispose() {
@@ -365,7 +357,7 @@ class _ButtonSectionState extends State<ButtonSection> {
         SizedBox(width: 5),
         ElevatedButton(
           onPressed: () {
-              pickAudioFile();
+            pickAudioFile();
           },
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(Icons.audiotrack),
