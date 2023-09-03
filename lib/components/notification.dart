@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:googleapis_auth/googleapis_auth.dart';
 
 Future<void> sendNotificationToTopic(
   String topic,

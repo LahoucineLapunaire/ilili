@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/appRouter.dart';
-import 'package:Ilili/components/widget.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 

@@ -4,8 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/widget.dart';
 import 'package:intl/intl.dart';
-import 'package:mailer/smtp_server.dart';
-import 'package:mailer/mailer.dart';
 
 import 'appRouter.dart';
 
@@ -20,7 +18,7 @@ class PostPage extends StatefulWidget {
   final String userId;
   final bool isOwner;
 
-  PostPage(
+  const PostPage(
       {super.key,
       required this.postId,
       required this.userId,
@@ -81,16 +79,16 @@ class _PostPageState extends State<PostPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xFFFAFAFA),
+        backgroundColor: const Color(0xFFFAFAFA),
         appBar: AppBar(
-          backgroundColor: Color(0xFFFAFAFA),
+          backgroundColor: const Color(0xFFFAFAFA),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () {
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AppRouter(index: 0),
+                    builder: (context) => const AppRouter(index: 0),
                   ));
             },
           ),
@@ -111,7 +109,7 @@ class _PostPageState extends State<PostPage> {
                 });
                 getComments();
               },
-              icon: Icon(Icons.refresh, color: Colors.black),
+              icon: const Icon(Icons.refresh, color: Colors.black),
             ),
           ],
         ),
@@ -121,7 +119,7 @@ class _PostPageState extends State<PostPage> {
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AppRouter(index: 0),
+                  builder: (context) => const AppRouter(index: 0),
                 ));
             return Future.value(false);
           },
@@ -145,11 +143,11 @@ class _PostPageState extends State<PostPage> {
                     future: _getCommentsFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator(
+                        return const CircularProgressIndicator(
                           color: Colors.grey,
                         );
                       } else {
-                        return CommentSection();
+                        return const CommentSection();
                       }
                     })
               ],
@@ -191,36 +189,34 @@ class _SortSectionState extends State<SortSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Row(
-        children: [
-          Text("Sort by: "),
-          DropdownButton<String>(
-            value: sortType,
-            icon: const Icon(Icons.arrow_downward),
-            iconSize: 24,
-            elevation: 16,
-            style: const TextStyle(color: Colors.deepPurple),
-            underline: Container(
-              height: 2,
-              color: Colors.deepPurpleAccent,
-            ),
-            onChanged: (String? newValue) {
-              setState(() {
-                sortType = newValue!;
-              });
-              sortComments(newValue);
-            },
-            items: <String>['newest', 'oldest', 'most liked', 'least liked']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-          )
-        ],
-      ),
+    return Row(
+      children: [
+        const Text("Sort by: "),
+        DropdownButton<String>(
+          value: sortType,
+          icon: const Icon(Icons.arrow_downward),
+          iconSize: 24,
+          elevation: 16,
+          style: const TextStyle(color: Colors.deepPurple),
+          underline: Container(
+            height: 2,
+            color: Colors.deepPurpleAccent,
+          ),
+          onChanged: (String? newValue) {
+            setState(() {
+              sortType = newValue!;
+            });
+            sortComments(newValue);
+          },
+          items: <String>['newest', 'oldest', 'most liked', 'least liked']
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+        )
+      ],
     );
   }
 }
@@ -233,16 +229,17 @@ class CommentSection extends StatefulWidget {
 }
 
 class _CommentSectionState extends State<CommentSection> {
+  @override
   void initState() {
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return commentList.length == 0
+    return commentList.isEmpty
         ? Container(
             height: 200,
-            child: Center(
+            child: const Center(
               child: Text(
                 "No comment yet.",
                 style: TextStyle(
@@ -287,6 +284,7 @@ class _CommentWidgetState extends State<CommentWidget> {
   String reportReason = "";
   bool isPictureLoaded = false;
 
+  @override
   void initState() {
     super.initState();
     getComment();
@@ -395,9 +393,9 @@ class _CommentWidgetState extends State<CommentWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 15),
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(10),
+      decoration: const BoxDecoration(
         color: Colors.white,
       ),
       child: Column(
@@ -416,20 +414,20 @@ class _CommentWidgetState extends State<CommentWidget> {
                             backgroundImage: NetworkImage(profilePicture),
                           ),
                         )
-                      : Center(
+                      : const Center(
                           child: CircularProgressIndicator(
                             color: Colors.grey,
                           ),
                         ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Text(
                     username,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Opacity(
                     opacity: 0.6,
                     child: Text(formatTimestamp(timestamp)),
@@ -437,7 +435,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                 ],
               ),
               PopupMenuButton<String>(
-                icon: Icon(Icons.more_horiz),
+                icon: const Icon(Icons.more_horiz),
                 onSelected: (String value) {
                   // Handle menu item selection
                   if (value == "Report Comment") {
@@ -457,7 +455,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                   }
                 },
                 itemBuilder: (BuildContext context) => [
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'Report Comment',
                     child: Text('Report Comment'),
                     textStyle: TextStyle(color: Colors.black),
@@ -471,12 +469,12 @@ class _CommentWidgetState extends State<CommentWidget> {
             children: [
               Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 50,
                   ),
                   Text(
                     comment,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                     ),
                   ),

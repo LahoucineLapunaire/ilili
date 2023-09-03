@@ -16,7 +16,6 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mailto/mailto.dart';
 import 'notification.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -24,6 +23,7 @@ Reference storageRef = FirebaseStorage.instance.ref("comments");
 FirebaseAuth auth = FirebaseAuth.instance;
 final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
+@immutable
 class AudioPlayerWidget extends StatefulWidget {
   final String userId;
   final String postId;

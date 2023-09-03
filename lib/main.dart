@@ -1,7 +1,5 @@
-import 'package:Ilili/components/OwnerProfile.dart';
 import 'package:Ilili/components/PrivacyPolicy.dart';
 import 'package:Ilili/components/addPost.dart';
-import 'package:Ilili/components/home.dart';
 import 'package:Ilili/components/settings.dart';
 import 'package:Ilili/components/termsOfService.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -25,7 +23,7 @@ Future<void> main() async {
   if (kIsWeb) {
     // Initialize Firebase for web.
     await Firebase.initializeApp(
-      options: FirebaseOptions(
+      options: const FirebaseOptions(
         apiKey: "AIzaSyDWjIzP1Fn3dHcbWCOs1WVf6lFBlcQIYgE",
         appId: "1:593268336010:web:5ceffd538c530070c71473",
         messagingSenderId: "593268336010",
@@ -33,14 +31,6 @@ Future<void> main() async {
         storageBucket: "ilili-7ebc6.appspot.com/",
       ),
     );
-
-    // Define routes for web.
-    final Map<String, WidgetBuilder> routes = {
-      '/privacypolicy': (context) => PrivacyPolicyPage(),
-      '/termsofservice': (context) => TermsOfServicePage(),
-      '/profilepage': (context) => OwnerProfilePage(),
-      '/addpost': (context) => AddPostPage(),
-    };
   } else {
     // Initialize Firebase for mobile.
     await Firebase.initializeApp();
@@ -55,7 +45,7 @@ Future<void> main() async {
   initSharedPreferences();
 
   // Fetch keys from Remote Config.
-  GetKeysFromRemoteConfig();
+  getKeysFromRemoteConfig();
 
   // Listen for changes in user authentication state.
   FirebaseAuth.instance.authStateChanges().listen((User? user) {
@@ -72,7 +62,7 @@ Future<void> main() async {
   });
 }
 
-Future<void> GetKeysFromRemoteConfig() async {
+Future<void> getKeysFromRemoteConfig() async {
   try {
     // Check if a user is currently authenticated.
     if (FirebaseAuth.instance.currentUser != null) {

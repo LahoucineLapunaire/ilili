@@ -47,7 +47,7 @@ class _AddPostPageState extends State<AddPostPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFECEFF1),
+      backgroundColor: const Color(0xFFECEFF1),
       body: SingleChildScrollView(
         child: Center(
             child: Container(
@@ -56,40 +56,40 @@ class _AddPostPageState extends State<AddPostPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              DelayedDisplay(
+              const DelayedDisplay(
                 delay: Duration(milliseconds: 500),
                 child: HeaderSection(),
               ),
-              SizedBox(height: 20),
-              DelayedDisplay(
+              const SizedBox(height: 20),
+              const DelayedDisplay(
                 delay: Duration(milliseconds: 700),
                 child: TitleSection(),
               ),
-              SizedBox(height: 20),
-              DelayedDisplay(
+              const SizedBox(height: 20),
+              const DelayedDisplay(
                 delay: Duration(milliseconds: 900),
                 child: ButtonSection(),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               DelayedDisplay(
-                delay: Duration(milliseconds: 1100),
+                delay: const Duration(milliseconds: 1100),
                 child: AudioPlayerSection(),
               ),
-              SizedBox(height: 30),
-              Divider(
+              const SizedBox(height: 30),
+              const Divider(
                 height: 30,
                 thickness: 2,
               ),
-              DelayedDisplay(
+              const DelayedDisplay(
                 delay: Duration(milliseconds: 1300),
                 child: TagsSection(),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               DelayedDisplay(
-                delay: Duration(milliseconds: 1500),
+                delay: const Duration(milliseconds: 1500),
                 child: SendButtonSection(),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         )),
@@ -104,7 +104,7 @@ class HeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 20),
+      padding: const EdgeInsets.only(left: 20),
       width: double.maxFinite,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
@@ -136,6 +136,7 @@ class TitleSection extends StatefulWidget {
 }
 
 class _TitleSectionState extends State<TitleSection> {
+  @override
   void initState() {
     super.initState();
   }
@@ -149,7 +150,7 @@ class _TitleSectionState extends State<TitleSection> {
         maxLength: 30,
         decoration: InputDecoration(
           filled: true,
-          prefixIcon: Icon(Icons.title),
+          prefixIcon: const Icon(Icons.title),
           fillColor: Colors.white,
           labelText: 'title',
           border: OutlineInputBorder(
@@ -319,7 +320,15 @@ class _ButtonSectionState extends State<ButtonSection> {
             onPressed: () {
               stopRecording();
             },
-            child: Row(
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              fixedSize: const Size(175, 40),
+              backgroundColor: const Color(
+                  0xFF6A1B9A), // Set the background color of the button
+            ),
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.stop),
@@ -327,35 +336,29 @@ class _ButtonSectionState extends State<ButtonSection> {
                 Text('Stop Recording'),
               ],
             ),
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              fixedSize: Size(175, 40),
-              backgroundColor:
-                  Color(0xFF6A1B9A), // Set the background color of the button
-            ),
           ),
         if (!isRecording && !kIsWeb)
           ElevatedButton(
             onPressed: () {
               startRecording();
             },
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(Icons.mic),
-              SizedBox(width: 5),
-              Text('Record Audio')
-            ]),
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              fixedSize: Size(175, 40),
-              backgroundColor:
-                  Color(0xFF6A1B9A), // Set the background color of the button
+              fixedSize: const Size(175, 40),
+              backgroundColor: const Color(
+                  0xFF6A1B9A), // Set the background color of the button
             ),
+            child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.mic),
+                  SizedBox(width: 5),
+                  Text('Record Audio')
+                ]),
           ),
-        SizedBox(width: 5),
+        const SizedBox(width: 5),
         if (!kIsWeb)
           Text(
             "Or",
@@ -365,24 +368,27 @@ class _ButtonSectionState extends State<ButtonSection> {
               fontWeight: FontWeight.w400,
             ),
           ),
-        SizedBox(width: 5),
+        const SizedBox(width: 5),
         ElevatedButton(
           onPressed: () {
             pickAudioFile();
           },
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(Icons.audiotrack),
-            SizedBox(width: 5),
-            Text('Pick Audio')
-          ]),
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            fixedSize: Size(175, 40), // Set the width and height of the button
-            backgroundColor:
-                Color(0xFF6A1B9A), // Set the background color of the button
+            fixedSize:
+                const Size(175, 40), // Set the width and height of the button
+            backgroundColor: const Color(
+                0xFF6A1B9A), // Set the background color of the button
           ),
+          child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.audiotrack),
+                SizedBox(width: 5),
+                Text('Pick Audio')
+              ]),
         ),
       ],
     );
@@ -390,7 +396,7 @@ class _ButtonSectionState extends State<ButtonSection> {
 }
 
 class AudioPlayerSection extends StatefulWidget {
-  AudioPlayerSection({super.key});
+  const AudioPlayerSection({super.key});
 
   @override
   State<AudioPlayerSection> createState() => AudioPlayerSectionState();
@@ -398,9 +404,10 @@ class AudioPlayerSection extends StatefulWidget {
 
 class AudioPlayerSectionState extends State<AudioPlayerSection> {
   bool isPlaying = false;
-  Duration audioDuration = Duration();
-  Duration position = Duration();
+  Duration audioDuration = const Duration();
+  Duration position = const Duration();
 
+  @override
   void initState() {
     super.initState();
     audioPlayer.onDurationChanged.listen((Duration duration) {
@@ -456,7 +463,7 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
     double result = position / 1000;
     String minutes = (result / 60).floor().toString();
     String seconds = (result % 60).floor().toString();
-    return minutes + ':' + seconds;
+    return '$minutes:$seconds';
   }
 
   @override
@@ -479,8 +486,8 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
                 children: [
                   Text(formatPosition(position.inMilliseconds)),
                   Slider(
-                    activeColor: Color(0xFF6A1B9A),
-                    inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
+                    activeColor: const Color(0xFF6A1B9A),
+                    inactiveColor: const Color(0xFF6A1B9A).withOpacity(0.3),
                     min: 0.0,
                     max: audioDuration.inSeconds.toDouble(),
                     value: position.inSeconds.toDouble(),
@@ -560,7 +567,7 @@ class _TagsSectionState extends State<TagsSection> {
               filled: true,
               fillColor: Colors.white,
               suffixIcon: IconButton(
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 onPressed: () {
                   addTag();
                 },
@@ -582,7 +589,7 @@ class _TagsSectionState extends State<TagsSection> {
                   children: [
                     Text(tagsList[index]),
                     IconButton(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.delete,
                         color: Colors.red,
                       ),
@@ -604,7 +611,7 @@ class _TagsSectionState extends State<TagsSection> {
 }
 
 class SendButtonSection extends StatefulWidget {
-  SendButtonSection({Key? key}) : super(key: key);
+  const SendButtonSection({Key? key}) : super(key: key);
 
   @override
   _SendButtonSectionState createState() => _SendButtonSectionState();
@@ -617,6 +624,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
   String audioLink = "";
   InterstitialAd? interstitialAd;
 
+  @override
   void initState() {
     super.initState();
     if (!kIsWeb) {

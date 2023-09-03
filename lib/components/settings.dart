@@ -14,7 +14,6 @@ import 'package:Ilili/components/widget.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;

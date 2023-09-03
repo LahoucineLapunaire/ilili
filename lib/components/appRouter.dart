@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Ilili/components/addPost.dart';
@@ -8,7 +7,6 @@ import 'package:Ilili/components/home.dart';
 import 'package:Ilili/components/OwnerProfile.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:Ilili/components/google_ads.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -28,17 +26,16 @@ class _AppRouterState extends State<AppRouter> {
 
   final List<Widget> _pages = [
     HomePage(),
-    AddPostPage(),
-    OwnerProfilePage(),
+    const AddPostPage(),
+    const OwnerProfilePage(),
   ];
 
+  @override
   void initState() {
-    if (widget.index != null) {
-      setState(() {
-        _currentIndex = widget.index;
-        usersCollectionRef = firestore.collection('users');
-      });
-    }
+    setState(() {
+      _currentIndex = widget.index;
+      usersCollectionRef = firestore.collection('users');
+    });
     super.initState();
     if (!kIsWeb) {
       initGoogleMobileAds();
@@ -47,7 +44,6 @@ class _AppRouterState extends State<AppRouter> {
   }
 
   Future<InitializationStatus> initGoogleMobileAds() {
-    // TODO: Initialize Google Mobile Ads SDK
     // This function initializes the Google Mobile Ads SDK and returns an InitializationStatus.
     return MobileAds.instance.initialize();
   }
@@ -57,7 +53,7 @@ class _AppRouterState extends State<AppRouter> {
       // Create a BannerAd with specified ad unit ID, request, and size.
       BannerAd(
         adUnitId: AdHelper.bannerAdUnitId,
-        request: AdRequest(),
+        request: const AdRequest(),
         size: AdSize.banner,
         listener: BannerAdListener(
           onAdLoaded: (ad) {
@@ -95,6 +91,7 @@ class _AppRouterState extends State<AppRouter> {
     });
   }
 
+  @override
   void dispose() {
     super.dispose();
     bannerAd?.dispose();
@@ -117,10 +114,10 @@ class _AppRouterState extends State<AppRouter> {
                 ),
               ),
             BottomNavigationBar(
-              selectedItemColor: Color(0xFF6A1B9A),
+              selectedItemColor: const Color(0xFF6A1B9A),
               currentIndex: _currentIndex,
               onTap: _onTabTapped,
-              items: [
+              items: const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),
                   label: 'Home',

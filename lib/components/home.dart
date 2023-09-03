@@ -1,15 +1,12 @@
-import 'package:Ilili/components/addPost.dart';
 import 'package:Ilili/components/appRouter.dart';
 import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:Ilili/components/UserProfilePage.dart';
-import 'package:Ilili/components/changeProfile.dart';
 import 'package:Ilili/components/messageList.dart';
 import 'package:Ilili/components/setUsername.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:Ilili/components/widget.dart';
-import 'package:provider/provider.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
