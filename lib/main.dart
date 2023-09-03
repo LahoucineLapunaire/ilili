@@ -2,6 +2,7 @@ import 'package:Ilili/components/OwnerProfile.dart';
 import 'package:Ilili/components/PrivacyPolicy.dart';
 import 'package:Ilili/components/addPost.dart';
 import 'package:Ilili/components/home.dart';
+import 'package:Ilili/components/settings.dart';
 import 'package:Ilili/components/termsOfService.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -181,6 +182,7 @@ class Logged extends StatelessWidget {
         '/termsofservice': (context) => TermsOfServicePage(),
         '/profilepage': (context) => OwnerProfilePage(),
         '/addpost': (context) => AddPostPage(),
+        '/settings': (context) => SettingsPage(),
       },
     );
   }
