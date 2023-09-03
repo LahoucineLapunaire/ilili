@@ -108,7 +108,7 @@
         <key>CFBundleTypeRole</key>
         <string>Editor</string>
         <key>CFBundleURLName</key>
-        <string></string>
+        <string>com.example.ilili</string>
         <key>CFBundleURLSchemes</key>
         <array>
 			<string>ilili</string>
