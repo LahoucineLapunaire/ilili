@@ -31,9 +31,7 @@
 			<string></string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>ilili://</string>
 				<string>ilili</string>
-				<string>com.googleusercontent.apps.593268336010-8m9pfikeamerfjpoothd9aa83bqa4u84</string>
 			</array>
 		</dict>
 	</array>
