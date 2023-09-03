@@ -4,15 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/widget.dart';
 import 'package:intl/intl.dart';
-import 'package:mailer/smtp_server.dart';
-import 'package:mailer/mailer.dart';
 
 import 'appRouter.dart';
 
 String sortType = "newest";
 List<dynamic> commentList = [];
-FirebaseAuth auth = FirebaseAuth.instance;
 
+FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 class PostPage extends StatefulWidget {
@@ -20,7 +18,7 @@ class PostPage extends StatefulWidget {
   final String userId;
   final bool isOwner;
 
-  PostPage(
+  const PostPage(
       {super.key,
       required this.postId,
       required this.userId,
@@ -39,12 +37,16 @@ class _PostPageState extends State<PostPage> {
     super.initState();
   }
 
+// Function to fetch comments for a post
   Future<void> getComments() async {
     try {
       List<dynamic> result = [];
+      // Fetch the post data
       final postSnapshot =
           await firestore.collection('posts').doc(widget.postId).get();
       final comments = postSnapshot.data()?['comments'];
+
+      // Loop through the comments and fetch details for each comment
       for (String comment in comments) {
         final postSnapshot =
             await firestore.collection('comments').doc(comment).get();
@@ -55,7 +57,11 @@ class _PostPageState extends State<PostPage> {
           "userId": postSnapshot.data()?['userId'],
         });
       }
+
+      // Sort the comments by timestamp in descending order
       result.sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
+
+      // Update the commentList in the state
       setState(() {
         commentList = result;
       });
@@ -73,13 +79,17 @@ class _PostPageState extends State<PostPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xFFFAFAFA),
+        backgroundColor: const Color(0xFFFAFAFA),
         appBar: AppBar(
-          backgroundColor: Color(0xFFFAFAFA),
+          backgroundColor: const Color(0xFFFAFAFA),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AppRouter(index: 0),
+                  ));
             },
           ),
           title: Text(
@@ -99,20 +109,21 @@ class _PostPageState extends State<PostPage> {
                 });
                 getComments();
               },
-              icon: Icon(Icons.refresh, color: Colors.black),
+              icon: const Icon(Icons.refresh, color: Colors.black),
             ),
           ],
         ),
         body: SingleChildScrollView(
-          child: WillPopScope(onWillPop: (){
+            child: WillPopScope(
+          onWillPop: () {
             Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AppRouter(index: 0),
-        ));
-        return Future.value(false);
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AppRouter(index: 0),
+                ));
+            return Future.value(false);
           },
-          child : Center(
+          child: Center(
             child: Column(
               children: [
                 AudioPlayerWidget(
@@ -132,17 +143,17 @@ class _PostPageState extends State<PostPage> {
                     future: _getCommentsFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator(
+                        return const CircularProgressIndicator(
                           color: Colors.grey,
                         );
                       } else {
-                        return CommentSection();
+                        return const CommentSection();
                       }
-                    }),
+                    })
               ],
             ),
-          ),)
-        ));
+          ),
+        )));
   }
 }
 
@@ -158,8 +169,10 @@ class SortSection extends StatefulWidget {
 class _SortSectionState extends State<SortSection> {
   String sortType = "newest"; // Make sure this is declared here
 
+// Function to sort comments based on the selected criteria
   void sortComments(sortType) {
     List<dynamic> result = commentList;
+
     if (sortType == "newest") {
       result.sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
     } else if (sortType == "oldest") {
@@ -169,42 +182,41 @@ class _SortSectionState extends State<SortSection> {
     } else if (sortType == "least liked") {
       result.sort((a, b) => a['likes'].length.compareTo(b['likes'].length));
     }
-    widget
-        .onSortChanged(result); // Call the callback function with updated list
+
+    // Call the callback function with the updated list
+    widget.onSortChanged(result);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Row(
-        children: [
-          Text("Sort by: "),
-          DropdownButton<String>(
-            value: sortType,
-            icon: const Icon(Icons.arrow_downward),
-            iconSize: 24,
-            elevation: 16,
-            style: const TextStyle(color: Colors.deepPurple),
-            underline: Container(
-              height: 2,
-              color: Colors.deepPurpleAccent,
-            ),
-            onChanged: (String? newValue) {
-              setState(() {
-                sortType = newValue!;
-              });
-              sortComments(newValue);
-            },
-            items: <String>['newest', 'oldest', 'most liked', 'least liked']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-          )
-        ],
-      ),
+    return Row(
+      children: [
+        const Text("Sort by: "),
+        DropdownButton<String>(
+          value: sortType,
+          icon: const Icon(Icons.arrow_downward),
+          iconSize: 24,
+          elevation: 16,
+          style: const TextStyle(color: Colors.deepPurple),
+          underline: Container(
+            height: 2,
+            color: Colors.deepPurpleAccent,
+          ),
+          onChanged: (String? newValue) {
+            setState(() {
+              sortType = newValue!;
+            });
+            sortComments(newValue);
+          },
+          items: <String>['newest', 'oldest', 'most liked', 'least liked']
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+        )
+      ],
     );
   }
 }
@@ -217,16 +229,17 @@ class CommentSection extends StatefulWidget {
 }
 
 class _CommentSectionState extends State<CommentSection> {
+  @override
   void initState() {
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return commentList.length == 0
+    return commentList.isEmpty
         ? Container(
             height: 200,
-            child: Center(
+            child: const Center(
               child: Text(
                 "No comment yet.",
                 style: TextStyle(
@@ -271,28 +284,30 @@ class _CommentWidgetState extends State<CommentWidget> {
   String reportReason = "";
   bool isPictureLoaded = false;
 
+  @override
   void initState() {
     super.initState();
     getComment();
     getUser();
   }
 
+// Function to fetch details of a single comment
   getComment() {
     try {
-      bool _isLiked = false;
+      bool isLiked = false;
       firestore
           .collection('comments')
           .doc(widget.commentId)
           .get()
           .then((postSnapshot) {
         if (postSnapshot.data()?['likes'].contains(auth.currentUser!.uid)) {
-          _isLiked = true;
+          isLiked = true;
         }
         setState(() {
           comment = postSnapshot.data()?['comment'];
           timestamp = postSnapshot.data()?['timestamp'];
           likes = postSnapshot.data()?['likes'];
-          isLiked = _isLiked;
+          isLiked = isLiked;
         });
       });
     } catch (e) {
@@ -300,6 +315,7 @@ class _CommentWidgetState extends State<CommentWidget> {
     }
   }
 
+// Function to fetch user details associated with a comment
   getUser() {
     try {
       firestore
@@ -318,9 +334,11 @@ class _CommentWidgetState extends State<CommentWidget> {
     }
   }
 
+// Function to handle liking/unliking a comment
   likeComment() {
     try {
       if (isLiked) {
+        // Unlike the comment
         firestore.collection('comments').doc(widget.commentId).update({
           "likes": FieldValue.arrayRemove([auth.currentUser!.uid]),
           "score": FieldValue.increment(-1)
@@ -329,6 +347,7 @@ class _CommentWidgetState extends State<CommentWidget> {
           likes.remove(auth.currentUser!.uid);
         });
       } else {
+        // Like the comment
         setState(() {
           likes.add(auth.currentUser!.uid);
         });
@@ -345,33 +364,38 @@ class _CommentWidgetState extends State<CommentWidget> {
     }
   }
 
+  // Function to format timestamp into a readable format
   String formatTimestamp(Timestamp timestamp) {
-  final maintenant = Timestamp.now();
-  final difference = maintenant.seconds - timestamp.seconds;
+    final maintenant = Timestamp.now();
+    final difference = maintenant.seconds - timestamp.seconds;
 
-  if (difference < 60) {
-    return '$difference sec';
-  } else if (difference < 60 * 60) {
-    return '${difference ~/ 60} min';
-  } else if (difference < 60 * 60 * 24) {
-    return '${difference ~/ (60 * 60)} h';
-  } else if (difference < 60 * 60 * 24 * 7) {
-    return '${difference ~/ (60 * 60 * 24)} j';
-  } else if (difference < 60 * 60 * 24 * 30) {
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000);
-    return DateFormat('MM/dd/yyyy', 'en_US').format(dateTime); // Format américain
-  } else {
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000);
-    return DateFormat('MM/dd/yyyy', 'en_US').format(dateTime); // Format américain pour les mois
+    if (difference < 60) {
+      return '$difference sec';
+    } else if (difference < 60 * 60) {
+      return '${difference ~/ 60} min';
+    } else if (difference < 60 * 60 * 24) {
+      return '${difference ~/ (60 * 60)} h';
+    } else if (difference < 60 * 60 * 24 * 7) {
+      return '${difference ~/ (60 * 60 * 24)} j';
+    } else if (difference < 60 * 60 * 24 * 30) {
+      final dateTime =
+          DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000);
+      return DateFormat('MM/dd/yyyy', 'en_US')
+          .format(dateTime); // American format
+    } else {
+      final dateTime =
+          DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000);
+      return DateFormat('MM/dd/yyyy', 'en_US')
+          .format(dateTime); // American format for months
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 15),
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(10),
+      decoration: const BoxDecoration(
         color: Colors.white,
       ),
       child: Column(
@@ -390,28 +414,28 @@ class _CommentWidgetState extends State<CommentWidget> {
                             backgroundImage: NetworkImage(profilePicture),
                           ),
                         )
-                      : Center(
+                      : const Center(
                           child: CircularProgressIndicator(
                             color: Colors.grey,
                           ),
                         ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Text(
                     username,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Opacity(
-                opacity: 0.6,
-                child: Text(formatTimestamp(timestamp)),
-              ),
+                    opacity: 0.6,
+                    child: Text(formatTimestamp(timestamp)),
+                  ),
                 ],
               ),
               PopupMenuButton<String>(
-                icon: Icon(Icons.more_horiz),
+                icon: const Icon(Icons.more_horiz),
                 onSelected: (String value) {
                   // Handle menu item selection
                   if (value == "Report Comment") {
@@ -431,10 +455,10 @@ class _CommentWidgetState extends State<CommentWidget> {
                   }
                 },
                 itemBuilder: (BuildContext context) => [
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'Report Comment',
-                    child: Text('Report Comment'),
                     textStyle: TextStyle(color: Colors.black),
+                    child: Text('Report Comment'),
                   ),
                 ],
               )
@@ -443,15 +467,19 @@ class _CommentWidgetState extends State<CommentWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(children: [
-                SizedBox(width: 50,),
-                Text(
-                comment,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
+              Row(
+                children: [
+                  const SizedBox(
+                    width: 50,
+                  ),
+                  Text(
+                    comment,
+                    style: const TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
-              ],),
               Row(
                 children: [
                   Text(likes.length.toString()),

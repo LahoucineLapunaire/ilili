@@ -1,11 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:Ilili/components/login.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:Ilili/components/widget.dart';
-import 'package:intl/intl.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -19,7 +15,7 @@ class ResetEmail extends StatefulWidget {
 class _ResetEmailState extends State<ResetEmail> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Color(0xFFECEFF1),
       body: Center(
         child: Column(
@@ -44,7 +40,7 @@ class TextTop extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.only(left: 20),
+          padding: const EdgeInsets.only(left: 20),
           width: double.maxFinite,
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -81,17 +77,24 @@ class EmailSection extends StatefulWidget {
 class _EmailSectionState extends State<EmailSection> {
   TextEditingController emailController = TextEditingController();
 
+  // This function is used to send a password reset email to the current user.
   Future<void> sendEmailResetEmail() async {
-    showErrorMessage("All fields must be filled", context);
+    // Check if the email field is empty.
     if (emailController.text == '') {
+      showErrorMessage("All fields must be filled", context);
       return;
     }
+
     try {
+      // Attempt to update the current user's email with the new email provided.
       await auth.currentUser?.updateEmail(emailController.text);
+
+      // If the email update is successful, show a success message.
       showInfoMessage('Email changed successfully', context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
     } catch (e) {
+      // If there's an error during the email update, show an error message.
       showErrorMessage(e.toString().split('] ')[1], context);
       print('Error sending Email reset email : \n $e');
     }
@@ -108,24 +111,24 @@ class _EmailSectionState extends State<EmailSection> {
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.white,
-                prefixIcon: Icon(Icons.email),
+                prefixIcon: const Icon(Icons.email),
                 labelText: 'Email',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
                 sendEmailResetEmail();
               },
-              child: Text(
-                "Change Email",
-              ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF6A1B9A),
-                minimumSize: Size(250, 50),
+                backgroundColor: const Color(0xFF6A1B9A),
+                minimumSize: const Size(250, 50),
+              ),
+              child: const Text(
+                "Change Email",
               ),
             )
           ],

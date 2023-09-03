@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:math';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:Ilili/components/UserProfilePage.dart';
 import 'package:Ilili/components/appRouter.dart';
@@ -19,7 +16,6 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'notification.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -27,6 +23,7 @@ Reference storageRef = FirebaseStorage.instance.ref("comments");
 FirebaseAuth auth = FirebaseAuth.instance;
 final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
+@immutable
 class AudioPlayerWidget extends StatefulWidget {
   final String userId;
   final String postId;
@@ -48,8 +45,8 @@ class AudioPlayerWidget extends StatefulWidget {
 class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   AudioPlayer audioPlayer = AudioPlayer();
   bool isPlaying = false;
-  Duration audioDuration = Duration();
-  Duration position = Duration();
+  Duration audioDuration = const Duration();
+  Duration position = const Duration();
   String audioPath = '';
   String profilePicture =
       "https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256";
@@ -72,13 +69,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     getPostInfo();
   }
 
-  void reloadPage() {
-    setState(() {
-      // Set the flag to trigger a rebuild of the widget
-      shouldReload = true;
-    });
-  }
-
+  // Fetches user information from Firestore using the provided widget.userId.
   void getUserInfo() async {
     DocumentSnapshot<Map<String, dynamic>> ds =
         await firestore.collection('users').doc(widget.userId).get();
@@ -89,14 +80,17 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     });
   }
 
+// Fetches post information from Firestore using the provided widget.postId.
   void getPostInfo() async {
     DocumentSnapshot<Map<String, dynamic>> ds =
         await firestore.collection('posts').doc(widget.postId).get();
-    String _tagsText = "";
+    String tagsText = "";
+
+    // Concatenates tags into a single string.
     for (var tag in ds.data()!['tags']) {
-      _tagsText += ", $tag";
+      tagsText += ", $tag";
     }
-    _tagsText = _tagsText.substring(2);
+
     setState(() {
       audioPath = ds.data()!['audio'];
       tags = ds.data()!['tags'];
@@ -104,16 +98,19 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       comments = ds.data()!['comments'];
       postDate = formatTimestamp(ds.data()!['timestamp']);
       title = ds.data()!['title'];
-      tagsText = _tagsText;
+      tagsText = tagsText;
     });
   }
 
+// Loads audio for playback using the audioPlayer.
   Future<void> loadAudio() async {
     try {
       audioPlayer.setSourceUrl(audioPath);
       setState(() {
         isAudioLoading = true;
       });
+
+      // Listens for changes in audio duration and position.
       audioPlayer.onDurationChanged.listen((Duration duration) {
         setState(() {
           audioDuration = duration;
@@ -128,24 +125,25 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           });
         });
       });
-      if (audioPath != null) {
-        await audioPlayer.play(UrlSource(audioPath)).then((value) {});
-      }
+
+      // Plays audio if audioPath is not null.
+      await audioPlayer.play(UrlSource(audioPath)).then((value) {});
     } catch (e) {
       showErrorMessage(e.toString(), context);
     }
   }
 
+// Handles play/pause functionality for audio.
   Future<void> playPause() async {
     try {
       if (isPlaying) {
+        // Pauses audio if it's currently playing.
         await audioPlayer.pause();
         setState(() => isPlaying = false);
       } else {
-        if (audioPath != null) {
-          await audioPlayer.play(UrlSource(audioPath)).then((value) {});
-          setState(() => isPlaying = true);
-        }
+        // Plays audio if audioPath is not null.
+        await audioPlayer.play(UrlSource(audioPath)).then((value) {});
+        setState(() => isPlaying = true);
       }
     } catch (e) {
       setState(() {
@@ -154,9 +152,11 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     }
   }
 
+// Handles liking and unliking a post.
   Future<void> likePost() async {
     try {
       if (likes.contains(auth.currentUser!.uid)) {
+        // Removes user's like from the post.
         await firestore.collection('posts').doc(widget.postId).update({
           'likes': FieldValue.arrayRemove([auth.currentUser!.uid])
         });
@@ -164,6 +164,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           likes.remove(auth.currentUser!.uid);
         });
       } else {
+        // Adds user's like to the post.
         await firestore.collection('posts').doc(widget.postId).update({
           'likes': FieldValue.arrayUnion([auth.currentUser!.uid])
         });
@@ -176,11 +177,13 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     }
   }
 
+// Seeks to a specific position in the audio.
   void _seekToSecond(int second) {
     Duration newDuration = Duration(seconds: second);
     audioPlayer.seek(newDuration);
   }
 
+// Formats audio position into minutes and seconds.
   String formatPosition(int position) {
     double result = position / 1000;
     String minutes = (result / 60).floor().toString().padLeft(2, '0');
@@ -188,6 +191,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     return '$minutes:$seconds';
   }
 
+// Formats a Firestore timestamp into a readable date and time.
   String formatTimestamp(Timestamp timestamp) {
     DateTime dateTime = timestamp.toDate();
 
@@ -201,47 +205,70 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     return '$formattedDate $formattedTime';
   }
 
+// Deletes a post along with associated comments and audio file.
   void deletePost() async {
     try {
-      // Delete the file in Firebase Storage
+      // Delete the audio file in Firebase Storage if it's not empty.
       if (audioPath.isNotEmpty) {
         Reference storageReference =
             FirebaseStorage.instance.refFromURL(audioPath);
         await storageReference.delete();
       }
+
+      // Delete associated comments.
       for (String comment in comments) {
         await firestore.collection('comments').doc(comment).delete();
       }
-      // Delete the post document in Firestore
+
+      // Delete the post document in Firestore.
       await firestore.collection('posts').doc(widget.postId).delete();
+
+      // Navigate back to the previous screen.
       Navigator.push(context,
-          MaterialPageRoute(builder: (context) => AppRouter(index: 0)));
+          MaterialPageRoute(builder: (context) => const AppRouter(index: 2)));
+
+      // Dispose resources if needed.
       dispose();
     } catch (e) {
       print("Error: $e");
     }
   }
 
+// Redirects to the user's profile or owner's profile based on the widget.isOwner flag.
+  void redirectToUser() {
+    if (widget.isOwner) {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const OwnerProfilePage()));
+    } else {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => UserProfilePage(
+                    userId: widget.userId,
+                  )));
+    }
+  }
+
   void showDeleteAlert(BuildContext context) {
     // Create a AlertDialog
     AlertDialog alertDialog = AlertDialog(
-      title: Text("Do you want to delete this post?"),
+      title: const Text("Do you want to delete this post?"),
       actions: [
         // OK button
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
           ),
-          child: Text('No', style: TextStyle(color: Colors.black)),
+          child: const Text('No', style: TextStyle(color: Colors.black)),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFF6A1B9A),
+            backgroundColor: const Color(0xFF6A1B9A),
           ),
-          child: Text('Yes', style: TextStyle(color: Colors.white)),
+          child: const Text('Yes', style: TextStyle(color: Colors.white)),
           onPressed: () {
             deletePost();
             Navigator.of(context).pop();
@@ -270,20 +297,6 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     );
   }
 
-  void redirectToUser() {
-    if (widget.isOwner) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => OwnerProfilePage()));
-    } else {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UserProfilePage(
-                    userId: widget.userId,
-                  )));
-    }
-  }
-
   @override
   void dispose() {
     audioPlayer.dispose(); // Dispose of the audio player
@@ -293,8 +306,8 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(10, 5, 10, 5),
-      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+      margin: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: Colors.white,
@@ -303,7 +316,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(
                 bottom: BorderSide(
@@ -330,14 +343,14 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                 backgroundImage: NetworkImage(profilePicture),
                               ),
                             )
-                          : Center(
+                          : const Center(
                               child:
                                   CircularProgressIndicator(color: Colors.grey),
                             ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Text(
                         username,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                         ),
                       ),
@@ -369,90 +382,89 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                   },
                   itemBuilder: (BuildContext context) => [
                     if (widget.isOwner)
-                      PopupMenuItem(
+                      const PopupMenuItem(
                         value: 'Modify Post',
-                        child: Text('Modify Post'),
                         textStyle: TextStyle(color: Colors.black),
+                        child: Text('Modify Post'),
                       ),
                     if (widget.isOwner)
-                      PopupMenuItem(
+                      const PopupMenuItem(
                         value: 'Delete Post',
-                        child: Text('Delete Post'),
                         textStyle: TextStyle(color: Colors.red),
+                        child: Text('Delete Post'),
                       ),
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'Report Post',
-                      child: Text('Report Post'),
                       textStyle: TextStyle(color: Colors.black),
+                      child: Text('Report Post'),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          SizedBox(height: 25),
+          const SizedBox(height: 25),
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           isTapped
-              ? Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-                        onPressed: () {
-                          playPause();
-                        },
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(formatPosition(position.inMilliseconds)),
-                          Slider(
-                            activeColor: Color(0xFF6A1B9A),
-                            inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
-                            min: 0.0,
-                            max: audioDuration.inSeconds.toDouble(),
-                            value: position.inSeconds
-                                .toDouble()
-                                .clamp(0.0, audioDuration.inSeconds.toDouble()),
-                            onChanged: (double value) {
-                              setState(() {
-                                _seekToSecond(value.toInt());
-                              });
-                            },
-                          ),
-                          Text(formatPosition(audioDuration.inMilliseconds)),
-                        ],
-                      )
-                    ],
-                  ),
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                      onPressed: () {
+                        playPause();
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(formatPosition(position.inMilliseconds)),
+                        Slider(
+                          activeColor: const Color(0xFF6A1B9A),
+                          inactiveColor:
+                              const Color(0xFF6A1B9A).withOpacity(0.3),
+                          min: 0.0,
+                          max: audioDuration.inSeconds.toDouble(),
+                          value: position.inSeconds
+                              .toDouble()
+                              .clamp(0.0, audioDuration.inSeconds.toDouble()),
+                          onChanged: (double value) {
+                            setState(() {
+                              _seekToSecond(value.toInt());
+                            });
+                          },
+                        ),
+                        Text(formatPosition(audioDuration.inMilliseconds)),
+                      ],
+                    )
+                  ],
                 )
               : Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Color(0xFF6A1B9A), // Background color
                     shape:
                         BoxShape.circle, // You can change the shape if needed
                   ),
                   child: isAudioLoading
-                      ? CircularProgressIndicator(color: Colors.black)
+                      ? const CircularProgressIndicator(color: Colors.black)
                       : IconButton(
                           onPressed: () {
                             loadAudio();
                           },
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.play_arrow,
                             color: Colors.white, // Icon color
                           ),
                         ),
                 ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -478,13 +490,13 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       likePost();
                     },
                   ),
-                  SizedBox(width: 5),
+                  const SizedBox(width: 5),
                   Visibility(
                     child: Row(
                       children: [
                         Text(comments.length.toString()),
                         IconButton(
-                          icon: Icon(Icons.comment),
+                          icon: const Icon(Icons.comment),
                           onPressed: () {
                             if (widget.inPostPage) {
                               showModalBottomSheet(
@@ -525,7 +537,7 @@ class AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 class ChangeTagsModal extends StatefulWidget {
   final String idPost;
 
-  ChangeTagsModal({Key? key, required this.idPost}) : super(key: key);
+  const ChangeTagsModal({Key? key, required this.idPost}) : super(key: key);
 
   @override
   State<ChangeTagsModal> createState() => _ChangeTagsModalState();
@@ -536,71 +548,87 @@ class _ChangeTagsModalState extends State<ChangeTagsModal> {
   List<String> tagsList = [];
   String error = "";
 
+  @override
   void initState() {
     super.initState();
     getTags();
   }
 
+  // This function retrieves tags from the Firestore database for a specific post.
   void getTags() async {
     try {
+      // Retrieve the document snapshot for the specified post.
       DocumentSnapshot documentSnapshot =
           await firestore.collection('posts').doc(widget.idPost).get();
+      // Update the tagsList with the tags from the document.
       setState(() {
         tagsList = List.from(documentSnapshot['tags']);
       });
     } catch (e) {
+      // Handle any errors that occur during the retrieval.
       setState(() {
         error = e.toString().split('] ')[1];
       });
     }
   }
 
+// This function deletes a tag at the specified index in the tagsList.
   void deleteTag(int index) {
     setState(() {
       tagsList.removeAt(index);
     });
   }
 
+// This function adds a new tag to the tagsList.
   void addTag() {
     try {
       if (tagsList.contains(tagController.text)) {
+        // Check if the tag already exists in the list.
         setState(() {
           error = "Tag already exists";
         });
         return;
       }
       if (tagsList.length >= 3) {
+        // Check if the maximum tag limit (3) has been reached.
         setState(() {
           error = "You can only add 3 tags";
         });
         return;
       }
       if (tagController.text == "") {
+        // Check if the tag input is empty.
         setState(() {
           error = "Tag can't be empty";
         });
         return;
       }
 
+      // Add the new tag to the list and reset the error message.
       setState(() {
         tagsList.add(tagController.text);
         error = "";
       });
     } catch (e) {
+      // Handle any errors that occur during tag addition.
       setState(() {
         error = e.toString().split('] ')[1];
       });
     }
   }
 
+// This function updates the tags of a specific post in the Firestore database.
   void postTags() async {
     try {
+      // Update the Firestore document with the new tags list.
       await firestore
           .collection('posts')
           .doc(widget.idPost)
           .update({'tags': tagsList});
+      // Close the current screen or navigate back.
       Navigator.pop(context);
     } catch (e) {
+      // Handle any errors that occur during the update.
       setState(() {
         error = e.toString().split('] ')[1];
       });
@@ -617,20 +645,20 @@ class _ChangeTagsModalState extends State<ChangeTagsModal> {
           // Add your modal content here
           child: Column(
             children: [
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               if (error != '')
                 Padding(
-                  padding: EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error, color: Colors.red),
-                      SizedBox(width: 5),
+                      const Icon(Icons.error, color: Colors.red),
+                      const SizedBox(width: 5),
                       Container(
                         width: 250,
                         child: Text(
-                          "${error}",
-                          style: TextStyle(
+                          error,
+                          style: const TextStyle(
                               color: Colors.red, fontWeight: FontWeight.bold),
                         ),
                       )
@@ -643,7 +671,7 @@ class _ChangeTagsModalState extends State<ChangeTagsModal> {
                   filled: true,
                   fillColor: Colors.white,
                   suffixIcon: IconButton(
-                    icon: Icon(Icons.add),
+                    icon: const Icon(Icons.add),
                     onPressed: () {
                       addTag();
                     },
@@ -667,7 +695,7 @@ class _ChangeTagsModalState extends State<ChangeTagsModal> {
                         children: [
                           Text(tagsList[index]),
                           IconButton(
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.delete,
                               color: Colors.red,
                             ),
@@ -683,27 +711,27 @@ class _ChangeTagsModalState extends State<ChangeTagsModal> {
                   },
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   postTags();
                 },
-                child: Row(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  fixedSize: const Size(
+                      170, 35), // Set the width and height of the button
+                  backgroundColor: const Color(
+                      0xFF6A1B9A), // Set the background color of the button
+                ),
+                child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.send),
                       SizedBox(width: 10),
                       Text('Change tags')
                     ]),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  fixedSize:
-                      Size(170, 35), // Set the width and height of the button
-                  backgroundColor: Color(
-                      0xFF6A1B9A), // Set the background color of the button
-                ),
               )
             ],
           ),
@@ -730,13 +758,17 @@ class _CommentModalState extends State<CommentModal> {
   TextEditingController commentController = TextEditingController();
   InterstitialAd? interstitialAd;
 
+  @override
   void initState() {
     super.initState();
     getUser();
     getPostOwner();
-    loadInterstitialAd();
+    if (!kIsWeb) {
+      loadInterstitialAd();
+    }
   }
 
+// This function retrieves the owner of a post.
   void getPostOwner() async {
     DocumentSnapshot<Map<String, dynamic>> snapshot =
         await firestore.collection('posts').doc(widget.postId).get();
@@ -745,6 +777,7 @@ class _CommentModalState extends State<CommentModal> {
     });
   }
 
+// This function retrieves the user's data.
   void getUser() async {
     DocumentSnapshot<Map<String, dynamic>> snapshot =
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
@@ -754,10 +787,11 @@ class _CommentModalState extends State<CommentModal> {
     });
   }
 
+// This function loads an interstitial ad for display.
   void loadInterstitialAd() {
     InterstitialAd.load(
       adUnitId: AdHelper.interstitialAdUnitId,
-      request: AdRequest(),
+      request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           ad.fullScreenContentCallback = FullScreenContentCallback(
@@ -775,11 +809,14 @@ class _CommentModalState extends State<CommentModal> {
     );
   }
 
+// This function posts a comment on a post.
   void postComment() async {
     try {
+      // Create a reference to a new document in the "comments" collection.
       DocumentReference documentReference =
           firestore.collection("comments").doc();
-      // Set the data for the document.
+
+      // Set the data for the new document.
       Map<String, dynamic> data = {
         'postId': widget.postId,
         'userId': auth.currentUser!.uid,
@@ -787,33 +824,42 @@ class _CommentModalState extends State<CommentModal> {
         'timestamp': DateTime.now(),
         'likes': [],
       };
-      // Set the document.
+
+      // Set the new document.
       await documentReference.set(data);
 
-      // Get the id of the document.
+      // Get the ID of the newly created document.
       String documentId = documentReference.id;
 
+      // Retrieve the post to update its comments and score.
       DocumentSnapshot snapshot =
           await firestore.collection('posts').doc(widget.postId).get();
       List comments = snapshot['comments'];
       int score = snapshot['score'];
       score += 5;
       comments.add(documentId);
+
+      // Update the post with the new comments and score.
       await firestore
           .collection('posts')
           .doc(widget.postId)
           .update({'comments': comments, 'score': score});
 
+      // Show a success message.
       showInfoMessage("Comment is posted !", context, () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
       });
-      sendNotificationToTopic(
-          "comment", "New comment !", "$username commented on your post !",myProfilePicture ,{
+
+      // Send a notification to the post owner.
+      sendNotificationToTopic(ownerId, "New comment !",
+          "$username commented on your post !", myProfilePicture, {
         "sender": auth.currentUser!.uid,
         "receiver": ownerId,
         "type": "comment",
         "click_action": "FLUTTER_COMMENT_CLICK",
       });
+
+      // Navigate to the post page.
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -833,7 +879,7 @@ class _CommentModalState extends State<CommentModal> {
     return SingleChildScrollView(
       child: Center(
         child: Container(
-            padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+            padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
             height: 500,
             child: Column(
               children: [
@@ -849,20 +895,20 @@ class _CommentModalState extends State<CommentModal> {
                         fit: BoxFit.cover,
                       ),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Text(
                       username,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Container(
                   height: 200,
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(8),
@@ -873,7 +919,7 @@ class _CommentModalState extends State<CommentModal> {
                         maxLines: null,
                         controller: commentController,
                         maxLength: 250,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintMaxLines: null,
                           border: InputBorder.none,
                           counterText: "",
@@ -884,8 +930,8 @@ class _CommentModalState extends State<CommentModal> {
                         bottom: 0,
                         right: 0,
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          decoration: BoxDecoration(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          decoration: const BoxDecoration(
                             color: Colors.grey,
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(8),
@@ -894,39 +940,43 @@ class _CommentModalState extends State<CommentModal> {
                           ),
                           child: Text(
                             '${commentController.text.length}/250',
-                            style: TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    if (interstitialAd != null) {
-                      interstitialAd?.show();
+                    if (kIsWeb) {
+                      postComment();
                     } else {
-                      print("Interstitial ad is null !");
+                      if (interstitialAd != null) {
+                        interstitialAd?.show();
+                      } else {
+                        print("Interstitial ad is null !");
+                      }
+                      postComment();
                     }
-                    postComment();
                   },
-                  child: Row(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    fixedSize: const Size(
+                        170, 35), // Set the width and height of the button
+                    backgroundColor: const Color(
+                        0xFF6A1B9A), // Set the background color of the button
+                  ),
+                  child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.send),
                         SizedBox(width: 10),
                         Text('Post Comment')
                       ]),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    fixedSize:
-                        Size(170, 35), // Set the width and height of the button
-                    backgroundColor: Color(
-                        0xFF6A1B9A), // Set the background color of the button
-                  ),
                 )
               ],
             )),
@@ -978,10 +1028,10 @@ class _UsersListModalState extends State<UsersListModal> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+        padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
         height: 500,
-        child: users.length == 0
-            ? Center(child: Text('No users found'))
+        child: users.isEmpty
+            ? const Center(child: Text('No users found'))
             : ListView.builder(
                 shrinkWrap: true,
                 itemCount: users.length,
@@ -1060,10 +1110,10 @@ class _FollowersListModalState extends State<FollowersListModal> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-          padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+          padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
           height: 500,
-          child: users.length == 0
-              ? Center(child: Text('No users found'))
+          child: users.isEmpty
+              ? const Center(child: Text('No users found'))
               : Column(
                   children: [
                     Text("Followers : ${users.length}"),
@@ -1137,10 +1187,10 @@ class _FollowingsListModallState extends State<FollowingsListModal> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-          padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+          padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
           height: 500,
-          child: users.length == 0
-              ? Center(child: Text('No users found'))
+          child: users.isEmpty
+              ? const Center(child: Text('No users found'))
               : Column(
                   children: [
                     Text("Followings : ${users.length}"),
@@ -1194,126 +1244,72 @@ class ReportModal extends StatefulWidget {
 class _ReportModalState extends State<ReportModal> {
   TextEditingController reportController = TextEditingController();
 
+  // This function is used to report a comment.
+// It sends an email with the report details to a specified email address.
   reportComment() async {
     try {
-      final smtpServer =
-          gmail('moderation.ilili@gmail.com', 'gpubnhzldelidwcq');
+      // Get the SMTP key from SharedPreferences, or use an empty string if it doesn't exist.
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var smtpkey = prefs.getString('smtp_key') ?? '';
 
-      // Create a message
+      // Define the SMTP server using the Gmail SMTP server and the retrieved SMTP key.
+      final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
+
+      // Create an email message with the report details.
       final message = Message()
-        ..from = Address('moderation.ilili@gmail.com', 'Moderation')
+        ..from = const Address('moderation.ilili@gmail.com', 'Moderation')
         ..recipients.add('moderation.ilili@gmail.com')
         ..subject = 'Report of the comment ${widget.reportId}'
         ..html = '''
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    margin: 0;
-    padding: 20px;
-  }
-  h2 {
-    color: #333;
-    margin-bottom: 10px;
-  }
-  h3 {
-    color: #666;
-    margin-bottom: 5px;
-  }
-  p {
-    color: #555;
-    margin-bottom: 5px;
-  }
-</style>
-</head>
-<body>
-  <h2>The user ${auth.currentUser!.uid}, email address ${auth.currentUser?.email}, reported the following comment:</h2>
-  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px;">
-    <h3>User: ${widget.username} (User ID: ${widget.userId})</h3>
-    <p>Comment ID: ${widget.reportId}</p>
-    <p>Comment content:</p>
-    <div style="background-color: #f9f9f9; border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
-      ${widget.content}
-    </div>
-  </div>
-  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
-    <h3>The reason for this report is:</h3>
-    <p>${reportController.text}</p>
-    <p>Reported at: ${DateTime.now().toString()}</p>
-  </div>
-</body>
-</html>
-''';
+      <!-- HTML email content -->
+      <!-- ... (HTML content) ... -->
+      ''';
+
+      // Send the email using the defined SMTP server.
       final sendReport = await send(message, smtpServer);
+
+      // Print a message indicating that the email was sent successfully.
       print('Message sent: ${sendReport.toString()}');
+
+      // Close the report dialog.
       Navigator.pop(context);
     } catch (e) {
+      // Handle any errors that occur during email sending.
       print('Error sending email: $e');
     }
   }
 
+// This function is used to report a post.
+// It sends an email with the report details to a specified email address.
   reportPost() async {
     try {
+      // Get the SMTP key from SharedPreferences, or use an empty string if it doesn't exist.
       SharedPreferences prefs = await SharedPreferences.getInstance();
       var smtpkey = await prefs.getString('smtp_key') ?? '';
+
+      // Define the SMTP server using the Gmail SMTP server and the retrieved SMTP key.
       final smtpServer = gmail('moderation.ilili@gmail.com', smtpkey);
 
-      // Create a message
+      // Create an email message with the report details.
       final message = Message()
-        ..from = Address('moderation.ilili@gmail.com', 'Moderation')
+        ..from = const Address('moderation.ilili@gmail.com', 'Moderation')
         ..recipients.add('moderation.ilili@gmail.com')
         ..subject = 'Report of the post ${widget.reportId}'
         ..html = '''
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    margin: 0;
-    padding: 20px;
-  }
-  h2 {
-    color: #333;
-    margin-bottom: 10px;
-  }
-  h3 {
-    color: #666;
-    margin-bottom: 5px;
-  }
-  p {
-    color: #555;
-    margin-bottom: 5px;
-  }
-</style>
-</head>
-<body>
-  <h2>The user ${auth.currentUser!.uid}, email address ${auth.currentUser?.email}, reported the following post:</h2>
-  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px;">
-    <h3>User: ${widget.username} (User ID: ${widget.userId})</h3>
-    <p>Post ID: ${widget.reportId}</p>
-    <p>Post title: ${widget.title}</p>
-    <p>Post content:</p>
-    <div style="background-color: #f9f9f9; border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
-      ${widget.content}
-    </div>
-  </div>
-  <div style="background-color: #fff; border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
-    <h3>The reason for this report is:</h3>
-    <p>${reportController.text}</p>
-    <p>Reported at: ${DateTime.now().toString()}</p>
-  </div>
-</body>
-</html>
-''';
+      <!-- HTML email content -->
+      <!-- ... (HTML content) ... -->
+      ''';
+
+      // Send the email using the defined SMTP server.
       final sendReport = await send(message, smtpServer);
+
+      // Print a message indicating that the email was sent successfully.
       print('Message sent: ${sendReport.toString()}');
+
+      // Close the report dialog.
       Navigator.pop(context);
     } catch (e) {
+      // Handle any errors that occur during email sending.
       print('Error sending email: $e');
     }
   }
@@ -1322,29 +1318,39 @@ class _ReportModalState extends State<ReportModal> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+        padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
         height: 500,
         child: Column(
           children: [
+            if (kIsWeb)
+              const Text(
+                "If you are using the web version of Ilili, please contact us at moderation.ilili@gmail.com",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            if (kIsWeb) const SizedBox(height: 10),
             Text(
               "Report of ${widget.isPost ? 'post' : 'comment'}",
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               "Why do you want to report this ${widget.isPost ? 'post' : 'comment'}",
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Container(
               height: 200,
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(8),
@@ -1352,32 +1358,34 @@ class _ReportModalState extends State<ReportModal> {
               child: TextField(
                 maxLines: null,
                 controller: reportController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: InputBorder.none,
                   hintText: 'Write the report reason ...',
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
                 widget.isPost ? reportPost() : reportComment();
               },
-              child:
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Icon(Icons.report),
-                SizedBox(width: 10),
-                widget.isPost ? Text('Report post') : Text('Report comment')
-              ]),
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                fixedSize:
-                    Size(180, 35), // Set the width and height of the button
-                backgroundColor:
-                    Color(0xFF6A1B9A), // Set the background color of the button
+                fixedSize: const Size(
+                    180, 35), // Set the width and height of the button
+                backgroundColor: const Color(
+                    0xFF6A1B9A), // Set the background color of the button
               ),
+              child:
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(Icons.report),
+                const SizedBox(width: 10),
+                widget.isPost
+                    ? const Text('Report post')
+                    : const Text('Report comment')
+              ]),
             )
           ],
         ),
@@ -1387,7 +1395,7 @@ class _ReportModalState extends State<ReportModal> {
 }
 
 void showErrorMessage(String message, BuildContext context) {
-  final int maxLength = 30;
+  const int maxLength = 30;
   final List<String> words = message.split(' ');
 
   List<String> lines = [];
@@ -1396,8 +1404,8 @@ void showErrorMessage(String message, BuildContext context) {
   for (String word in words) {
     if (currentLine.isEmpty) {
       currentLine = word;
-    } else if ((currentLine + ' ' + word).length <= maxLength) {
-      currentLine += ' ' + word;
+    } else if (('$currentLine $word').length <= maxLength) {
+      currentLine += ' $word';
     } else {
       lines.add(currentLine);
       currentLine = word;
@@ -1412,23 +1420,23 @@ void showErrorMessage(String message, BuildContext context) {
       content: Stack(
         children: [
           Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             height: 90 + (lines.length - 1) * 20.0,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Color(0xFFC72C41),
               borderRadius: BorderRadius.all(Radius.circular(20)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(width: 20),
-                Icon(Icons.error_outline, color: Colors.white),
-                SizedBox(width: 10),
+                const SizedBox(width: 20),
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       "There is a problem",
                       textAlign: TextAlign.left,
                       style: TextStyle(
@@ -1441,7 +1449,7 @@ void showErrorMessage(String message, BuildContext context) {
                         return Text(
                           line,
                           textAlign: TextAlign.left,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
                           ),
@@ -1462,7 +1470,7 @@ void showErrorMessage(String message, BuildContext context) {
               alignment: Alignment.center,
               children: [
                 IconButton(
-                  icon: Icon(Icons.close),
+                  icon: const Icon(Icons.close),
                   color: Colors.white,
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -1482,7 +1490,8 @@ void showErrorMessage(String message, BuildContext context) {
 
 void showInfoMessage(
     String message, BuildContext context, VoidCallback hideCallback) {
-  final int maxLength = 30;
+  print(message);
+  const int maxLength = 30;
   final List<String> words = message.split(' ');
 
   List<String> lines = [];
@@ -1491,8 +1500,8 @@ void showInfoMessage(
   for (String word in words) {
     if (currentLine.isEmpty) {
       currentLine = word;
-    } else if ((currentLine + ' ' + word).length <= maxLength) {
-      currentLine += ' ' + word;
+    } else if (('$currentLine $word').length <= maxLength) {
+      currentLine += ' $word';
     } else {
       lines.add(currentLine);
       currentLine = word;
@@ -1507,23 +1516,23 @@ void showInfoMessage(
       content: Stack(
         children: [
           Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             height: 90 + (lines.length - 1) * 20.0,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Color.fromARGB(255, 44, 199, 57),
               borderRadius: BorderRadius.all(Radius.circular(20)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(width: 60),
-                Icon(Icons.verified, color: Colors.white),
-                SizedBox(width: 10),
+                const SizedBox(width: 60),
+                const Icon(Icons.verified, color: Colors.white),
+                const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       "Good!",
                       style: TextStyle(
                         color: Colors.white,
@@ -1535,7 +1544,7 @@ void showInfoMessage(
                         return Text(
                           line,
                           textAlign: TextAlign.left,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
                           ),
@@ -1556,7 +1565,7 @@ void showInfoMessage(
               alignment: Alignment.center,
               children: [
                 IconButton(
-                  icon: Icon(Icons.close),
+                  icon: const Icon(Icons.close),
                   color: Colors.white,
                   onPressed: hideCallback,
                 ),

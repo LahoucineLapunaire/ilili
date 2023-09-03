@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/changeProfile.dart';
 import 'package:Ilili/components/chat.dart';
-import 'package:Ilili/components/floattingButton.dart';
 import 'package:Ilili/components/notification.dart';
 import 'package:Ilili/components/widget.dart';
 
@@ -20,19 +19,21 @@ class UserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFAFAFA),
+      backgroundColor: const Color(0xFFFAFAFA),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
-              SizedBox(height: 30,),
-              DelayedDisplay(
-                child: TopSection(userId: userId),
-                delay: Duration(microseconds: 500),
+              const SizedBox(
+                height: 30,
               ),
               DelayedDisplay(
+                delay: const Duration(microseconds: 500),
+                child: TopSection(userId: userId),
+              ),
+              DelayedDisplay(
+                delay: const Duration(microseconds: 800),
                 child: PostSection(userId: userId),
-                delay: Duration(microseconds: 800),
               ),
             ],
           ),
@@ -68,29 +69,34 @@ class _TopSectionState extends State<TopSection> {
     getMyInfo();
   }
 
+  // This function allows the user to follow or unfollow another user.
   void follow() async {
     if (followers.contains(auth.currentUser!.uid)) {
-      firestore.collection('users').doc(widget.userId).update({
+      // If the user is already following, unfollow them.
+      await firestore.collection('users').doc(widget.userId).update({
         'followers': FieldValue.arrayRemove([auth.currentUser!.uid])
       });
-      firestore.collection('users').doc(auth.currentUser!.uid).update({
+      await firestore.collection('users').doc(auth.currentUser!.uid).update({
         'following': FieldValue.arrayRemove([widget.userId])
       });
       setState(() {
         followers.remove(auth.currentUser!.uid);
       });
     } else {
-      firestore.collection('users').doc(widget.userId).update({
+      // If the user is not following, follow them.
+      await firestore.collection('users').doc(widget.userId).update({
         'followers': FieldValue.arrayUnion([auth.currentUser!.uid])
       });
-      firestore.collection('users').doc(auth.currentUser!.uid).update({
+      await firestore.collection('users').doc(auth.currentUser!.uid).update({
         'followings': FieldValue.arrayUnion([widget.userId])
       });
       setState(() {
         followers.add(auth.currentUser!.uid);
       });
-      sendNotificationToTopic(
-          "follow", "New followers", "$myUsername started to following you",myProfilePicture ,{
+
+      // Send a notification to the user being followed.
+      sendNotificationToTopic(widget.userId, "New followers",
+          "$myUsername started to following you", myProfilePicture, {
         "sender": auth.currentUser!.uid,
         "receiver": widget.userId,
         "type": "follow",
@@ -99,11 +105,7 @@ class _TopSectionState extends State<TopSection> {
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
+// This function retrieves data of the user being viewed.
   void getUserData() async {
     DocumentSnapshot ds =
         await firestore.collection('users').doc(widget.userId).get();
@@ -118,6 +120,7 @@ class _TopSectionState extends State<TopSection> {
     });
   }
 
+// This function retrieves the current user's information.
   void getMyInfo() async {
     DocumentSnapshot ds =
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
@@ -125,14 +128,18 @@ class _TopSectionState extends State<TopSection> {
     setState(() {
       myProfilePicture = ds.get('profilePicture');
       myUsername = ds.get('username');
-
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(50),
             topRight: Radius.circular(50),
@@ -148,16 +155,16 @@ class _TopSectionState extends State<TopSection> {
           boxShadow: [
             BoxShadow(
               color: Colors.grey,
-              offset: const Offset(
-                        0.0,
-                        5.0,
-                      ),
-                      blurRadius: 5.0,
+              offset: Offset(
+                0.0,
+                5.0,
+              ),
+              blurRadius: 5.0,
             )
           ]),
       child: Column(
         children: [
-          SizedBox(height: 25),
+          const SizedBox(height: 25),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -165,13 +172,13 @@ class _TopSectionState extends State<TopSection> {
                 children: [
                   Text(
                     "${followers.length}",
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Text(
+                  const Text(
                     "followers",
                     style: TextStyle(
                       fontSize: 14,
@@ -205,7 +212,7 @@ class _TopSectionState extends State<TopSection> {
                           backgroundImage: NetworkImage(profilPicture),
                         ),
                       )
-                    : Center(
+                    : const Center(
                         child: CircularProgressIndicator(
                           color: Colors.grey,
                         ),
@@ -215,13 +222,13 @@ class _TopSectionState extends State<TopSection> {
                 children: [
                   Text(
                     "${followings.length}",
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Text(
+                  const Text(
                     "followings",
                     style: TextStyle(
                       fontSize: 14,
@@ -233,20 +240,20 @@ class _TopSectionState extends State<TopSection> {
               ),
             ],
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
-            "$username",
+            username,
             style: TextStyle(
                 fontFamily: GoogleFonts.poppins().fontFamily,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.white),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
             child: Text(
-              "$description",
+              description,
               style: TextStyle(
                 fontFamily: GoogleFonts.poppins().fontFamily,
                 fontSize: 14,
@@ -255,7 +262,7 @@ class _TopSectionState extends State<TopSection> {
               ),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -265,17 +272,17 @@ class _TopSectionState extends State<TopSection> {
                 },
                 style: followers.contains(auth.currentUser!.uid)
                     ? ElevatedButton.styleFrom(
-                        side: BorderSide(color: Colors.white),
+                        side: const BorderSide(color: Colors.white),
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
-                        minimumSize: Size(75, 40),
+                        minimumSize: const Size(75, 40),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
                       )
                     : ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
-                        minimumSize: Size(75, 40),
+                        minimumSize: const Size(75, 40),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
@@ -286,7 +293,7 @@ class _TopSectionState extends State<TopSection> {
                       : "Follow",
                 ),
               ),
-              SizedBox(width: 15),
+              const SizedBox(width: 15),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -300,21 +307,21 @@ class _TopSectionState extends State<TopSection> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  side: BorderSide(color: Colors.white),
+                  side: const BorderSide(color: Colors.white),
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
-                  minimumSize: Size(75, 40),
+                  minimumSize: const Size(75, 40),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   "Message",
                 ),
               )
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -338,11 +345,6 @@ class _PostSectionState extends State<PostSection> {
     getPosts();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   void getPosts() async {
     QuerySnapshot<Map<String, dynamic>> qs = await FirebaseFirestore.instance
         .collection('posts')
@@ -355,11 +357,16 @@ class _PostSectionState extends State<PostSection> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return posts.length == 0
+    return posts.isEmpty
         ? Container(
             height: 200,
-            child: Center(
+            child: const Center(
               child: Text(
                 "No posts yet",
                 style: TextStyle(
@@ -371,13 +378,13 @@ class _PostSectionState extends State<PostSection> {
           )
         : ListView(
             shrinkWrap: true,
-            physics: ClampingScrollPhysics(),
+            physics: const ClampingScrollPhysics(),
             children: [
               for (var post in posts)
                 AudioPlayerWidget(
                   postId: post,
                   userId: widget.userId,
-                  isOwner: true,
+                  isOwner: widget.userId == auth.currentUser!.uid,
                   inPostPage: false,
                 ),
             ],

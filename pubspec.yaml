@@ -49,24 +49,29 @@ dependencies:
   image_picker: ^1.0.2
   fluttertoast: ^8.2.2
   mailer: ^6.0.1
-  firebase_messaging: ^14.6.6
+  firebase_messaging: ^14.6.7
   http: ^1.1.0
   googleapis_auth: ^1.4.1
   flutter_local_notifications: ^15.1.0+1
   google_mobile_ads: ^3.0.0
-  flutter_stripe: ^9.3.0
   flutter_dotenv: ^5.1.0
   shared_preferences: ^2.2.0
   firebase_remote_config: ^4.2.5
   delayed_display: ^2.0.0
   google_fonts: ^5.1.0
   carousel_slider: ^4.2.1
-  dots_indicator: ^2.1.1
+  provider: ^6.0.5
+  mailto: ^2.0.0
+  flutter_router: ^1.1.0
   
+  
+  
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -78,12 +83,14 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/ic_launcher.png"
+
 # The following section is specific to Flutter packages.
 flutter:
-  plugin:
-    platforms:
-      ios:
-        pluginClass: AppDelegate
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

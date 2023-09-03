@@ -5,9 +5,10 @@ class LegalNoticePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Legal Notice'),
+        title: const Text('Legal Notice'),
+        backgroundColor: const Color(0xFF6A1B9A),
       ),
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -8,8 +8,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:Ilili/components/widget.dart';
 
-GoogleSignIn googleSignIn = GoogleSignIn();
-
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -24,31 +22,31 @@ class LoginPage extends StatelessWidget {
               child: Container(
         height: MediaQuery.of(context).size.height,
         width: double.maxFinite,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Color(0xFFFAFAFA),
         ),
-        child: Column(
+        child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             DelayedDisplay(
-                child: HeaderSection(), delay: Duration(milliseconds: 500)),
+                delay: Duration(milliseconds: 500), child: HeaderSection()),
             SizedBox(height: 50),
             DelayedDisplay(
-                child: FormSection(), delay: Duration(milliseconds: 800)),
+                delay: Duration(milliseconds: 800), child: FormSection()),
             SizedBox(height: 20),
             DelayedDisplay(
-                child: ToSignup(), delay: Duration(milliseconds: 1000)),
+                delay: Duration(milliseconds: 1000), child: ToSignup()),
             DelayedDisplay(
-                child: ToForgottedPassword(),
-                delay: Duration(milliseconds: 1000)),
+                delay: Duration(milliseconds: 1000),
+                child: ToForgottedPassword()),
             DelayedDisplay(
+                delay: Duration(milliseconds: 1000),
                 child: Divider(
                   height: 20,
                   thickness: 2,
-                ),
-                delay: Duration(milliseconds: 1000)),
+                )),
             DelayedDisplay(
-                child: GoogleLoginForm(), delay: Duration(milliseconds: 1200)),
+                delay: Duration(milliseconds: 1200), child: GoogleLoginForm()),
           ],
         ),
       ))),
@@ -62,7 +60,7 @@ class HeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 20),
+      padding: const EdgeInsets.only(left: 20),
       width: double.maxFinite,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
@@ -87,7 +85,7 @@ class HeaderSection extends StatelessWidget {
 }
 
 class FormSection extends StatefulWidget {
-  FormSection({super.key});
+  const FormSection({super.key});
 
   @override
   _FormSectionState createState() => _FormSectionState();
@@ -100,21 +98,29 @@ class _FormSectionState extends State<FormSection> {
 
   void login() async {
     try {
+      // Check if email and password fields are empty
       if (emailController.text == '' || passwordController.text == '') {
         showErrorMessage("All fields must be filled", context);
         return;
       }
+
+      // Attempt to sign in with the provided email and password
       await auth
           .signInWithEmailAndPassword(
               email: emailController.text, password: passwordController.text)
-          .then((value) => {print("User ${value.user?.email} logged in")});
+          .then((value) {
+        // If successful, print a success message
+        print("User ${value.user?.email} logged in");
+      });
     } catch (e) {
       if (mounted) {
+        // Check the error message to determine the specific error
         if (e.toString().split('] ')[1] ==
             "There is no user record corresponding to this identifier. The user may have been deleted.") {
           showErrorMessage("User not found", context);
           return;
         } else {
+          // If there is an error, print the error message and display it to the user
           print("Error : $e");
           showErrorMessage(e.toString().split('] ')[1], context);
         }
@@ -148,13 +154,13 @@ class _FormSectionState extends State<FormSection> {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   TextField(
                     controller: emailController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      prefixIcon: Icon(Icons.email),
+                      prefixIcon: const Icon(Icons.email),
                       labelText: 'Enter your email',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -163,7 +169,7 @@ class _FormSectionState extends State<FormSection> {
                   ),
                 ],
               )),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Container(
               width: 300,
               child: Column(
@@ -177,14 +183,14 @@ class _FormSectionState extends State<FormSection> {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   TextField(
                     obscureText: obscureText,
                     controller: passwordController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      prefixIcon: Icon(Icons.lock),
+                      prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
                         icon: Icon(
                           obscureText ? Icons.visibility : Icons.visibility_off,
@@ -203,14 +209,14 @@ class _FormSectionState extends State<FormSection> {
                   ),
                 ],
               )),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF6A1B9A),
-              minimumSize: Size(250, 50),
+              backgroundColor: const Color(0xFF6A1B9A),
+              minimumSize: const Size(250, 50),
             ),
             onPressed: () => login(),
-            child: Text("Login"),
+            child: const Text("Login"),
           ),
         ],
       ),
@@ -226,17 +232,17 @@ class ToSignup extends StatelessWidget {
     return ElevatedButton(
         onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => SignupPage()),
+              MaterialPageRoute(builder: (context) => const SignupPage()),
             ),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          minimumSize: Size(250, 50),
+          minimumSize: const Size(250, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
         ),
-        child: Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
@@ -267,20 +273,20 @@ class ToForgottedPassword extends StatelessWidget {
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ResetPassword()),
+          MaterialPageRoute(builder: (context) => const ResetPassword()),
         );
       },
-      child: Text(
-        "password forgotten ?",
-        style: TextStyle(color: Colors.black),
-      ),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
-        minimumSize: Size(250, 50),
+        minimumSize: const Size(250, 50),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
+      ),
+      child: const Text(
+        "password forgotten ?",
+        style: TextStyle(color: Colors.black),
       ),
     );
   }
@@ -297,7 +303,10 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
   Future<void> signupWithGoogle() async {
     try {
       // Trigger the Google sign-in flow
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn(
+        clientId:
+            "YOUR_CLIENT_ID_HERE", // Replace with your Google OAuth2 client ID
+      ).signIn();
 
       print(googleUser);
 
@@ -318,7 +327,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
 
         final String uid = userCredential.user!.uid;
 
-        // Check if the user already exists
+        // Check if the user already exists in Firestore
         final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
             await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
@@ -326,20 +335,21 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
           // User already exists, log in and navigate to HomePage
           // Add your own navigation logic here
           print('User already exists');
-          // Navigate to HomePage
+          // Example navigation to HomePage:
           // Navigator.pushReplacement(
           //   context,
           //   MaterialPageRoute(builder: (context) => HomePage()),
           // );
         } else {
           // User does not exist, create a new document in Firestore
-          await firestore.collection('users').doc(uid).set({
+          await FirebaseFirestore.instance.collection('users').doc(uid).set({
             'profilePicture':
-                'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256',
+                'YOUR_DEFAULT_PROFILE_IMAGE_URL_HERE', // Replace with your default profile image URL
             'username': '',
             'posts': [],
             'followers': [],
             'followings': [],
+            'chats': [],
             'description': '',
           });
 
@@ -372,7 +382,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
                 borderRadius:
                     BorderRadius.circular(30), // Set button border radius
               ),
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                   vertical: 10, horizontal: 16), // Set button padding
             ),
             child: Row(
@@ -382,9 +392,9 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
                   'assets/images/google.png', // Replace with the path to your Google icon image
                   height: 20, // Set the height of the icon
                 ),
-                SizedBox(
+                const SizedBox(
                     width: 10), // Add some spacing between the icon and text
-                Text(
+                const Text(
                   'Login with Google',
                   style: TextStyle(
                       fontSize: 16,

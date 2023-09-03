@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:Ilili/components/appRouter.dart';
-import 'package:Ilili/components/widget.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -17,6 +16,7 @@ class SetUsernamePage extends StatefulWidget {
 class _SetUsernamePageState extends State<SetUsernamePage> {
   TextEditingController usernameController = TextEditingController();
   List<String> usernameList = [];
+  String error = "";
 
   @override
   void initState() {
@@ -24,49 +24,76 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
     getAllUsername();
   }
 
+  // This function retrieves all usernames from the Firestore database and populates usernameList.
   Future<void> getAllUsername() async {
     QuerySnapshot querySnapshot =
         await FirebaseFirestore.instance.collection("users").get();
 
+    // Loop through the retrieved documents and add usernames to usernameList.
     for (int i = 0; i < querySnapshot.docs.length; i++) {
       usernameList.add(querySnapshot.docs[i].get('username'));
     }
   }
 
+// Check if a given string contains spaces or special characters using regular expressions.
   bool containsSpacesOrSpecialCharacters(String input) {
-    RegExp regex = RegExp(r'[^\w,]');
-    return regex.hasMatch(input);
+    RegExp regex = RegExp(r'[^\w,]'); // Define a regular expression pattern.
+    return regex
+        .hasMatch(input); // Check if the pattern matches any part of the input.
   }
 
+// Check the validity of a username.
   bool checkUsername() {
-    if (usernameList.contains(usernameController.text)) {
-      showErrorMessage("Username already exists", context);
+    if (usernameList.contains(usernameController.text.toLowerCase())) {
+      setState(
+        () {
+          error =
+              "Username already exists"; // Display an error message if the username already exists.
+        },
+      );
       return false;
     }
     if (containsSpacesOrSpecialCharacters(usernameController.text)) {
-      showErrorMessage(
-          "Username cannot contain spaces or special characters", context);
+      setState(
+        () {
+          error =
+              "Username cannot contain spaces or special characters"; // Display an error message for invalid characters.
+        },
+      );
       return false;
     }
     if (usernameController.text.length > 20) {
-      showErrorMessage("Username cannot be longer than 20 characters", context);
+      setState(
+        () {
+          error =
+              "Username cannot be more than 20 characters"; // Display an error message for a username that's too long.
+        },
+      );
       return false;
     }
-    return true;
+    setState(
+      () {
+        error = ""; // Clear any previous error messages.
+      },
+    );
+    return true; // Username is valid.
   }
 
+// Set the username in Firestore if it passes validation.
   Future<void> setUsername() async {
     if (checkUsername()) {
       await FirebaseFirestore.instance
           .collection("users")
           .doc(auth.currentUser!.uid)
-          .update({"username": usernameController.text.toLowerCase()});
+          .update({
+        "username": usernameController.text.toLowerCase()
+      }); // Update the username in Firestore.
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => AppRouter(index: 2),
+          builder: (context) => const AppRouter(index: 2),
         ),
-      );
+      ); // Navigate to the specified route.
     }
   }
 
@@ -82,8 +109,8 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextTop(),
-            SizedBox(height: 30),
+            const TextTop(),
+            const SizedBox(height: 30),
             Container(
               width: 300,
               child: TextField(
@@ -94,7 +121,7 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
-                  prefixIcon: Icon(Icons.person),
+                  prefixIcon: const Icon(Icons.person),
                   labelText: 'Username',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -102,17 +129,37 @@ class _SetUsernamePageState extends State<SetUsernamePage> {
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 5),
+            if (error != "")
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error, color: Colors.red),
+                    const SizedBox(width: 5),
+                    Text(
+                      error,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: GoogleFonts.poppins().fontFamily,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
                 setUsername();
               },
-              child: Text(
-                "Set My Username",
-              ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF6A1B9A),
-                minimumSize: Size(250, 50),
+                backgroundColor: const Color(0xFF6A1B9A),
+                minimumSize: const Size(250, 50),
+              ),
+              child: const Text(
+                "Set My Username",
               ),
             )
           ],
@@ -130,7 +177,7 @@ class TextTop extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.only(left: 20),
+          padding: const EdgeInsets.only(left: 20),
           width: double.maxFinite,
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

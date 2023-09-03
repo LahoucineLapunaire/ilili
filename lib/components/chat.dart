@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:Ilili/components/changeProfile.dart';
 import 'package:intl/intl.dart';
 import 'notification.dart';
 
@@ -31,39 +29,49 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final ScrollController scrollController = ScrollController();
-  
 
+  @override
   void initState() {
     super.initState();
     getMyInfo();
     // Use addPostFrameCallback to perform actions after widget is built
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      Future.delayed(Duration(milliseconds: 500), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 500), () {
         scrollToBottom();
       });
     });
   }
 
+// Scroll to the bottom of a scrollable view using a scroll controller.
   void scrollToBottom() {
     try {
+      // Use the scroll controller to jump to the maximum scroll extent.
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
     } catch (e) {
+      // Handle any exceptions that may occur while scrolling.
       print(e.toString());
     }
   }
 
-  getMyInfo() async{
+// Fetch user information from Firestore for the currently authenticated user.
+  void getMyInfo() async {
     try {
-      DocumentSnapshot documentSnapshot = await firestore.collection("users").doc(auth.currentUser?.uid).get();
+      // Retrieve the user's document from the "users" collection using their UID.
+      DocumentSnapshot documentSnapshot =
+          await firestore.collection("users").doc(auth.currentUser?.uid).get();
+
+      // Update the state with the user's profile picture and username.
       setState(() {
         myProfilePicture = documentSnapshot.get("profilePicture");
         myUsername = documentSnapshot.get("username");
       });
     } catch (e) {
+      // Handle any exceptions that may occur while fetching user information.
       print(e.toString());
     }
   }
 
+  @override
   void dispose() {
     super.dispose();
   }
@@ -71,11 +79,11 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xFFFAFAFA),
+        backgroundColor: const Color(0xFFFAFAFA),
         appBar: AppBar(
-          backgroundColor: Color(0xFFFAFAFA),
+          backgroundColor: const Color(0xFFFAFAFA),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -85,7 +93,7 @@ class _ChatPageState extends State<ChatPage> {
               CircleAvatar(
                 backgroundImage: NetworkImage(widget.profilePicture),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Text(
                 widget.username,
                 style: TextStyle(
@@ -103,8 +111,9 @@ class _ChatPageState extends State<ChatPage> {
             controller: scrollController,
             child: Center(
               child: Column(
-                children: [ListSection(widget.userId),
-                SizedBox(width: 50,)],
+                children: [
+                  ListSection(widget.userId),
+                ],
               ),
             )));
   }
@@ -118,17 +127,22 @@ class ListSection extends StatefulWidget {
 }
 
 class _ListSectionState extends State<ListSection> {
+  @override
   void initState() {
     super.initState();
   }
 
   void markAllAsRead() async {
     try {
+      // Fetch a QuerySnapshot containing all documents in the chat collection
       QuerySnapshot querySnapshot = await chatRef
           .doc(auth.currentUser!.uid)
           .collection(widget.otherUserID)
           .get();
+
+      // Loop through each document in the QuerySnapshot
       for (QueryDocumentSnapshot document in querySnapshot.docs) {
+        // Update the 'read' field of the current document to 'true'
         await chatRef
             .doc(auth.currentUser!.uid)
             .collection(widget.otherUserID)
@@ -136,6 +150,7 @@ class _ListSectionState extends State<ListSection> {
             .update({'read': true});
       }
     } catch (e) {
+      // Handle any exceptions that may occur during the process
       print(e.toString());
     }
   }
@@ -157,7 +172,7 @@ class _ListSectionState extends State<ListSection> {
         if (messageList.isEmpty) {
           return Container(
             height: 200,
-            child: Center(
+            child: const Center(
               child: Text(
                 "No message yet, please send a message to start a chat.",
                 style: TextStyle(
@@ -168,48 +183,89 @@ class _ListSectionState extends State<ListSection> {
             ),
           );
         }
-        return Column(
-          children: messageList.map((document) {
-            return document['userId'] == auth.currentUser?.uid
-                ? CurrentUserMessage(document['message'], document['timestamp'],
-                    document["read"])
-                : OtherUserMessage(document['message'], document['timestamp']);
-          }).toList(),
+        return Container(
+          margin: const EdgeInsets.only(bottom: 50),
+          child: Column(
+            children: messageList.map((document) {
+              return document['userId'] == auth.currentUser?.uid
+                  ? CurrentUserMessage(document['message'],
+                      document['timestamp'], document["read"])
+                  : OtherUserMessage(
+                      document['message'], document['timestamp']);
+            }).toList(),
+          ),
         );
       },
     );
   }
 }
 
-class MessageField extends StatelessWidget {
+class MessageField extends StatefulWidget {
   final String otherUserID;
   final String username;
+
+  const MessageField(this.otherUserID, this.username, {Key? key})
+      : super(key: key);
+
+  @override
+  _MessageFieldState createState() => _MessageFieldState();
+}
+
+class _MessageFieldState extends State<MessageField> {
   final textField = TextEditingController();
-  MessageField(this.otherUserID, this.username, {Key? key}) : super(key: key);
+  EdgeInsets margin = EdgeInsets.zero;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    textField.dispose();
+    super.dispose();
+  }
 
   Future<void> sendMessage() async {
+    // Check if the text input is empty
+    if (textField.text.isEmpty) {
+      return;
+    }
+
+    // Get the current date and time
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd – kk:mm:ss').format(now);
+
     try {
-      chatRef.doc(auth.currentUser?.uid).collection(otherUserID).add({
+      // Add the message to the sender's chat collection
+      chatRef.doc(auth.currentUser?.uid).collection(widget.otherUserID).add({
         'message': textField.text,
         'userId': auth.currentUser?.uid,
         'timestamp': formattedDate,
         'read': true,
       }).then((value) {
-        chatRef.doc(otherUserID).collection(auth.currentUser?.uid ?? "").add({
+        // Add the message to the receiver's chat collection
+        chatRef
+            .doc(widget.otherUserID)
+            .collection(auth.currentUser?.uid ?? "")
+            .add({
           'message': textField.text,
           'userId': auth.currentUser?.uid,
           'timestamp': formattedDate,
           'read': false,
         }).then((value) {
+          // Add the conversation to the user's chats list
           addConversation();
+          // Clear the text input field
           textField.clear();
         });
       });
-      sendNotificationToTopic("chat", "$myUsername", "${textField.text}", myProfilePicture,{
+
+      // Send a notification to the receiver
+      sendNotificationToTopic(
+          widget.otherUserID, myUsername, textField.text, myProfilePicture, {
         "sender": auth.currentUser!.uid,
-        "receiver": otherUserID,
+        "receiver": widget.otherUserID,
         "type": "chat",
         "click_action": "FLUTTER_CHAT_CLICK",
       });
@@ -218,28 +274,47 @@ class MessageField extends StatelessWidget {
     }
   }
 
-  addConversation() async {
+  void addConversation() async {
     try {
+      // Get the user's chats list and update it
       DocumentSnapshot documentSnapshot =
           await firestore.collection("users").doc(auth.currentUser?.uid).get();
       List<dynamic> chats = documentSnapshot.get("chats");
-      if (!chats.contains(otherUserID)) {
-        chats.add(otherUserID);
+      if (!chats.contains(widget.otherUserID)) {
+        chats.add(widget.otherUserID);
         firestore.collection("users").doc(auth.currentUser?.uid).update({
           "chats": chats,
         });
       }
+
+      // Get the receiver's chats list and update it
       documentSnapshot =
-          await firestore.collection("users").doc(otherUserID).get();
+          await firestore.collection("users").doc(widget.otherUserID).get();
       chats = documentSnapshot.get("chats");
       if (!chats.contains(auth.currentUser?.uid)) {
         chats.add(auth.currentUser?.uid);
-        firestore.collection("users").doc(otherUserID).update({
+        firestore.collection("users").doc(widget.otherUserID).update({
           "chats": chats,
         });
       }
     } catch (e) {
       print(e.toString());
+    }
+  }
+
+  void changeMargin(bool isFocused) {
+    if (isFocused) {
+      // If the text input is focused, change the margin to make space for the keyboard
+      print("focused");
+      setState(() {
+        margin = const EdgeInsets.only(bottom: 50);
+      });
+    } else {
+      // If the text input is not focused, reset the margin
+      print("not focused");
+      setState(() {
+        margin = const EdgeInsets.only(bottom: 0);
+      });
     }
   }
 
@@ -301,7 +376,7 @@ class CurrentUserMessage extends StatelessWidget {
                   fontSize: 12,
                 ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               isRead
                   ? const Icon(
                       Icons.done_all,
@@ -315,7 +390,7 @@ class CurrentUserMessage extends StatelessWidget {
                     ),
             ],
           ),
-          SizedBox(width: 10), // Add some spacing
+          const SizedBox(width: 10), // Add some spacing
           Flexible(
             // Use Flexible to adapt to text height
             child: Container(
@@ -365,7 +440,7 @@ class OtherUserMessage extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: 10), // Add some spacing
+          const SizedBox(width: 10), // Add some spacing
           Text(
             dateMessage.toString().substring(13, 18),
             style: TextStyle(

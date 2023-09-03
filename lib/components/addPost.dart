@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delayed_display/delayed_display.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -15,11 +16,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart' as path;
 import 'dart:async';
 import 'dart:io';
-import 'package:carousel_slider/carousel_slider.dart';
 
 List<String> tagsList = [];
 AudioPlayer audioPlayer = AudioPlayer();
 String audioPath = '';
+UrlSource urlSource = UrlSource('');
+Uint8List urlBytes = Uint8List(0);
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseStorage storage = FirebaseStorage.instance;
 TextEditingController titleController = TextEditingController();
@@ -37,7 +39,7 @@ class _AddPostPageState extends State<AddPostPage> {
   void dispose() {
     audioPath = '';
     tagsList = [];
-    audioPlayer.release();
+    titleController.clear();
     audioPlayer.dispose();
     super.dispose();
   }
@@ -45,13 +47,13 @@ class _AddPostPageState extends State<AddPostPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFECEFF1),
+      backgroundColor: const Color(0xFFECEFF1),
       body: SingleChildScrollView(
         child: Center(
             child: Container(
           height: MediaQuery.of(context).size.height,
           width: double.maxFinite,
-          child: Column(
+          child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               DelayedDisplay(
@@ -102,7 +104,7 @@ class HeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 20),
+      padding: const EdgeInsets.only(left: 20),
       width: double.maxFinite,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
@@ -134,6 +136,7 @@ class TitleSection extends StatefulWidget {
 }
 
 class _TitleSectionState extends State<TitleSection> {
+  @override
   void initState() {
     super.initState();
   }
@@ -147,7 +150,7 @@ class _TitleSectionState extends State<TitleSection> {
         maxLength: 30,
         decoration: InputDecoration(
           filled: true,
-          prefixIcon: Icon(Icons.title),
+          prefixIcon: const Icon(Icons.title),
           fillColor: Colors.white,
           labelText: 'title',
           border: OutlineInputBorder(
@@ -170,38 +173,33 @@ class _ButtonSectionState extends State<ButtonSection> {
   FlutterSoundRecorder? audioRecorder;
   FlutterSoundPlayer? player;
   bool isRecording = false;
+  String pathToAudio = "";
 
-  Future<bool> checkPermission() async {
-    var status = await Permission.microphone.request();
-    if (status != PermissionStatus.granted) {
-      throw RecordingPermissionException('Microphone permission not granted');
-    }
-    if (await Permission.microphone.request().isGranted) {
-      print('Permission granted');
-      return true;
-    } else {
-      print('Permission denied');
-      return false;
-    }
-  }
-
+  // Function to start audio recording
   void startRecording() async {
     try {
       if (audioRecorder != null) {
         // Stop any ongoing recording before starting a new one
         await audioRecorder!.stopRecorder();
       }
+
+      await audioPlayer.stop();
       File existingFile = File('audio.aac');
       if (existingFile.existsSync()) {
+        // Delete existing audio file if it exists
         await existingFile.delete();
         print('Existing file deleted');
       }
-      await checkPermission();
+      if (!(await askPermission())) {
+        return;
+      }
       audioRecorder = FlutterSoundRecorder();
-      // Start recording audio
+
+      // Start recording audio to 'audio.aac' file
       await audioRecorder?.openRecorder();
       await audioRecorder!.startRecorder(toFile: 'audio.aac');
       setState(() {
+        audioPath = '';
         isRecording = true;
       });
     } catch (e) {
@@ -210,19 +208,31 @@ class _ButtonSectionState extends State<ButtonSection> {
     }
   }
 
+// Function to stop audio recording
   void stopRecording() async {
     try {
       if (audioRecorder != null) {
+        String filePath = '/data/user/0/com.example.ilili/cache/audio.aac';
         // Stop the ongoing recording
-        await audioRecorder!.stopRecorder();
+        await audioRecorder!.stopRecorder().then((value) {
+          if (value != null) {
+            filePath = value;
+          }
+        });
         await audioRecorder!.closeRecorder();
         audioRecorder = null;
-        String filePath = '/data/user/0/com.example.ilili/cache/audio.aac';
+
         setState(() {
           audioPath = filePath;
           isRecording = false;
-          audioPlayer.setSourceUrl(audioPath);
         });
+        if (Platform.isIOS) {
+          // Play recorded audio on iOS using DeviceFileSource
+          audioPlayer.play(DeviceFileSource(audioPath));
+        } else {
+          // Play recorded audio on other platforms using UrlSource
+          audioPlayer.play(UrlSource(audioPath));
+        }
       }
     } catch (e) {
       showErrorMessage(e.toString(), context);
@@ -230,18 +240,51 @@ class _ButtonSectionState extends State<ButtonSection> {
     }
   }
 
+// Function to create UrlSource from bytes
+  UrlSource urlSourceFromBytes(Uint8List bytes,
+      {String mimeType = "audio/mpeg"}) {
+    return UrlSource(Uri.dataFromBytes(bytes, mimeType: mimeType).toString());
+  }
+
+// Function to pick an audio file
   Future<void> pickAudioFile() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.audio,
-      );
-
+      FilePickerResult? result;
+      if (Platform.isIOS) {
+        // Allow custom file types on iOS
+        result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['wav', 'mp3', 'aac'],
+        );
+      } else {
+        // Pick audio file on other platforms
+        result = await FilePicker.platform.pickFiles(
+          type: FileType.audio,
+        );
+      }
       if (result != null) {
         PlatformFile file = result.files.first;
-        setState(() {
-          audioPath = file.path!;
-          audioPlayer.setSourceUrl(file.path!);
-        });
+        if (kIsWeb) {
+          // Handle audio file selection on web
+          Uint8List bytes = file.bytes!;
+          setState(() {
+            audioPlayer.setSource(urlSourceFromBytes(bytes));
+            urlBytes = bytes;
+            urlSource = urlSourceFromBytes(bytes);
+          });
+        } else if (Platform.isIOS) {
+          // Handle audio file selection on iOS
+          setState(() {
+            audioPath = file.path!;
+            audioPlayer.setSourceDeviceFile(audioPath);
+          });
+        } else {
+          // Handle audio file selection on other platforms
+          setState(() {
+            audioPath = file.path!;
+            audioPlayer.setSourceUrl(file.path!);
+          });
+        }
       }
     } catch (e) {
       showErrorMessage(e.toString(), context);
@@ -249,17 +292,43 @@ class _ButtonSectionState extends State<ButtonSection> {
     }
   }
 
+// Function to request microphone permission
+  Future<bool> askPermission() async {
+    var microphoneStatus = await Permission.microphone.request();
+    if (microphoneStatus != PermissionStatus.granted) {
+      print('Microphone Permission not granted');
+      return false;
+    } else {
+      print('Microphone Permission granted');
+      return true;
+    }
+  }
+
+  @override
+  void dispose() {
+    audioRecorder?.closeRecorder();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (isRecording)
+        if (isRecording && !kIsWeb)
           ElevatedButton(
             onPressed: () {
               stopRecording();
             },
-            child: Row(
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              fixedSize: const Size(175, 40),
+              backgroundColor: const Color(
+                  0xFF6A1B9A), // Set the background color of the button
+            ),
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.stop),
@@ -267,61 +336,59 @@ class _ButtonSectionState extends State<ButtonSection> {
                 Text('Stop Recording'),
               ],
             ),
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              fixedSize: Size(175, 40),
-              backgroundColor:
-                  Color(0xFF6A1B9A), // Set the background color of the button
-            ),
           ),
-        if (!isRecording)
+        if (!isRecording && !kIsWeb)
           ElevatedButton(
             onPressed: () {
               startRecording();
             },
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(Icons.mic),
-              SizedBox(width: 5),
-              Text('Record Audio')
-            ]),
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              fixedSize: Size(175, 40),
-              backgroundColor:
-                  Color(0xFF6A1B9A), // Set the background color of the button
+              fixedSize: const Size(175, 40),
+              backgroundColor: const Color(
+                  0xFF6A1B9A), // Set the background color of the button
+            ),
+            child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.mic),
+                  SizedBox(width: 5),
+                  Text('Record Audio')
+                ]),
+          ),
+        const SizedBox(width: 5),
+        if (!kIsWeb)
+          Text(
+            "Or",
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
             ),
           ),
-        SizedBox(width: 5),
-        Text(
-          "Or",
-          style: TextStyle(
-            fontFamily: GoogleFonts.poppins().fontFamily,
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-        SizedBox(width: 5),
+        const SizedBox(width: 5),
         ElevatedButton(
           onPressed: () {
             pickAudioFile();
           },
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(Icons.audiotrack),
-            SizedBox(width: 5),
-            Text('Pick Audio')
-          ]),
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            fixedSize: Size(175, 40), // Set the width and height of the button
-            backgroundColor:
-                Color(0xFF6A1B9A), // Set the background color of the button
+            fixedSize:
+                const Size(175, 40), // Set the width and height of the button
+            backgroundColor: const Color(
+                0xFF6A1B9A), // Set the background color of the button
           ),
+          child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.audiotrack),
+                SizedBox(width: 5),
+                Text('Pick Audio')
+              ]),
         ),
       ],
     );
@@ -329,7 +396,7 @@ class _ButtonSectionState extends State<ButtonSection> {
 }
 
 class AudioPlayerSection extends StatefulWidget {
-  AudioPlayerSection({super.key});
+  const AudioPlayerSection({super.key});
 
   @override
   State<AudioPlayerSection> createState() => AudioPlayerSectionState();
@@ -337,9 +404,10 @@ class AudioPlayerSection extends StatefulWidget {
 
 class AudioPlayerSectionState extends State<AudioPlayerSection> {
   bool isPlaying = false;
-  Duration audioDuration = Duration();
-  Duration position = Duration();
+  Duration audioDuration = const Duration();
+  Duration position = const Duration();
 
+  @override
   void initState() {
     super.initState();
     audioPlayer.onDurationChanged.listen((Duration duration) {
@@ -357,28 +425,45 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
 
   void playPause() async {
     try {
+      // Check if the audio is currently playing
       if (isPlaying) {
+        // If playing, pause the audio
         await audioPlayer.pause();
         setState(() => isPlaying = false);
       } else {
-        await audioPlayer.play(UrlSource(audioPath));
+        // If not playing, start playing the audio
+        if (kIsWeb) {
+          // On web, play the audio using the provided URL source
+          await audioPlayer.play(urlSource);
+        } else {
+          // On mobile, play the audio using the local audioPath
+          await audioPlayer.play(UrlSource(audioPath));
+        }
+
+        // Update the state to indicate that the audio is now playing
         setState(() => isPlaying = true);
       }
     } catch (e) {
+      // Handle any errors that may occur during playback
       showErrorMessage(e.toString(), context);
     }
   }
 
+// Seek to a specific position in the audio
   void _seekToSecond(int second) {
+    // Create a new duration based on the specified second
     Duration newDuration = Duration(seconds: second);
+    // Seek to the new duration in the audio
     audioPlayer.seek(newDuration);
   }
 
+// Format the position in seconds to a readable format (minutes:seconds)
   String formatPosition(int position) {
+    // Convert the position to seconds and format it as minutes:seconds
     double result = position / 1000;
     String minutes = (result / 60).floor().toString();
-    String secondes = (result % 60).floor().toString();
-    return minutes + ':' + secondes;
+    String seconds = (result % 60).floor().toString();
+    return '$minutes:$seconds';
   }
 
   @override
@@ -386,7 +471,7 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (audioPath != '')
+        if (audioPath != '' || urlSource.url != '')
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -401,8 +486,8 @@ class AudioPlayerSectionState extends State<AudioPlayerSection> {
                 children: [
                   Text(formatPosition(position.inMilliseconds)),
                   Slider(
-                    activeColor: Color(0xFF6A1B9A),
-                    inactiveColor: Color(0xFF6A1B9A).withOpacity(0.3),
+                    activeColor: const Color(0xFF6A1B9A),
+                    inactiveColor: const Color(0xFF6A1B9A).withOpacity(0.3),
                     min: 0.0,
                     max: audioDuration.inSeconds.toDouble(),
                     value: position.inSeconds.toDouble(),
@@ -435,25 +520,37 @@ class _TagsSectionState extends State<TagsSection> {
 
   void addTag() {
     try {
+      // Check if the tag already exists in the tagsList
       if (tagsList.contains(tagController.text)) {
-        showErrorMessage("Tag already exists", context);
-        return;
-      }
-      if (tagsList.length >= 3) {
-        showErrorMessage("You can only add 3 tags", context);
-        return;
-      }
-      if (tagController.text == "") {
-        showErrorMessage("Tag can't be empty", context);
-        return;
+        showErrorMessage(
+            "Tag already exists", context); // Display an error message
+        return; // Exit the function
       }
 
+      // Check if the maximum number of tags (3) has been reached
+      if (tagsList.length >= 3) {
+        showErrorMessage(
+            "You can only add 3 tags", context); // Display an error message
+        return; // Exit the function
+      }
+
+      // Check if the tag is empty
+      if (tagController.text == "") {
+        showErrorMessage(
+            "Tag can't be empty", context); // Display an error message
+        return; // Exit the function
+      }
+
+      // If all checks pass, add the tag to the tagsList
       setState(() {
         tagsList.add(tagController.text);
       });
+
+      // Clear the text field after adding the tag
       tagController.clear();
     } catch (e) {
-      showErrorMessage(e.toString(), context);
+      showErrorMessage(e.toString(),
+          context); // Handle any exceptions and show an error message
     }
   }
 
@@ -470,7 +567,7 @@ class _TagsSectionState extends State<TagsSection> {
               filled: true,
               fillColor: Colors.white,
               suffixIcon: IconButton(
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 onPressed: () {
                   addTag();
                 },
@@ -492,7 +589,7 @@ class _TagsSectionState extends State<TagsSection> {
                   children: [
                     Text(tagsList[index]),
                     IconButton(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.delete,
                         color: Colors.red,
                       ),
@@ -514,7 +611,7 @@ class _TagsSectionState extends State<TagsSection> {
 }
 
 class SendButtonSection extends StatefulWidget {
-  SendButtonSection({Key? key}) : super(key: key);
+  const SendButtonSection({Key? key}) : super(key: key);
 
   @override
   _SendButtonSectionState createState() => _SendButtonSectionState();
@@ -522,35 +619,49 @@ class SendButtonSection extends StatefulWidget {
 
 class _SendButtonSectionState extends State<SendButtonSection> {
   Reference storageRef = storage.ref("posts");
+  Reference webStorageRef =
+      storage.refFromURL("gs://ilili-7ebc6.appspot.com/posts");
   String audioLink = "";
   InterstitialAd? interstitialAd;
 
+  @override
   void initState() {
     super.initState();
-    loadInterstitialAd();
+    if (!kIsWeb) {
+      loadInterstitialAd();
+    }
   }
 
   void loadInterstitialAd() {
     try {
+      // Load an Interstitial Ad
       InterstitialAd.load(
-        adUnitId: AdHelper.interstitialAdUnitId,
-        request: AdRequest(),
+        adUnitId:
+            AdHelper.interstitialAdUnitId, // Ad Unit ID for the interstitial ad
+        request: const AdRequest(), // Create an ad request
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (ad) {
+            // Ad successfully loaded
             ad.fullScreenContentCallback = FullScreenContentCallback(
-              onAdDismissedFullScreenContent: (ad) {},
+              onAdDismissedFullScreenContent: (ad) {
+                // Interstitial ad dismissed
+                // You can add custom logic here if needed
+              },
             );
 
+            // Update the state with the loaded interstitial ad
             setState(() {
               interstitialAd = ad;
             });
           },
           onAdFailedToLoad: (err) {
+            // Failed to load the interstitial ad
             print('Failed to load an interstitial ad: ${err.message}');
           },
         ),
       );
     } catch (e) {
+      // Handle any errors that may occur during ad loading
       print("error interstitial ad : ${e.toString()}");
     }
   }
@@ -572,17 +683,20 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       if (user != null) {
         String userId = user.uid;
 
+        // Query user's posts
         QuerySnapshot snapshot = await FirebaseFirestore.instance
             .collection('users')
             .doc(userId)
             .collection('posts')
             .get();
 
+        // Extract post data from the query result
         List<dynamic> posts = snapshot.docs.map((doc) => doc.data()).toList();
 
         return posts;
       }
     } catch (e) {
+      // Handle any errors that occur during post retrieval
       showErrorMessage(e.toString(), context);
       print('Error getting posts: $e');
     }
@@ -594,16 +708,33 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       String name = generateUniqueFileName();
       List<dynamic> posts = await getPosts();
 
+      // Add the new post's name to the user's list of posts
       posts.add(name);
       String title = titleController.text;
 
-      Reference postRef = storageRef.child(name);
-      UploadTask uploadTask = postRef.putFile(File(audioPath));
+      Reference postRef;
+
+      // Determine the storage reference based on the platform
+      if (kIsWeb) {
+        postRef = webStorageRef.child(name);
+      } else {
+        postRef = storageRef.child(name);
+      }
+
+      UploadTask uploadTask;
+
+      // Determine the upload task based on the platform
+      if (kIsWeb) {
+        uploadTask = postRef.putData(urlBytes);
+      } else {
+        uploadTask = postRef.putFile(File(audioPath));
+      }
 
       await uploadTask.whenComplete(() async {
         String downloadURL = await postRef.getDownloadURL();
 
-        FirebaseFirestore.instance.collection('posts').doc(name).set({
+        // Create a new post in the 'posts' collection
+        await FirebaseFirestore.instance.collection('posts').doc(name).set({
           'userId': auth.currentUser!.uid,
           "title": title,
           'audio': downloadURL,
@@ -614,6 +745,7 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           'score': 0,
         });
 
+        // Update the user's 'posts' field with the new post
         FirebaseFirestore.instance
             .collection('users')
             .doc(auth.currentUser!.uid)
@@ -621,54 +753,71 @@ class _SendButtonSectionState extends State<SendButtonSection> {
           'posts': posts,
         });
       });
+
+      // Display a success message
       showInfoMessage("Your post is posted !", context, () {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        }
       });
+
+      // Navigate to a different screen (you might need to define AppRouter)
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => AppRouter(index: 0),
+          builder: (context) => const AppRouter(index: 0),
         ),
       );
     } catch (e) {
+      // Handle any errors that occur during post submission
       print(e.toString());
     }
   }
 
   void showConfirmAlert(BuildContext context) {
-    if (titleController.text == "" || tagsList.isEmpty || audioPath == "") {
+    if (titleController.text == "" || tagsList.isEmpty) {
       showErrorMessage("please add an audio and fill title and tags", context);
       return;
     }
-
+    if (kIsWeb && urlSource.url == "") {
+      showErrorMessage("please add an audio and fill title and tags", context);
+      return;
+    }
+    if (!kIsWeb && audioPath == "") {
+      showErrorMessage("please add an audio and fill title and tags", context);
+      return;
+    }
     // Create a AlertDialog
     AlertDialog alertDialog = AlertDialog(
-      title: Text("Do you want to post this audio?"),
+      title: const Text("Do you want to post this audio?"),
       actions: [
         // OK button
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
           ),
-          child: Text('No', style: TextStyle(color: Colors.black)),
+          child: const Text('No', style: TextStyle(color: Colors.black)),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFF6A1B9A),
+            backgroundColor: const Color(0xFF6A1B9A),
           ),
-          child: Text('Yes', style: TextStyle(color: Colors.white)),
+          child: const Text('Yes', style: TextStyle(color: Colors.white)),
           onPressed: () {
-            print("post audio");
-            if (interstitialAd != null) {
-              interstitialAd!.show();
+            if (kIsWeb) {
+              postAudio();
             } else {
-              print("interstitialAd is null");
+              if (interstitialAd != null) {
+                interstitialAd!.show();
+              } else {
+                print("interstitialAd is null");
+              }
+              postAudio();
+              Navigator.of(context).pop();
             }
-            postAudio();
-            Navigator.of(context).pop();
           },
         ),
       ],
@@ -689,19 +838,20 @@ class _SendButtonSectionState extends State<SendButtonSection> {
       onPressed: () {
         showConfirmAlert(context);
       },
-      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(Icons.send),
-        SizedBox(width: 10),
-        Text('Post Audio')
-      ]),
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        fixedSize: Size(250, 50), // Set the width and height of the button
+        fixedSize:
+            const Size(250, 50), // Set the width and height of the button
         backgroundColor:
-            Color(0xFF6A1B9A), // Set the background color of the button
+            const Color(0xFF6A1B9A), // Set the background color of the button
       ),
+      child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Icon(Icons.send),
+        SizedBox(width: 10),
+        Text('Post Audio')
+      ]),
     );
   }
 }

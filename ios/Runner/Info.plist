@@ -2,12 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>This app uses your location to send you push notifications</string>
-<key>NSBackgroundFetchUsageDescription</key>
-<string>This app uses background fetch to send you push notifications when your app is not in the foreground</string>
-<key>com.apple.developer.userNotifications.receive</key>
-<true/>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -19,16 +15,71 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>ilili</string>
+	<string>Ilili</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string></string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ilili://</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-5863565056037942~4963240651</string>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSBackgroundFetchUsageDescription</key>
+	<string>This app uses background fetch to send you push notifications when your app is not in the foreground</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.593268336010-8m9pfikeamerfjpoothd9aa83bqa4u84</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow access to camera to capture photos</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+   		<string>remote-notification</string>
+	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app uses your location to send you push notifications</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Audio for posts</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Allow access to microphone to record audio</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow access to photo library</string>
+	<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsLocalNetworking</key>
+    <true/>
+	<key>NSAllowsArbitraryLoads</key>
+    <true/>
+</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -49,9 +100,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<key>com.apple.developer.userNotifications.receive</key>
 	<true/>
 	<key>CFBundleURLTypes</key>
 <array>
