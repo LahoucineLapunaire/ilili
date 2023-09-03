@@ -62,7 +62,9 @@
         <string></string>
         <key>CFBundleURLSchemes</key>
         <array>
-            <string>ilili://</string> <!-- Replace with your URL scheme -->
+			<string>ilili</string>
+            <string>ilili://</string>
+			<string>com.googleusercontent.apps.593268336010-8m9pfikeamerfjpoothd9aa83bqa4u84</string>
         </array>
     </dict>
 </array>
@@ -78,18 +80,5 @@
 <key>NSMicrophoneUsageDescription</key>
 <string>Allow access to microphone</string>
 <string>Network access required</string>
-<key>NSBonjourServices</key>
-<array>
-	<dict>
-		<key>CFBundleTypeRole</key>
-		<string>Editor</string>
-		<key>CFBundleURLSchemes</key>
-		<array>
-			<!-- TODO Replace this value: -->
-			<!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
-			<string>com.googleusercontent.apps.593268336010-8m9pfikeamerfjpoothd9aa83bqa4u84</string>
-		</array>
-	</dict>
-</array>
 </dict>
 </plist>
