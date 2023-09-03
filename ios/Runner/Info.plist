@@ -32,6 +32,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>ilili://</string>
+				<string>ilili</string>
 			</array>
 		</dict>
 	</array>
