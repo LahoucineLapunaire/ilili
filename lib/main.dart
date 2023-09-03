@@ -1,3 +1,8 @@
+import 'package:Ilili/components/OwnerProfile.dart';
+import 'package:Ilili/components/PrivacyPolicy.dart';
+import 'package:Ilili/components/addPost.dart';
+import 'package:Ilili/components/home.dart';
+import 'package:Ilili/components/termsOfService.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
@@ -24,6 +29,12 @@ Future<void> main() async {
         storageBucket: "ilili-7ebc6.appspot.com/",
       ),
     );
+    final Map<String, WidgetBuilder> routes = {
+      '/privacypolicy': (context) => PrivacyPolicyPage(),
+      '/termsofservice': (context) => TermsOfServicePage(),
+      '/profilepage': (context) => OwnerProfilePage(),
+      '/addpost': (context) => AddPostPage(),
+    };
   } else {
     await Firebase.initializeApp();
     await checkPermission();
@@ -137,14 +148,18 @@ class UnLogged extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primaryColor: Color(0xFF6A1B9A), // Change this to your desired color
-        ),
-        title: 'Ilili',
-        home: Scaffold(
-          body: GetStartedPage(),
-        ));
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: Color(0xFF6A1B9A), // Change this to your desired color
+      ),
+      title: 'Ilili',
+      initialRoute: '/',
+      routes: {
+        '/': (context) => GetStartedPage(),
+        '/privacypolicy': (context) => PrivacyPolicyPage(),
+        '/termsofservice': (context) => TermsOfServicePage(),
+      },
+    );
   }
 }
 
@@ -159,9 +174,14 @@ class Logged extends StatelessWidget {
         primaryColor: Color(0xFF6A1B9A), // Change this to your desired color
       ),
       title: 'Ilili',
-      home: AppRouter(
-        index: 0,
-      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => GetStartedPage(),
+        '/privacypolicy': (context) => PrivacyPolicyPage(),
+        '/termsofservice': (context) => TermsOfServicePage(),
+        '/profilepage': (context) => OwnerProfilePage(),
+        '/addpost': (context) => AddPostPage(),
+      },
     );
   }
 }

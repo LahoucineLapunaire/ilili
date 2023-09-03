@@ -331,9 +331,9 @@ class SearchDelegateWidget extends SearchDelegate {
           return Center(child: CircularProgressIndicator());
         } else if (snapshot.hasData) {
           final users = snapshot.data!.docs;
-          List<User> suggestion = users
+          List<UserHome> suggestion = users
               .map((document) {
-                return User(
+                return UserHome(
                   userId: document.id,
                   username: document['username'] as String,
                   profilePicture: document['profilePicture'] as String,
@@ -345,7 +345,7 @@ class SearchDelegateWidget extends SearchDelegate {
           return ListView.builder(
             itemCount: suggestion.length,
             itemBuilder: (context, index) {
-              User user = suggestion[index];
+              UserHome user = suggestion[index];
               return ListTile(
                 leading: CircleAvatar(
                   backgroundImage: NetworkImage(user.profilePicture),
@@ -376,12 +376,12 @@ class SearchDelegateWidget extends SearchDelegate {
   }
 }
 
-class User {
+class UserHome {
   final String username;
   final String profilePicture;
   final String userId;
 
-  User(
+  UserHome(
       {required this.username,
       required this.profilePicture,
       required this.userId});
