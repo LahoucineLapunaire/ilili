@@ -32,6 +32,8 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>ilili://</string>
+				<string>ilili</string>
+				<string>com.googleusercontent.apps.593268336010-8m9pfikeamerfjpoothd9aa83bqa4u84</string>
 			</array>
 		</dict>
 	</array>
@@ -43,17 +45,6 @@
 	<true/>
 	<key>NSBackgroundFetchUsageDescription</key>
 	<string>This app uses background fetch to send you push notifications when your app is not in the foreground</string>
-	<key>NSBonjourServices</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.593268336010-8m9pfikeamerfjpoothd9aa83bqa4u84</string>
-			</array>
-		</dict>
-	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Allow access to camera to capture photos</string>
 	<key>FirebaseAppDelegateProxyEnabled</key>
@@ -102,32 +93,5 @@
 	<false/>
 	<key>com.apple.developer.userNotifications.receive</key>
 	<true/>
-	<key>CFBundleURLTypes</key>
-<array>
-    <dict>
-        <key>CFBundleTypeRole</key>
-        <string>Editor</string>
-        <key>CFBundleURLName</key>
-        <string>com.example.ilili</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-			<string>ilili</string>
-            <string>ilili://</string>
-			<string>com.googleusercontent.apps.593268336010-8m9pfikeamerfjpoothd9aa83bqa4u84</string>
-        </array>
-    </dict>
-</array>
-	<key>NSPhotoLibraryUsageDescription</key>
-<string>Allow access to photo library</string>
-
-<key>NSCameraUsageDescription</key>
-<string>Allow access to camera to capture photos</string>
-
-<key>GADApplicationIdentifier</key>
-<string>ca-app-pub-5863565056037942~4963240651</string>
-
-<key>NSMicrophoneUsageDescription</key>
-<string>Allow access to microphone</string>
-<string>Network access required</string>
 </dict>
 </plist>
