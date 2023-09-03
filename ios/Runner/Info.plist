@@ -60,11 +60,14 @@
 	<false/>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>remote-notification</string>
 		<string>audio</string>
+		<string>fetch</string>
+   		<string>remote-notification</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app uses your location to send you push notifications</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Audio for posts</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow access to microphone to record audio</string>
 	<key>NSPhotoLibraryUsageDescription</key>

@@ -242,9 +242,23 @@ class _ButtonSectionState extends State<ButtonSection> {
 
   Future<void> pickAudioFile() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      FilePickerResult? result;
+      if(Platform.isIOS){
+        result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: [
+          'wav',
+          'mp3',
+          'aac',
+        ]
+      );
+      }
+      else{
+        result = await FilePicker.platform.pickFiles(
         type: FileType.audio,
       );
+      }
+      print(result?.files);
       if (result != null) {
         PlatformFile file = result.files.first;
         if (kIsWeb) {
@@ -254,7 +268,14 @@ class _ButtonSectionState extends State<ButtonSection> {
             urlBytes = bytes;
             urlSource = urlSourceFromBytes(bytes);
           });
-        } else {
+        } 
+        else if(Platform.isIOS){
+          setState(() {
+            audioPath = file.path!;
+            audioPlayer.setSourceDeviceFile(audioPath);
+          });
+        }
+        else {
           setState(() {
             audioPath = file.path!;
             audioPlayer.setSourceUrl(file.path!);
@@ -266,6 +287,7 @@ class _ButtonSectionState extends State<ButtonSection> {
       print("Error while picking the file: ${e.toString()}");
     }
   }
+
 
   Future<bool> askPermission() async {
   var microphoneStatus = await Permission.microphone.request();
@@ -343,7 +365,7 @@ class _ButtonSectionState extends State<ButtonSection> {
         SizedBox(width: 5),
         ElevatedButton(
           onPressed: () {
-            pickAudioFile();
+              pickAudioFile();
           },
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(Icons.audiotrack),
