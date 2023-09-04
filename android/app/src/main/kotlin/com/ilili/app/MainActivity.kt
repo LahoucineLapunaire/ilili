@@ -1,6 +1,5 @@
-package com.example.ilili
+package com.ilili.app
 
-import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterFragmentActivity
 
 class MainActivity: FlutterFragmentActivity() {

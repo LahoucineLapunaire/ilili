@@ -831,19 +831,17 @@ class _CommentModalState extends State<CommentModal> {
       // Get the ID of the newly created document.
       String documentId = documentReference.id;
 
-      // Retrieve the post to update its comments and score.
+      // Retrieve the post to update its comments
       DocumentSnapshot snapshot =
           await firestore.collection('posts').doc(widget.postId).get();
       List comments = snapshot['comments'];
-      int score = snapshot['score'];
-      score += 5;
       comments.add(documentId);
 
-      // Update the post with the new comments and score.
+      // Update the post with the new comments
       await firestore
           .collection('posts')
           .doc(widget.postId)
-          .update({'comments': comments, 'score': score});
+          .update({'comments': comments});
 
       // Show a success message.
       showInfoMessage("Comment is posted !", context, () {

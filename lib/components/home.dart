@@ -99,21 +99,34 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> getFeedPosts() async {
     try {
+      DocumentSnapshot userDoc =
+          await firestore.collection('users').doc(auth.currentUser!.uid).get();
+
+      List<dynamic> following = List<dynamic>.from(userDoc['followings']);
+
       // Retrieve the Firestore posts collection
       CollectionReference<Map<String, dynamic>> postsCollectionRef =
           firestore.collection('posts');
 
-      // Query the posts collection and order by weighted score
+      // Query the posts collection and order by timestamp
       QuerySnapshot<Map<String, dynamic>> querySnapshot =
-          await postsCollectionRef.get();
+          await postsCollectionRef.orderBy('timestamp', descending: true).get();
 
-      // Extract the post documents and convert them to Post objects with weighted score
+      // Extract the post documents and convert them to Post objects
       List<Post> postslist = querySnapshot.docs.map((doc) {
         String user = doc.get('userId');
-        int score = doc.get('score');
-        Timestamp timestamp = doc.get('timestamp');
-        double weightedScore =
-            score.toDouble() * 0.7 + timestamp.seconds.toDouble() * 0.3;
+        List<dynamic> likes = doc.get('likes');
+        List<dynamic> comments = doc.get('comments');
+        bool isFollowing =
+            following.contains(user); // Check if user is followed
+        double weightedScore = likes.length * 0.5 + comments.length * 0.3;
+
+        // You can adjust the weights as per your preference.
+
+        // If the user is followed, add a bonus to the weighted score
+        if (isFollowing) {
+          weightedScore += 10.0; // Adjust the bonus as needed
+        }
 
         return Post(
           userId: user,
@@ -125,11 +138,9 @@ class _HomePageState extends State<HomePage> {
 
       // Sort the posts based on weighted score
       postslist.sort((a, b) => b.weightedScore.compareTo(a.weightedScore));
-
       setState(() {
         posts = postslist;
       });
-      return;
     } catch (e) {
       print(e.toString());
     }
