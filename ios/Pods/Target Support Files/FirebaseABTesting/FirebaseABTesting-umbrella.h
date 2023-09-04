@@ -10,8 +10,16 @@
 #endif
 #endif
 
+<<<<<<< HEAD
 #import "FirebaseABTesting.h"
 #import "FIRExperimentController.h"
+=======
+#import "FirebaseABTesting 5.h"
+#import "FirebaseABTesting.h"
+#import "FIRExperimentController 4.h"
+#import "FIRExperimentController.h"
+#import "FIRLifecycleEvents 4.h"
+>>>>>>> c914324a30a3178e01160bd69b181f676fe67118
 #import "FIRLifecycleEvents.h"
 
 FOUNDATION_EXPORT double FirebaseABTestingVersionNumber;

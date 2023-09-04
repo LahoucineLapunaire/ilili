@@ -7,7 +7,11 @@
 		<key>ImageNotification.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
+<<<<<<< HEAD
 			<integer>72</integer>
+=======
+			<integer>62</integer>
+>>>>>>> c914324a30a3178e01160bd69b181f676fe67118
 		</dict>
 		<key>Runner.xcscheme_^#shared#^_</key>
 		<dict>

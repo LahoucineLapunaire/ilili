@@ -10,6 +10,10 @@
 #endif
 #endif
 
+<<<<<<< HEAD
+=======
+#import "UIView+Toast 4.h"
+>>>>>>> c914324a30a3178e01160bd69b181f676fe67118
 #import "UIView+Toast.h"
 #import "Toast.h"
 
