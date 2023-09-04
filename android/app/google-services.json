@@ -61,6 +61,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "593268336010-8r52etfd5dufr9fn8hetua70l88p6472.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ilili.app",
+            "certificate_hash": "90ac5f59bf74c1ab18d14a63b20c3bbc045739c4"
+          }
+        },
+        {
           "client_id": "593268336010-9o5us0954qr95sqrbmcl6j57dm4keib1.apps.googleusercontent.com",
           "client_type": 3
         }
