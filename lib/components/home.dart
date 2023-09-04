@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage> {
         await firestore.collection('users').doc(auth.currentUser!.uid).get();
 
     // Initialize variables to keep track of unread messages and chat IDs
-    int unreadMessages = 0;
+    int _unreadMessages = 0;
     List<String> chats = List<String>.from(userDoc['chats']);
 
     // Iterate through chat IDs and get the last message for each chat
@@ -84,14 +84,14 @@ class _HomePageState extends State<HomePage> {
       // Check if the last message is unread and update the unread message count
       if (chatSnapshot.docs.isNotEmpty) {
         if (!chatSnapshot.docs.first['read']) {
-          unreadMessages++;
+          _unreadMessages++;
         }
       }
 
       // Update the unreadMessages state if the component is still mounted
       if (mounted) {
         setState(() {
-          unreadMessages = unreadMessages;
+          unreadMessages = _unreadMessages;
         });
       }
     }

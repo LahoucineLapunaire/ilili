@@ -200,8 +200,9 @@ class _NotificationSectionState extends State<NotificationSection> {
 // Function to set values in SharedPreferences and subscribe/unsubscribe from topics
   void setValues(String pref, bool value) async {
     try {
+      
       // Get an instance of Firebase Messaging
-      var messaging = FirebaseMessaging.instance;
+      var messaging = FirebaseMessaging.instance;  
 
       // Get an instance of SharedPreferences
       final SharedPreferences prefs = await SharedPreferences.getInstance();

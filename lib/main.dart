@@ -175,11 +175,13 @@ void initUserNotification(String uid) async {
 
 // Function to initialize Firebase Cloud Messaging (FCM) for notifications
 void initNotification() async {
-  // Create an instance of FirebaseMessaging
+  try {
+    // Create an instance of FirebaseMessaging
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   // Subscribe to the "general" topic for receiving notifications
   messaging.subscribeToTopic("general");
+  Future<String?> token = messaging.getAPNSToken();
 
   // Request notification permissions from the user
   NotificationSettings settings = await messaging.requestPermission(
@@ -202,6 +204,10 @@ void initNotification() async {
     print("onMessage: ${message.notification?.body}");
     print("onMessage: ${message.data}");
   });
+  } catch (e) {
+    print("error : ${e.toString()}");
+  }
+  
 }
 
 // Function to handle FCM messages when the app is in the background
