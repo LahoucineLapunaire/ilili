@@ -488,15 +488,6 @@ class GoogleSignupForm extends StatefulWidget {
 }
 
 class _GoogleSignupFormState extends State<GoogleSignupForm> {
-  verifyTermsOfUses() {
-    if (termOfUses) {
-      signupWithGoogle();
-    } else {
-      showErrorMessage('You must agree to the terms of uses', context);
-      return;
-    }
-  }
-
   Future<void> signupWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn(
@@ -557,7 +548,7 @@ class _GoogleSignupFormState extends State<GoogleSignupForm> {
           height: 50,
           child: ElevatedButton(
             onPressed: () {
-              verifyTermsOfUses();
+              signupWithGoogle();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors
