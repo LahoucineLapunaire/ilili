@@ -37,39 +37,40 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-5863565056037942~4963240651</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Audio for posts</string>
 	<key>NSBackgroundFetchUsageDescription</key>
 	<string>This app uses background fetch to send you push notifications when your app is not in the foreground</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Allow access to camera to capture photos</string>
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>audio</string>
-		<string>fetch</string>
-   		<string>remote-notification</string>
-	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app uses your location to send you push notifications</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>Audio for posts</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow access to microphone to record audio</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow access to photo library</string>
-	<key>NSAppTransportSecurity</key>
-<dict>
-    <key>NSAllowsLocalNetworking</key>
-    <true/>
-	<key>NSAllowsArbitraryLoads</key>
-    <true/>
-</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+		<string>location</string>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
