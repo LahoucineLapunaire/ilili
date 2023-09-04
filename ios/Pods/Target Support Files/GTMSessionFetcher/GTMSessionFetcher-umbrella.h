@@ -10,19 +10,9 @@
 #endif
 #endif
 
-<<<<<<< HEAD
 #import "GTMSessionFetcher.h"
 #import "GTMSessionFetcherLogging.h"
 #import "GTMSessionFetcherService.h"
-=======
-#import "GTMSessionFetcher 4.h"
-#import "GTMSessionFetcher.h"
-#import "GTMSessionFetcherLogging 4.h"
-#import "GTMSessionFetcherLogging.h"
-#import "GTMSessionFetcherService 4.h"
-#import "GTMSessionFetcherService.h"
-#import "GTMSessionUploadFetcher 4.h"
->>>>>>> c914324a30a3178e01160bd69b181f676fe67118
 #import "GTMSessionUploadFetcher.h"
 
 FOUNDATION_EXPORT double GTMSessionFetcherVersionNumber;

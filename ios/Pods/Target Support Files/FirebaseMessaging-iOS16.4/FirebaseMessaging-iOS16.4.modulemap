@@ -1,6 +1,0 @@
-framework module FirebaseMessaging {
-  umbrella header "FirebaseMessaging-iOS16.4-umbrella.h"
-
-  export *
-  module * { export * }
-}
