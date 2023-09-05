@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Ilili/components/PrivacyPolicy.dart';
 import 'package:Ilili/components/addPost.dart';
 import 'package:Ilili/components/settings.dart';
@@ -56,6 +58,7 @@ Future<void> main() async {
       // User's email is not verified, show EmailNotVerified page.
       runApp(const EmailNotVerified());
     } else {
+      initUserNotification(user.uid);
       // User is logged in, show Logged page.
       runApp(const Logged());
     }
@@ -145,7 +148,6 @@ void initSharedPreferences() async {
     // Check if a user is logged in.
     if (FirebaseAuth.instance.currentUser != null) {
       // Subscribe the user to a notification topic using their UID.
-      messaging.subscribeToTopic(FirebaseAuth.instance.currentUser!.uid);
     }
   }
 
@@ -156,13 +158,30 @@ void initSharedPreferences() async {
   }
 }
 
+void initUserNotification(String uid) async {
+  // Get an instance of SharedPreferences for storing user preferences.
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  // Initialize Firebase Cloud Messaging.
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // Check if the "notification" preference is not set (null).
+  if (prefs.getBool("notification") ?? true) {
+    // Set the "notification" preference to true by default.
+    prefs.setBool("notification", true);
+    messaging.subscribeToTopic(uid);
+  }
+}
+
 // Function to initialize Firebase Cloud Messaging (FCM) for notifications
 void initNotification() async {
-  // Create an instance of FirebaseMessaging
+  try {
+    // Create an instance of FirebaseMessaging
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   // Subscribe to the "general" topic for receiving notifications
   messaging.subscribeToTopic("general");
+  Future<String?> token = messaging.getAPNSToken();
 
   // Request notification permissions from the user
   NotificationSettings settings = await messaging.requestPermission(
@@ -185,6 +204,10 @@ void initNotification() async {
     print("onMessage: ${message.notification?.body}");
     print("onMessage: ${message.data}");
   });
+  } catch (e) {
+    print("error : ${e.toString()}");
+  }
+  
 }
 
 // Function to handle FCM messages when the app is in the background

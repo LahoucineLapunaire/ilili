@@ -302,7 +302,7 @@ class _TopSectionState extends State<TopSection> {
                         builder: (context) => ChatPage(
                               userId: widget.userId,
                               username: username,
-                              profilePicture: profilePicture,
+                              profilePicture: profilPicture,
                             )),
                   );
                 },

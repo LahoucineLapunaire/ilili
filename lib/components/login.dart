@@ -305,7 +305,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
       // Trigger the Google sign-in flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn(
         clientId:
-            "YOUR_CLIENT_ID_HERE", // Replace with your Google OAuth2 client ID
+            "593268336010-9o5us0954qr95sqrbmcl6j57dm4keib1.apps.googleusercontent.com", // Replace with your Google OAuth2 client ID
       ).signIn();
 
       print(googleUser);
