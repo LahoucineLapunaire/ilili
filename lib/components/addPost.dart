@@ -250,13 +250,19 @@ class _ButtonSectionState extends State<ButtonSection> {
   Future<void> pickAudioFile() async {
     try {
       FilePickerResult? result;
-      if (Platform.isIOS) {
+      if (kIsWeb) {
+        result = await FilePicker.platform.pickFiles(
+          type: FileType.audio,
+        );
+      } else if (Platform.isIOS) {
+        print("iOS");
         // Allow custom file types on iOS
         result = await FilePicker.platform.pickFiles(
           type: FileType.custom,
           allowedExtensions: ['wav', 'mp3', 'aac'],
         );
       } else {
+        print("OTHER");
         // Pick audio file on other platforms
         result = await FilePicker.platform.pickFiles(
           type: FileType.audio,
