@@ -523,6 +523,7 @@ class TagsSection extends StatefulWidget {
 
 class _TagsSectionState extends State<TagsSection> {
   TextEditingController tagController = TextEditingController();
+  int tagLength = 0;
 
   void addTag() {
     try {
@@ -530,6 +531,12 @@ class _TagsSectionState extends State<TagsSection> {
       if (tagsList.contains(tagController.text)) {
         showErrorMessage(
             "Tag already exists", context); // Display an error message
+        return; // Exit the function
+      }
+
+      if (tagController.text.length > 20) {
+        showErrorMessage("Tag can't be more than 20 characters",
+            context); // Display an error message
         return; // Exit the function
       }
 
@@ -566,23 +573,60 @@ class _TagsSectionState extends State<TagsSection> {
       width: 300,
       child: Column(
         children: [
-          TextField(
-            controller: tagController,
-            maxLength: 30,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  addTag();
-                },
+          Row(
+            children: [
+              Expanded(
+                child: Stack(
+                  alignment: Alignment
+                      .centerRight, // Align the character count to the right
+                  children: [
+                    TextField(
+                      controller: tagController,
+                      maxLength: 20,
+                      onChanged: (value) {
+                        setState(() {
+                          tagLength = value.length;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelText: 'tag',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        counterText:
+                            '', // Remove the default character count text at the bottom
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          right: 16.0), // Adjust the right padding as needed
+                      child: Text(
+                        '${tagLength}/20', // Display the character count here
+                        style: TextStyle(
+                          color: Colors.grey, // Customize the color as desired
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              labelText: 'tag',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
+              SizedBox(width: 10),
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF6A1B9A),
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    addTag();
+                  },
+                  icon: const Icon(Icons.add),
+                  color: Colors.white,
+                ),
+              )
+            ],
           ),
           ListView.builder(
             shrinkWrap: true,

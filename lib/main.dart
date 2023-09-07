@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:Ilili/components/PrivacyPolicy.dart';
 import 'package:Ilili/components/addPost.dart';
 import 'package:Ilili/components/settings.dart';
@@ -137,9 +135,6 @@ void initSharedPreferences() async {
   // Get an instance of SharedPreferences for storing user preferences.
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  // Initialize Firebase Cloud Messaging.
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-
   // Check if the "notification" preference is not set (null).
   if (prefs.getBool("notification") == null) {
     // Set the "notification" preference to true by default.
@@ -177,37 +172,35 @@ void initUserNotification(String uid) async {
 void initNotification() async {
   try {
     // Create an instance of FirebaseMessaging
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  // Subscribe to the "general" topic for receiving notifications
-  messaging.subscribeToTopic("general");
-  Future<String?> token = messaging.getAPNSToken();
+    // Subscribe to the "general" topic for receiving notifications
+    messaging.subscribeToTopic("general");
 
-  // Request notification permissions from the user
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true, // Allow displaying alerts
-    announcement: false, // Do not allow announcements
-    badge: true, // Show badges on app icon
-    carPlay: false, // Disable CarPlay notifications
-    criticalAlert: false, // Do not allow critical alerts
-    provisional: false, // Notifications are not provisional
-    sound: true, // Allow playing notification sounds
-  );
+    // Request notification permissions from the user
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true, // Allow displaying alerts
+      announcement: false, // Do not allow announcements
+      badge: true, // Show badges on app icon
+      carPlay: false, // Disable CarPlay notifications
+      criticalAlert: false, // Do not allow critical alerts
+      provisional: false, // Notifications are not provisional
+      sound: true, // Allow playing notification sounds
+    );
 
-  // Print the user's permission status for notifications
-  print('User granted permission: ${settings.authorizationStatus}');
-  print("Notification initialization completed");
+    // Print the user's permission status for notifications
+    print('User granted permission: ${settings.authorizationStatus}');
+    print("Notification initialization completed");
 
-  // Listen for incoming FCM messages when the app is in the foreground
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print("You received a message");
-    print("onMessage: ${message.notification?.body}");
-    print("onMessage: ${message.data}");
-  });
+    // Listen for incoming FCM messages when the app is in the foreground
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("You received a message");
+      print("onMessage: ${message.notification?.body}");
+      print("onMessage: ${message.data}");
+    });
   } catch (e) {
     print("error : ${e.toString()}");
   }
-  
 }
 
 // Function to handle FCM messages when the app is in the background
@@ -232,8 +225,8 @@ class UnLogged extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const GetStartedPage(),
-        '/privacypolicy': (context) => PrivacyPolicyPage(),
-        '/termsofservice': (context) => TermsOfServicePage(),
+        '/privacypolicy': (context) => const PrivacyPolicyPage(),
+        '/termsofservice': (context) => const TermsOfServicePage(),
       },
     );
   }
@@ -256,8 +249,8 @@ class Logged extends StatelessWidget {
         '/': (context) => const AppRouter(
               index: 0,
             ),
-        '/privacypolicy': (context) => PrivacyPolicyPage(),
-        '/termsofservice': (context) => TermsOfServicePage(),
+        '/privacypolicy': (context) => const PrivacyPolicyPage(),
+        '/termsofservice': (context) => const TermsOfServicePage(),
         '/profilepage': (context) => const AppRouter(
               index: 2,
             ),

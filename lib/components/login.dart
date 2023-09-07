@@ -344,7 +344,7 @@ class _GoogleLoginFormState extends State<GoogleLoginForm> {
           // User does not exist, create a new document in Firestore
           await FirebaseFirestore.instance.collection('users').doc(uid).set({
             'profilePicture':
-                'YOUR_DEFAULT_PROFILE_IMAGE_URL_HERE', // Replace with your default profile image URL
+                'https://firebasestorage.googleapis.com/v0/b/ilili-7ebc6.appspot.com/o/users%2Fuser-default.jpg?alt=media&token=8aa7825f-2890-4f63-9fb2-e66e7e916256', // Replace with your default profile image URL
             'username': '',
             'posts': [],
             'followers': [],
